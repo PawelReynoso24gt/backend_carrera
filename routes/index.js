@@ -13,6 +13,8 @@ const tipoPublicoController =  require('../controllers/tipo_publicosController')
 const categoriaBitacorasController = require('../controllers/categoria_bitacorasController');
 const tipoTrasladosController = require('../controllers/tipoTrasladosController');
 const trasladosController = require('../controllers/trasladosController');
+const pedidosController = require('../controllers/pedidosController');
+
 
 
 module.exports = (app) => {
@@ -101,11 +103,22 @@ module.exports = (app) => {
     // * RUTAS DE TRASLADOS
     router.get('/traslados', trasladosController.find_All);
     router.get('/traslados/activas', trasladosController.find_active);
+    router.get('/traslados/inactivas', trasladosController.find_inactive);
     router.post('/traslados', trasladosController.create);
     router.put('/traslados/:idTraslado', trasladosController.update);
     router.put('/traslados/desactivar/:idTraslado', trasladosController.deactivate);
     router.put('/traslados/activar/:idTraslado', trasladosController.activate);
     router.get('/traslados/:descripcion', trasladosController.find_traslado);
+
+    // * RUTAS DE PEDIDOS
+    router.get('/pedidos', pedidosController.find_All);
+    router.get('/pedidos/activas', pedidosController.find_active);
+    router.get('/pedidos/inactivas', pedidosController.find_inactive);
+    router.post('/pedidos', pedidosController.create);
+    router.put('/pedidos/:idPedido', pedidosController.update);
+    router.put('/pedidos/desactivar/:idPedido', pedidosController.deactivate);
+    router.put('/pedidos/activar/:idPedido', pedidosController.activate);
+    router.get('/pedidos/:descripcion', pedidosController.find_pedido);
 
 
     app.use('/', router);

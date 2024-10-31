@@ -48,6 +48,24 @@ module.exports = {
         });
     },
 
+    // * Listar todos los traslados inactivos
+    async find_inactive(req, res) {
+        return TRASLADOS.findAll({
+            where: {
+                estado: 0 
+            }
+        })
+        .then((traslados) => {
+            res.status(200).send(traslados);
+        })
+        .catch((error) => {
+            res.status(500).send({
+                message: error.message || 'Error al listar los traslados inactivos.'
+            });
+        });
+    },
+
+
     // * Crear un nuevo traslado
     async create(req, res) {
         const { fecha, descripcion, idTipoTraslado } = req.body;
