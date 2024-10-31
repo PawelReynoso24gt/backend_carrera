@@ -10,6 +10,7 @@ const categoriaHorariosController = require('../controllers/categoriaHorariosCon
 const sedesController = require('../controllers/sedesController');
 const eventosController = require ('../controllers/eventosController');
 const tipoPublicoController =  require('../controllers/tipo_publicosController');
+const categoriaBitacorasController = require('../controllers/categoria_bitacorasController');
 
 
 module.exports = (app) => {
@@ -67,6 +68,13 @@ module.exports = (app) => {
     router.post('/tipo_publicos/create', tipoPublicoController.create);
     router.put('/tipo_publicos/update/:id', tipoPublicoController.update);
     router.delete('/tipo_publicos/delete/:id', tipoPublicoController.delete);
+
+    // * RUTAS PARA CATEGORÍA DE BITÁCORAS
+    router.get('/categoria_bitacoras', categoriaBitacorasController.find);
+    router.get('/categoria_bitacoras/:id', categoriaBitacorasController.findById);
+    router.post('/categoria_bitacoras', categoriaBitacorasController.create);
+    router.put('/categoria_bitacoras/:id', categoriaBitacorasController.update);
+    router.delete('/categoria_bitacoras/:id', categoriaBitacorasController.delete);
 
     app.use('/', router);
 
