@@ -2,11 +2,14 @@ const { Router } = require('express');
 const router = Router();
 
 // Aqui van los imports
+//RUTAS
 const usuariosController = require('../controllers/usuariosController');
 const horariosController = require('../controllers/horariosController');
 const tipoStandsController = require('../controllers/tipoStandsController');
+const categoriaHorariosController = require('../controllers/categoriaHorariosController');
 const sedesController = require('../controllers/sedesController');
 const eventosController = require ('../controllers/eventosController');
+const categoriaController = require('../controllers/categoriaController')
 
 module.exports = (app) => {
 
@@ -55,6 +58,25 @@ module.exports = (app) => {
     router.put('/eventos/activar/:idEvento', eventosController.activate);
     router.get('/eventos/:nombreEvento', eventosController.find_evento);
 
+ // * RUTAS DE CATEGORIA
+ router.get('/categorias', categoriaController.find_All);
+ router.get('/categorias/activas', categoriaController.find_active);
+ router.get('/categorias/inactivas', categoriaController.find_inactive);
+ router.post('/categorias', categoriaController.create);
+ router.put('/categorias/:idCategoria', categoriaController.update);
+ router.put('/categorias/desactivar/:idCategoria', categoriaController.deactivate);
+ router.put('/categorias/activar/:idCategoria', categoriaController.activate);
+ router.get('/categorias/:nombreCategoria', categoriaController.find_categoria);
+
+ // * RUTAS DE CATEGORIA HORARIOS
+router.get('/categoriaHorarios', categoriaHorariosController.find_All);
+router.get('/categoriaHorarios/activas', categoriaHorariosController.find_active);
+router.get('/categoriaHorarios/inactivas', categoriaHorariosController.find_inactive);
+router.post('/categoriaHorarios', categoriaHorariosController.create);
+router.put('/categoriaHorarios/:idCategoriaHorario', categoriaHorariosController.update);
+router.put('/categoriaHorarios/desactivar/:idCategoriaHorario', categoriaHorariosController.deactivate);
+router.put('/categoriaHorarios/activar/:idCategoriaHorario', categoriaHorariosController.activate);
+router.get('/categoriaHorarios/:categoria', categoriaHorariosController.find_categoria);
 
 
     app.use('/', router);
