@@ -4,7 +4,10 @@ const { Model } = require('sequelize');
 module.exports = (sequelize, DataTypes) => {
   class categorias extends Model {
     static associate(models) {
-      // * Aquí van las relaciones
+       // Una categoría tiene muchos productos
+        categorias.hasMany(models.productos, {
+        foreignKey: 'idCategoria'
+    });
     }
   }
 

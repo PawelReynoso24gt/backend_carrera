@@ -13,6 +13,7 @@ const tipoPublicoController =  require('../controllers/tipo_publicosController')
 const categoriaBitacorasController = require('../controllers/categoria_bitacorasController');
 const tipoTrasladosController = require('../controllers/tipoTrasladosController');
 const trasladosController = require('../controllers/trasladosController');
+const productosController = require('../controllers/productosController');
 
 
 module.exports = (app) => {
@@ -107,7 +108,12 @@ module.exports = (app) => {
     router.put('/traslados/activar/:idTraslado', trasladosController.activate);
     router.get('/traslados/:descripcion', trasladosController.find_traslado);
 
-
+    // * PRODUCTOS
+    router.get('/productos', productosController.find); 
+    router.get('/productos/:id', productosController.findById); 
+    router.post('/productos', productosController.create); 
+    router.put('/productos/:id', productosController.update);
+    router.delete('/productos/:id', productosController.delete); 
     app.use('/', router);
 
 };
