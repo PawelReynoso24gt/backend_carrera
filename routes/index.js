@@ -10,7 +10,6 @@ const categoriaHorariosController = require('../controllers/categoriaHorariosCon
 const sedesController = require('../controllers/sedesController');
 const eventosController = require ('../controllers/eventosController');
 const standsController = require('../controllers/standsController');
-const tipoPublicoController =  require('../controllers/tipo_publicosController');
 const departamentosController = require('../controllers/departamentosController');
 const tipoPagosController = require('../controllers/tipoPagosController');
 const categoriaBitacorasController = require('../controllers/categoria_bitacorasController');
@@ -19,6 +18,7 @@ const trasladosController = require('../controllers/trasladosController');
 const productosController = require('../controllers/productosController');
 const rifasController = require('../controllers/rifasController');
 const pedidosController = require('../controllers/pedidosController');
+const municipiosController = require('../controllers/municipiosController');
 const detalleHorariosController = require('../controllers/detalle_horariosController');
 
 
@@ -173,6 +173,14 @@ module.exports = (app) => {
     router.post('/stand/create', standsController.createStand);
     router.put('/stand/update/:id', standsController.updateStand);
     router.delete('/stand/:id', standsController.deleteStand);
+
+    // * RUTAS DE MUNICIPIOS
+    router.get('/municipios', municipiosController.find);
+    router.get('/municipios/activas', municipiosController.findActivateMunicipios);
+    router.get('/municipios/inactivas', municipiosController.findInactiveMunicipios);
+    router.post('/municipios/create', municipiosController.createMunicipio);
+    router.put('/municipios/update/:id', municipiosController.updateMunicipio);
+    router.delete('/municipios/:id', municipiosController.deleteMunicipio);
 
     // * DETALLE HORARIOS
     router.get('/detalle_horarios/activos', detalleHorariosController.find); // Listar todos los detalles de horarios activos
