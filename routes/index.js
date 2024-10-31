@@ -19,6 +19,7 @@ const productosController = require('../controllers/productosController');
 const rifasController = require('../controllers/rifasController');
 const pedidosController = require('../controllers/pedidosController');
 const municipiosController = require('../controllers/municipiosController');
+const tipoPublicoController =  require('../controllers/tipo_publicosController');
 
 
 
