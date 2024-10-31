@@ -177,6 +177,8 @@ module.exports = (app) => {
      router.get('/categorias/:nombreCategoria', categoriasController.find_categoria);
      router.delete('/categorias/:idCategoria', categoriasController.delete);
 
+     
+
     app.use('/', router);
 
 };
