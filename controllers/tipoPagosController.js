@@ -23,7 +23,7 @@ module.exports = {
         }
     },
     
-    async findActivateDepto(req, res) {
+    async findActivateTipoPago(req, res) {
         return TIPOPAGOS.findAll({
             where: {
                 estado: 1 
@@ -39,7 +39,7 @@ module.exports = {
         });
     },
 
-    async findaInactivateDepto(req, res) {
+    async findaInactivateTipoPago(req, res) {
         return TIPOPAGOS.findAll({
             where: {
                 estado: 0 

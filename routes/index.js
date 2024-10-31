@@ -10,7 +10,8 @@ const categoriaHorariosController = require('../controllers/categoriaHorariosCon
 const sedesController = require('../controllers/sedesController');
 const eventosController = require ('../controllers/eventosController');
 const standsController = require('../controllers/standsController');
-
+const departamentosController = require('../controllers/departamentosController');
+const tipoPagosController = require('../controllers/tipoPagosController');
 module.exports = (app) => {
 
     // * USUARIOS
@@ -64,7 +65,24 @@ module.exports = (app) => {
     router.get('/stand/inactivas', standsController.findaInactivateStand);
     router.post('/stand/create', standsController.createStand);
     router.put('/stand/update/:id', standsController.updateStand);
-    router.delete('/stand/:id', standsController.deleteTiposPago);
+    router.delete('/stand/:id', standsController.deleteStand);
+
+    // * RUTAS DE DEPARTAMENTOS
+    router.get('/departamentos', departamentosController.find);
+    router.get('/departamentos/activas', departamentosController.findActivateDepto);
+    router.get('/departamentos/inactivas', departamentosController.findaInactivateDepto);
+    router.post('/departamentos/create', departamentosController.createDepto);
+    router.put('/departamentos/:id', departamentosController.updateDepto);
+    router.delete('/departamentos/delete/:id', departamentosController.deleteDepto);
+
+    // * RUTAS DE TIPOS PAGOS
+    router.get('/tipospagos', tipoPagosController.find);
+    router.get('tipopago/activas', tipoPagosController.findActivateTipoPago);
+    router.get('/tipopago/inactivas', tipoPagosController.findaInactivateTipoPago);
+    router.post('/tipopagos/create', tipoPagosController.createTipoPago);
+    router.put('/tipopagos/:id', tipoPagosController.updateTipoPago);
+    router.delete('/tipopago/delete/:id', tipoPagosController.deleteTiposPago);
+
     app.use('/', router);
 
 };

@@ -141,11 +141,9 @@ module.exports = {
             console.error(`Error al actualizar el stand con ID ${id}:`, error);
             return res.status(500).json({ error: 'Error al actualizar stand' });
         }
-    },
-    
+    },   
 
-
-    async deleteTiposPago(req, res) {
+    async deleteStand(req, res) {
         const id = req.params.id; 
     
         try {
