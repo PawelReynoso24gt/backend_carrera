@@ -6,7 +6,6 @@ const TIPOPAGOS = db.tipo_pagos;
 // Métodos CRUD
 module.exports = {
 
-    // Obtener todos los clientes con estado activo
     async find(req, res) {
         try {
             const tipo_pagos = await TIPOPAGOS.findAll({
@@ -24,7 +23,7 @@ module.exports = {
         }
     },
     
-    async findActivateDepto(req, res) {
+    async findActivateTipoPago(req, res) {
         return TIPOPAGOS.findAll({
             where: {
                 estado: 1 
@@ -40,7 +39,7 @@ module.exports = {
         });
     },
 
-    async findaInactivateDepto(req, res) {
+    async findaInactivateTipoPago(req, res) {
         return TIPOPAGOS.findAll({
             where: {
                 estado: 0 

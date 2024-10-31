@@ -10,7 +10,7 @@ module.exports = {
         try {
             const tipoStands = await TipoStands.findAll({
                 where: {
-                    estado: 1 // Filtrar por estado 1
+                    estado: 1 
                 }
             });
             return res.status(200).send(tipoStands);
@@ -57,7 +57,7 @@ module.exports = {
         const datos = req.body;
         const datos_ingreso = {
             tipo: datos.tipo,
-            estado: datos.estado,
+            estado: 1,  // Estado activo por defecto
             descripcion: datos.descripcion
         };
 

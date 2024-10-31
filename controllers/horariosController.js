@@ -58,7 +58,7 @@ module.exports = {
         const datos_ingreso = {
             horarioInicio: datos.horarioInicio,
             horarioFinal: datos.horarioFinal,
-            estado: datos.estado
+            estado: 1 // Estado activo por defecto
         };
 
         try {

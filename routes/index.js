@@ -9,11 +9,17 @@ const tipoStandsController = require('../controllers/tipoStandsController');
 const categoriaHorariosController = require('../controllers/categoriaHorariosController');
 const sedesController = require('../controllers/sedesController');
 const eventosController = require ('../controllers/eventosController');
-const tipoPublicoController =  require('../controllers/tipo_publicosController');
+const standsController = require('../controllers/standsController');
+const departamentosController = require('../controllers/departamentosController');
+const tipoPagosController = require('../controllers/tipoPagosController');
 const categoriaBitacorasController = require('../controllers/categoria_bitacorasController');
 const tipoTrasladosController = require('../controllers/tipoTrasladosController');
 const trasladosController = require('../controllers/trasladosController');
+const productosController = require('../controllers/productosController');
+const rifasController = require('../controllers/rifasController');
 const pedidosController = require('../controllers/pedidosController');
+const municipiosController = require('../controllers/municipiosController');
+const tipoPublicoController =  require('../controllers/tipo_publicosController');
 const categoriasController = require('../controllers/categoriaController');
 
 
@@ -63,8 +69,31 @@ module.exports = (app) => {
     router.post('/eventos', eventosController.create);
     router.put('/eventos/:idEvento', eventosController.update);
     router.get('/eventos/:nombreEvento', eventosController.find_evento);
-    router.delete('/eventos/:idEvento', eventosController.delete);
 
+    // * RUTAS DE STAND
+    router.get('/stand', standsController.find);
+    router.get('/stand/activas', standsController.findActivateStand);
+    router.get('/stand/inactivas', standsController.findaInactivateStand);
+    router.post('/stand/create', standsController.createStand);
+    router.put('/stand/update/:id', standsController.updateStand);
+    router.delete('/stand/:id', standsController.deleteStand);
+
+    // * RUTAS DE DEPARTAMENTOS
+    router.get('/departamentos', departamentosController.find);
+    router.get('/departamentos/activas', departamentosController.findActivateDepto);
+    router.get('/departamentos/inactivas', departamentosController.findaInactivateDepto);
+    router.post('/departamentos/create', departamentosController.createDepto);
+    router.put('/departamentos/:id', departamentosController.updateDepto);
+    router.delete('/departamentos/delete/:id', departamentosController.deleteDepto);
+
+    // * RUTAS DE TIPOS PAGOS
+    router.get('/tipospagos', tipoPagosController.find);
+    router.get('tipopago/activas', tipoPagosController.findActivateTipoPago);
+    router.get('/tipopago/inactivas', tipoPagosController.findaInactivateTipoPago);
+    router.post('/tipopagos/create', tipoPagosController.createTipoPago);
+    router.put('/tipopagos/:id', tipoPagosController.updateTipoPago);
+    router.delete('/tipopago/delete/:id', tipoPagosController.deleteTiposPago);    
+    
     // * RUTAS TIPO PUBLICO
     router.get('/tipo_publicos', tipoPublicoController.find);
     router.get('/tipo_publicos/activos', tipoPublicoController.findActive);
@@ -81,7 +110,7 @@ module.exports = (app) => {
     router.put('/categoria_bitacoras/:id', categoriaBitacorasController.update);
     router.delete('/categoria_bitacoras/:id', categoriaBitacorasController.delete);
 
-        // * RUTAS DE CATEGORIA HORARIOS
+    // * RUTAS DE CATEGORIA HORARIOS
     router.get('/categoriaHorarios', categoriaHorariosController.find_All);
     router.get('/categoriaHorarios/:idCategoriaHorario', categoriaHorariosController.find_by_id);
     router.get('/categoriaHorarios/activas', categoriaHorariosController.find_active);
@@ -101,7 +130,6 @@ module.exports = (app) => {
     router.put('/tipoTraslados/:idTipoTraslado', tipoTrasladosController.update);
     router.get('/tipoTraslados/:tipo', tipoTrasladosController.find_tipo);
     router.delete('/tipoTraslados/:idTipoTraslado', tipoTrasladosController.delete);
-   
 
 
     // * RUTAS DE TRASLADOS
@@ -112,8 +140,23 @@ module.exports = (app) => {
     router.post('/traslados', trasladosController.create);
     router.put('/traslados/:idTraslado', trasladosController.update);
     router.get('/traslados/:descripcion', trasladosController.find_traslado);
-    router.delete('/traslados/:idTraslado', trasladosController.delete);
 
+    // * PRODUCTOS
+    router.get('/productos', productosController.find); 
+    router.get('/productos/:id', productosController.findById); 
+    router.post('/productos', productosController.create); 
+    router.put('/productos/:id', productosController.update);
+    router.delete('/productos/:id', productosController.delete); 
+
+    // * RIFAS
+    router.get('/rifas', rifasController.find);
+    router.get('/rifas/activos', rifasController.findActive);
+    router.get('/rifas/inactivos', rifasController.findInactive);
+    router.get('/rifas/:id', rifasController.findById);
+    router.post('/rifas', rifasController.create);
+    router.put('/rifas/:id', rifasController.update);
+    router.delete('/rifas/:id', rifasController.delete);
+    
     // * RUTAS DE PEDIDOS
     router.get('/pedidos', pedidosController.find_All);
     router.get('/pedidos/:idPedido', pedidosController.find_by_id);

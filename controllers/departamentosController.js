@@ -5,8 +5,7 @@ const DEPARTAMENTOS = db.departamentos;
 
 // Métodos CRUD
 module.exports = {
-
-    // Obtener todos los clientes con estado activo
+    
     async find(req, res) {
         try {
             const departamentos = await DEPARTAMENTOS.findAll({

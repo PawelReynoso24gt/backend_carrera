@@ -2,45 +2,53 @@
 const { Model } = require('sequelize');
 
 module.exports = (sequelize, DataTypes) => {
-  class categorias extends Model {
+  class stands extends Model {
     static associate(models) {
-       // Una categoría tiene muchos productos
-        categorias.hasMany(models.productos, {
-        foreignKey: 'idCategoria'
-    });
+
     }
   }
-
-  categorias.init({
-    idCategoria: {
+  stands.init({
+    idStand: {
       type: DataTypes.INTEGER,
       autoIncrement: true,
       primaryKey: true
     },
-    nombreCategoria: {
+    nombreStand: {
+      type: DataTypes.STRING(255),
+      allowNull: false
+    },
+    direccion: {
       type: DataTypes.STRING(255),
       allowNull: false
     },
     estado: {
-      type: DataTypes.INTEGER,
-      allowNull: false
+     type: DataTypes.INTEGER,
+     allowNull: false
+    },
+    idSede: {
+     type: DataTypes.INTEGER,
+     allowNull: false
+    },
+    idTipoStands: {
+     type: DataTypes.INTEGER,
+     allowNull: false
     },
     createdAt: {
       type: DataTypes.DATE,
-      allowNull: true,
+      allowNull: false,
       defaultValue: DataTypes.NOW
     },
     updatedAt: {
       type: DataTypes.DATE,
-      allowNull: true,
-      defaultValue: DataTypes.NOW
+      allowNull: false,
+      defaultValue: DataTypes.NOW 
     }
   }, {
     sequelize,
-    modelName: 'categorias',
-    tableName: 'categorias',
+    modelName: 'stands',
+    tableName: 'stands',
     timestamps: true
   });
 
-  return categorias;
+  return stands;
 };
