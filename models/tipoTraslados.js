@@ -2,17 +2,17 @@
 const { Model } = require('sequelize');
 
 module.exports = (sequelize, DataTypes) => {
-  class tipo_traslados extends Model {
+  class TipoTraslado extends Model {
     static associate(models) {
       // Relación con la tabla traslados
-      tipo_traslados.hasMany(models.Traslado, {
+      TipoTraslado.hasMany(models.Traslado, {
         foreignKey: 'idTipoTraslado',
         as: 'traslados'
       });
     }
   }
 
-  tipo_traslados.init({
+  TipoTraslado.init({
     idTipoTraslado: {
       type: DataTypes.INTEGER,
       autoIncrement: true,
@@ -38,10 +38,10 @@ module.exports = (sequelize, DataTypes) => {
     }
   }, {
     sequelize,
-    modelName: 'tipo_traslados',
+    modelName: 'TipoTraslado', // Cambia esto a CamelCase
     tableName: 'tipo_traslados',
     timestamps: true
   });
 
-  return tipo_traslados;
+  return TipoTraslado;
 };

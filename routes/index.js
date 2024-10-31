@@ -11,6 +11,8 @@ const sedesController = require('../controllers/sedesController');
 const eventosController = require ('../controllers/eventosController');
 const tipoPublicoController =  require('../controllers/tipo_publicosController');
 const categoriaBitacorasController = require('../controllers/categoria_bitacorasController');
+const tipoTrasladosController = require('../controllers/tipoTrasladosController');
+const trasladosController = require('../controllers/trasladosController');
 
 
 module.exports = (app) => {
@@ -85,6 +87,26 @@ module.exports = (app) => {
     router.put('/categoriaHorarios/desactivar/:idCategoriaHorario', categoriaHorariosController.deactivate);
     router.put('/categoriaHorarios/activar/:idCategoriaHorario', categoriaHorariosController.activate);
     router.get('/categoriaHorarios/:categoria', categoriaHorariosController.find_categoria);
+
+    // * RUTAS DE TIPO TRASLADOS
+    router.get('/tipoTraslados', tipoTrasladosController.find_All);
+    router.get('/tipoTraslados/activas', tipoTrasladosController.find_active);
+    router.get('/tipoTraslados/inactivas', tipoTrasladosController.find_inactive);
+    router.post('/tipoTraslados', tipoTrasladosController.create);
+    router.put('/tipoTraslados/:idTipoTraslado', tipoTrasladosController.update);
+    router.put('/tipoTraslados/desactivar/:idTipoTraslado', tipoTrasladosController.deactivate);
+    router.put('/tipoTraslados/activar/:idTipoTraslado', tipoTrasladosController.activate);
+    router.get('/tipoTraslados/:tipo', tipoTrasladosController.find_tipo);
+
+    // * RUTAS DE TRASLADOS
+    router.get('/traslados', trasladosController.find_All);
+    router.get('/traslados/activas', trasladosController.find_active);
+    router.post('/traslados', trasladosController.create);
+    router.put('/traslados/:idTraslado', trasladosController.update);
+    router.put('/traslados/desactivar/:idTraslado', trasladosController.deactivate);
+    router.put('/traslados/activar/:idTraslado', trasladosController.activate);
+    router.get('/traslados/:descripcion', trasladosController.find_traslado);
+
 
     app.use('/', router);
 
