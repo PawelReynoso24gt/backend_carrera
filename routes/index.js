@@ -9,6 +9,9 @@ const tipoStandsController = require('../controllers/tipoStandsController');
 const categoriaHorariosController = require('../controllers/categoriaHorariosController');
 const sedesController = require('../controllers/sedesController');
 const eventosController = require ('../controllers/eventosController');
+const tipoPublicoController =  require('../controllers/tipo_publicosController');
+const categoriaBitacorasController = require('../controllers/categoria_bitacorasController');
+
 
 module.exports = (app) => {
 
@@ -57,7 +60,31 @@ module.exports = (app) => {
     router.put('/eventos/activar/:idEvento', eventosController.activate);
     router.get('/eventos/:nombreEvento', eventosController.find_evento);
 
+    // * RUTAS TIPO PUBLICO
+    router.get('/tipo_publicos', tipoPublicoController.find);
+    router.get('/tipo_publicos/activos', tipoPublicoController.findActive);
+    router.get('/tipo_publicos/inactivos', tipoPublicoController.findInactive);
+    router.get('/tipo_publicos/:id', tipoPublicoController.findById);
+    router.post('/tipo_publicos/create', tipoPublicoController.create);
+    router.put('/tipo_publicos/update/:id', tipoPublicoController.update);
+    router.delete('/tipo_publicos/delete/:id', tipoPublicoController.delete);
 
+    // * RUTAS PARA CATEGORÍA DE BITÁCORAS
+    router.get('/categoria_bitacoras', categoriaBitacorasController.find);
+    router.get('/categoria_bitacoras/:id', categoriaBitacorasController.findById);
+    router.post('/categoria_bitacoras', categoriaBitacorasController.create);
+    router.put('/categoria_bitacoras/:id', categoriaBitacorasController.update);
+    router.delete('/categoria_bitacoras/:id', categoriaBitacorasController.delete);
+
+        // * RUTAS DE CATEGORIA HORARIOS
+    router.get('/categoriaHorarios', categoriaHorariosController.find_All);
+    router.get('/categoriaHorarios/activas', categoriaHorariosController.find_active);
+    router.get('/categoriaHorarios/inactivas', categoriaHorariosController.find_inactive);
+    router.post('/categoriaHorarios', categoriaHorariosController.create);
+    router.put('/categoriaHorarios/:idCategoriaHorario', categoriaHorariosController.update);
+    router.put('/categoriaHorarios/desactivar/:idCategoriaHorario', categoriaHorariosController.deactivate);
+    router.put('/categoriaHorarios/activar/:idCategoriaHorario', categoriaHorariosController.activate);
+    router.get('/categoriaHorarios/:categoria', categoriaHorariosController.find_categoria);
 
     app.use('/', router);
 
