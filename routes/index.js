@@ -9,6 +9,11 @@ const tipoStandsController = require('../controllers/tipoStandsController');
 const categoriaHorariosController = require('../controllers/categoriaHorariosController');
 const sedesController = require('../controllers/sedesController');
 const eventosController = require ('../controllers/eventosController');
+const tipoPublicoController =  require('../controllers/tipo_publicosController');
+const categoriaBitacorasController = require('../controllers/categoria_bitacorasController');
+const tipoTrasladosController = require('../controllers/tipoTrasladosController');
+const trasladosController = require('../controllers/trasladosController');
+
 
 module.exports = (app) => {
 
@@ -57,6 +62,50 @@ module.exports = (app) => {
     router.put('/eventos/activar/:idEvento', eventosController.activate);
     router.get('/eventos/:nombreEvento', eventosController.find_evento);
 
+    // * RUTAS TIPO PUBLICO
+    router.get('/tipo_publicos', tipoPublicoController.find);
+    router.get('/tipo_publicos/activos', tipoPublicoController.findActive);
+    router.get('/tipo_publicos/inactivos', tipoPublicoController.findInactive);
+    router.get('/tipo_publicos/:id', tipoPublicoController.findById);
+    router.post('/tipo_publicos/create', tipoPublicoController.create);
+    router.put('/tipo_publicos/update/:id', tipoPublicoController.update);
+    router.delete('/tipo_publicos/delete/:id', tipoPublicoController.delete);
+
+    // * RUTAS PARA CATEGORÍA DE BITÁCORAS
+    router.get('/categoria_bitacoras', categoriaBitacorasController.find);
+    router.get('/categoria_bitacoras/:id', categoriaBitacorasController.findById);
+    router.post('/categoria_bitacoras', categoriaBitacorasController.create);
+    router.put('/categoria_bitacoras/:id', categoriaBitacorasController.update);
+    router.delete('/categoria_bitacoras/:id', categoriaBitacorasController.delete);
+
+        // * RUTAS DE CATEGORIA HORARIOS
+    router.get('/categoriaHorarios', categoriaHorariosController.find_All);
+    router.get('/categoriaHorarios/activas', categoriaHorariosController.find_active);
+    router.get('/categoriaHorarios/inactivas', categoriaHorariosController.find_inactive);
+    router.post('/categoriaHorarios', categoriaHorariosController.create);
+    router.put('/categoriaHorarios/:idCategoriaHorario', categoriaHorariosController.update);
+    router.put('/categoriaHorarios/desactivar/:idCategoriaHorario', categoriaHorariosController.deactivate);
+    router.put('/categoriaHorarios/activar/:idCategoriaHorario', categoriaHorariosController.activate);
+    router.get('/categoriaHorarios/:categoria', categoriaHorariosController.find_categoria);
+
+    // * RUTAS DE TIPO TRASLADOS
+    router.get('/tipoTraslados', tipoTrasladosController.find_All);
+    router.get('/tipoTraslados/activas', tipoTrasladosController.find_active);
+    router.get('/tipoTraslados/inactivas', tipoTrasladosController.find_inactive);
+    router.post('/tipoTraslados', tipoTrasladosController.create);
+    router.put('/tipoTraslados/:idTipoTraslado', tipoTrasladosController.update);
+    router.put('/tipoTraslados/desactivar/:idTipoTraslado', tipoTrasladosController.deactivate);
+    router.put('/tipoTraslados/activar/:idTipoTraslado', tipoTrasladosController.activate);
+    router.get('/tipoTraslados/:tipo', tipoTrasladosController.find_tipo);
+
+    // * RUTAS DE TRASLADOS
+    router.get('/traslados', trasladosController.find_All);
+    router.get('/traslados/activas', trasladosController.find_active);
+    router.post('/traslados', trasladosController.create);
+    router.put('/traslados/:idTraslado', trasladosController.update);
+    router.put('/traslados/desactivar/:idTraslado', trasladosController.deactivate);
+    router.put('/traslados/activar/:idTraslado', trasladosController.activate);
+    router.get('/traslados/:descripcion', trasladosController.find_traslado);
 
 
     app.use('/', router);
