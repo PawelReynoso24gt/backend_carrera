@@ -62,7 +62,7 @@ module.exports = {
         const datos = req.body;
         const datos_ingreso = {
             foto: datos.foto,
-            estado: datos.estado,
+            estado: 1,
             idSede: datos.idSede
         };
 

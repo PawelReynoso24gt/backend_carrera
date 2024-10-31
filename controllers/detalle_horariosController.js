@@ -62,7 +62,7 @@ module.exports = {
         const datos = req.body;
         const datos_ingreso = {
             cantidadPersonas: datos.cantidadPersonas,
-            estado: datos.estado,
+            estado: 1,
             idHorario: datos.idHorario,
             idCategoriaHorario: datos.idCategoriaHorario
         };
