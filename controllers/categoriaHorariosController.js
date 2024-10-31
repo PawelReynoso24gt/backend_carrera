@@ -93,48 +93,6 @@ module.exports = {
         });
     },
 
-    // * Desactivar una categoría de horario
-    async deactivate(req, res) {
-        const { idCategoriaHorario } = req.params;
-
-        return CATEGORIA_HORARIOS.update(
-            { estado: 0 }, 
-            { where: { idCategoriaHorario } }
-        )
-        .then((affectedRows) => {
-            if (affectedRows[0] === 0) {
-                return res.status(404).send({ message: 'Categoría de horario no encontrada.' });
-            }
-            res.status(200).send({ message: 'Categoría de horario desactivada con éxito.' });
-        })
-        .catch((error) => {
-            res.status(500).send({
-                message: error.message || 'Error al desactivar la categoría de horario.'
-            });
-        });
-    },
-
-    // * Activar una categoría de horario
-    async activate(req, res) {
-        const { idCategoriaHorario } = req.params;
-
-        return CATEGORIA_HORARIOS.update(
-            { estado: 1 }, 
-            { where: { idCategoriaHorario } }
-        )
-        .then((affectedRows) => {
-            if (affectedRows[0] === 0) {
-                return res.status(404).send({ message: 'Categoría de horario no encontrada.' });
-            }
-            res.status(200).send({ message: 'Categoría de horario activada con éxito.' });
-        })
-        .catch((error) => {
-            res.status(500).send({
-                message: error.message || 'Error al activar la categoría de horario.'
-            });
-        });
-    },
-
     // * Buscar una categoría de horario por nombre
     async find_categoria(req, res) {
         const { categoria } = req.params;
@@ -155,6 +113,44 @@ module.exports = {
         .catch((error) => {
             res.status(500).send({
                 message: error.message || 'Error al buscar la categoría de horario.'
+            });
+        });
+    },
+
+     // * Buscar una categoría de horario por ID
+     async find_by_id(req, res) {
+        const { idCategoriaHorario } = req.params;
+
+        return CATEGORIA_HORARIOS.findByPk(idCategoriaHorario)
+        .then((categoriaHorario) => {
+            if (!categoriaHorario) {
+                return res.status(404).send({ message: 'Categoría de horario no encontrada.' });
+            }
+            res.status(200).send(categoriaHorario);
+        })
+        .catch((error) => {
+            res.status(500).send({
+                message: error.message || 'Error al buscar la categoría de horario por ID.'
+            });
+        });
+    },
+
+    // * Eliminar una categoría de horario por ID
+    async delete(req, res) {
+        const { idCategoriaHorario } = req.params;
+
+        return CATEGORIA_HORARIOS.destroy({
+            where: { idCategoriaHorario }
+        })
+        .then((deleted) => {
+            if (deleted === 0) {
+                return res.status(404).send({ message: 'Categoría de horario no encontrada.' });
+            }
+            res.status(200).send({ message: 'Categoría de horario eliminada con éxito.' });
+        })
+        .catch((error) => {
+            res.status(500).send({
+                message: error.message || 'Error al eliminar la categoría de horario.'
             });
         });
     }

@@ -93,47 +93,6 @@ module.exports = {
         });
     },
 
-    // * Desactivar un tipo de traslado
-    async deactivate(req, res) {
-        const { idTipoTraslado } = req.params;
-
-        return TIPO_TRASLADOS.update(
-            { estado: 0 }, // Estado inactivo
-            { where: { idTipoTraslado } }
-        )
-        .then((affectedRows) => {
-            if (affectedRows[0] === 0) {
-                return res.status(404).send({ message: 'Tipo de traslado no encontrado.' });
-            }
-            res.status(200).send({ message: 'Tipo de traslado desactivado con éxito.' });
-        })
-        .catch((error) => {
-            res.status(500).send({
-                message: error.message || 'Error al desactivar el tipo de traslado.'
-            });
-        });
-    },
-
-    // * Activar un tipo de traslado
-    async activate(req, res) {
-        const { idTipoTraslado } = req.params;
-
-        return TIPO_TRASLADOS.update(
-            { estado: 1 }, // Estado activo
-            { where: { idTipoTraslado } }
-        )
-        .then((affectedRows) => {
-            if (affectedRows[0] === 0) {
-                return res.status(404).send({ message: 'Tipo de traslado no encontrado.' });
-            }
-            res.status(200).send({ message: 'Tipo de traslado activado con éxito.' });
-        })
-        .catch((error) => {
-            res.status(500).send({
-                message: error.message || 'Error al activar el tipo de traslado.'
-            });
-        });
-    },
 
     // * Buscar un tipo de traslado por nombre
     async find_tipo(req, res) {
@@ -155,6 +114,45 @@ module.exports = {
         .catch((error) => {
             res.status(500).send({
                 message: error.message || 'Error al buscar el tipo de traslado.'
+            });
+        });
+    },
+
+  // * Buscar un tipo de traslado por ID
+async find_by_id(req, res) {
+    const { idTipoTraslado } = req.params;
+
+    return TIPO_TRASLADOS.findByPk(idTipoTraslado)
+    .then((tipoTraslado) => {
+        if (!tipoTraslado) {
+            return res.status(404).send({ message: 'Tipo de traslado no encontrado.' });
+        }
+        res.status(200).send(tipoTraslado);
+    })
+    .catch((error) => {
+        console.error('Error al buscar el tipo de traslado por ID:', error); // Agrega este log
+        res.status(500).send({
+            message: error.message || 'Error al buscar el tipo de traslado por ID.'
+        });
+    });
+},
+
+    // * Eliminar un tipo de traslado por ID
+    async delete(req, res) {
+        const { idTipoTraslado } = req.params;
+
+        return TIPO_TRASLADOS.destroy({
+            where: { idTipoTraslado }
+        })
+        .then((deleted) => {
+            if (deleted === 0) {
+                return res.status(404).send({ message: 'Tipo de traslado no encontrado.' });
+            }
+            res.status(200).send({ message: 'Tipo de traslado eliminado con éxito.' });
+        })
+        .catch((error) => {
+            res.status(500).send({
+                message: error.message || 'Error al eliminar el tipo de traslado.'
             });
         });
     }

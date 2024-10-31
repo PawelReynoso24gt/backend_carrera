@@ -135,47 +135,6 @@ module.exports = {
         });
     },
 
-    // * Desactivar un pedido
-    async deactivate(req, res) {
-        const { idPedido } = req.params;
-
-        return PEDIDOS.update(
-            { estado: 0 }, // Inactivo
-            { where: { idPedido } }
-        )
-        .then((affectedRows) => {
-            if (affectedRows[0] === 0) {
-                return res.status(404).send({ message: 'Pedido no encontrado.' });
-            }
-            res.status(200).send({ message: 'Pedido desactivado con éxito.' });
-        })
-        .catch((error) => {
-            res.status(500).send({
-                message: error.message || 'Error al desactivar el pedido.'
-            });
-        });
-    },
-
-    // * Activar un pedido
-    async activate(req, res) {
-        const { idPedido } = req.params;
-
-        return PEDIDOS.update(
-            { estado: 1 }, // Activo
-            { where: { idPedido } }
-        )
-        .then((affectedRows) => {
-            if (affectedRows[0] === 0) {
-                return res.status(404).send({ message: 'Pedido no encontrado.' });
-            }
-            res.status(200).send({ message: 'Pedido activado con éxito.' });
-        })
-        .catch((error) => {
-            res.status(500).send({
-                message: error.message || 'Error al activar el pedido.'
-            });
-        });
-    },
 
     // * Buscar un pedido por descripción
     async find_pedido(req, res) {
@@ -209,6 +168,57 @@ module.exports = {
         .catch((error) => {
             res.status(500).send({
                 message: error.message || 'Error al buscar el pedido.'
+            });
+        });
+    },
+
+       // * Buscar un pedido por ID
+       async find_by_id(req, res) {
+        const { idPedido } = req.params;
+
+        return PEDIDOS.findByPk(idPedido, {
+            include: [
+                {
+                    model: SEDES,
+                    as: 'sede',
+                    attributes: ['nombreSede']
+                },
+                {
+                    model: USUARIOS,
+                    as: 'usuario',
+                    attributes: ['usuario']
+                }
+            ]
+        })
+        .then((pedido) => {
+            if (!pedido) {
+                return res.status(404).send({ message: 'Pedido no encontrado.' });
+            }
+            res.status(200).send(pedido);
+        })
+        .catch((error) => {
+            res.status(500).send({
+                message: error.message || 'Error al buscar el pedido por ID.'
+            });
+        });
+    },
+
+    // * Eliminar un pedido por ID
+    async delete(req, res) {
+        const { idPedido } = req.params;
+
+        return PEDIDOS.destroy({
+            where: { idPedido }
+        })
+        .then((deleted) => {
+            if (deleted === 0) {
+                return res.status(404).send({ message: 'Pedido no encontrado.' });
+            }
+            res.status(200).send({ message: 'Pedido eliminado con éxito.' });
+        })
+        .catch((error) => {
+            res.status(500).send({
+                message: error.message || 'Error al eliminar el pedido.'
             });
         });
     }

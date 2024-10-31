@@ -97,49 +97,6 @@ module.exports = {
         });
     },
 
-     // * Desactivar una sede
-    async deactivate(req, res) {
-        const { idSede } = req.params;
-
-        return SEDES.update(
-            { estado: 0 }, 
-            { where: { idSede } }
-        )
-        .then((affectedRows) => {
-            if (affectedRows[0] === 0) {
-                return res.status(404).send({ message: 'Sede no encontrada.' });
-            }
-            res.status(200).send({ message: 'Sede desactivada con éxito.' });
-        })
-        .catch((error) => {
-            res.status(500).send({
-                message: error.message || 'Error al desactivar la sede.'
-            });
-        });
-    },
-
-
-     // * Activar una sede
-    async activate(req, res) {
-        const { idSede } = req.params;
-
-        return SEDES.update(
-            { estado: 1 }, 
-            { where: { idSede } }
-        )
-        .then((affectedRows) => {
-            if (affectedRows[0] === 0) {
-                return res.status(404).send({ message: 'Sede no encontrada.' });
-            }
-            res.status(200).send({ message: 'Sede activada con éxito.' });
-        })
-        .catch((error) => {
-            res.status(500).send({
-                message: error.message || 'Error al activar la sede.'
-            });
-        });
-    },
-
     // * Buscar una sede por nombre
     async find_sede(req, res) {
         const { nombreSede } = req.params;
@@ -160,6 +117,44 @@ module.exports = {
         .catch((error) => {
             res.status(500).send({
                 message: error.message || 'Error al buscar la sede.'
+            });
+        });
+    },
+
+     // * Buscar una sede por ID
+     async find_by_id(req, res) {
+        const { idSede } = req.params;
+
+        return SEDES.findByPk(idSede)
+        .then((sede) => {
+            if (!sede) {
+                return res.status(404).send({ message: 'Sede no encontrada.' });
+            }
+            res.status(200).send(sede);
+        })
+        .catch((error) => {
+            res.status(500).send({
+                message: error.message || 'Error al buscar la sede por ID.'
+            });
+        });
+    },
+
+    // * Eliminar una sede por ID
+    async delete(req, res) {
+        const { idSede } = req.params;
+
+        return SEDES.destroy({
+            where: { idSede }
+        })
+        .then((deleted) => {
+            if (deleted === 0) {
+                return res.status(404).send({ message: 'Sede no encontrada.' });
+            }
+            res.status(200).send({ message: 'Sede eliminada con éxito.' });
+        })
+        .catch((error) => {
+            res.status(500).send({
+                message: error.message || 'Error al eliminar la sede.'
             });
         });
     }
