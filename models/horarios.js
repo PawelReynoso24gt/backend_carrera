@@ -5,7 +5,11 @@ const { Model } = require('sequelize');
 module.exports = (sequelize, DataTypes) => {
   class horarios extends Model {
     static associate(models) {
-        // * Aqui van las relaciones
+      // * Relaciones
+      horarios.hasMany(models.detalle_horarios, {
+        foreignKey: 'idHorario',
+        as: 'detalles'
+      });
     }
   }
 

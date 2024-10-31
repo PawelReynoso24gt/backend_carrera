@@ -1,10 +1,15 @@
+// ! Modelo de categoria_horarios
 'use strict';
 const { Model } = require('sequelize');
 
 module.exports = (sequelize, DataTypes) => {
   class categoria_horarios extends Model {
     static associate(models) {
-      // * Aquí van las relaciones si son necesarias
+      // * Relaciones
+      categoria_horarios.hasMany(models.detalle_horarios, {
+        foreignKey: 'idCategoriaHorario',
+        as: 'detalles'
+      });
     }
   }
 
