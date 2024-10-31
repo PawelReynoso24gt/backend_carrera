@@ -90,7 +90,9 @@ module.exports = (app) => {
     router.get('/tipopago/inactivas', tipoPagosController.findaInactivateTipoPago);
     router.post('/tipopagos/create', tipoPagosController.createTipoPago);
     router.put('/tipopagos/:id', tipoPagosController.updateTipoPago);
-    router.delete('/tipopago/delete/:id', tipoPagosController.deleteTiposPago);    // * RUTAS TIPO PUBLICO
+    router.delete('/tipopago/delete/:id', tipoPagosController.deleteTiposPago);    
+    
+    // * RUTAS TIPO PUBLICO
     router.get('/tipo_publicos', tipoPublicoController.find);
     router.get('/tipo_publicos/activos', tipoPublicoController.findActive);
     router.get('/tipo_publicos/inactivos', tipoPublicoController.findInactive);
@@ -151,6 +153,7 @@ module.exports = (app) => {
     router.post('/rifas', rifasController.create);
     router.put('/rifas/:id', rifasController.update);
     router.delete('/rifas/:id', rifasController.delete);
+    
     // * RUTAS DE PEDIDOS
     router.get('/pedidos', pedidosController.find_All);
     router.get('/pedidos/activas', pedidosController.find_active);
