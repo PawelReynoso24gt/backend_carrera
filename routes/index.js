@@ -13,7 +13,6 @@ const standsController = require('../controllers/standsController');
 const tipoPublicoController =  require('../controllers/tipo_publicosController');
 const departamentosController = require('../controllers/departamentosController');
 const tipoPagosController = require('../controllers/tipoPagosController');
-const tipoPublicoController =  require('../controllers/tipo_publicosController');
 const categoriaBitacorasController = require('../controllers/categoria_bitacorasController');
 const tipoTrasladosController = require('../controllers/tipoTrasladosController');
 const trasladosController = require('../controllers/trasladosController');
@@ -110,7 +109,7 @@ module.exports = (app) => {
     router.put('/categoria_bitacoras/:id', categoriaBitacorasController.update);
     router.delete('/categoria_bitacoras/:id', categoriaBitacorasController.delete);
 
-        // * RUTAS DE CATEGORIA HORARIOS
+    // * RUTAS DE CATEGORIA HORARIOS
     router.get('/categoriaHorarios', categoriaHorariosController.find_All);
     router.get('/categoriaHorarios/activas', categoriaHorariosController.find_active);
     router.get('/categoriaHorarios/inactivas', categoriaHorariosController.find_inactive);
@@ -165,6 +164,7 @@ module.exports = (app) => {
     router.put('/pedidos/desactivar/:idPedido', pedidosController.deactivate);
     router.put('/pedidos/activar/:idPedido', pedidosController.activate);
     router.get('/pedidos/:descripcion', pedidosController.find_pedido);
+    
     // * RUTAS DE STAND
     router.get('/stand', standsController.find);
     router.get('/stand/activas', standsController.findActivateStand);
