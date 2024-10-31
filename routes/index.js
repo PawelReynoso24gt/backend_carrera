@@ -14,6 +14,7 @@ const categoriaBitacorasController = require('../controllers/categoria_bitacoras
 const tipoTrasladosController = require('../controllers/tipoTrasladosController');
 const trasladosController = require('../controllers/trasladosController');
 const productosController = require('../controllers/productosController');
+const rifasController = require('../controllers/rifasController');
 
 
 module.exports = (app) => {
@@ -114,6 +115,16 @@ module.exports = (app) => {
     router.post('/productos', productosController.create); 
     router.put('/productos/:id', productosController.update);
     router.delete('/productos/:id', productosController.delete); 
+
+    // * RIFAS
+    router.get('/rifas', rifasController.find);
+    router.get('/rifas/activos', rifasController.findActive);
+    router.get('/rifas/inactivos', rifasController.findInactive);
+    router.get('/rifas/:id', rifasController.findById);
+    router.post('/rifas', rifasController.create);
+    router.put('/rifas/:id', rifasController.update);
+    router.delete('/rifas/:id', rifasController.delete);
+
     app.use('/', router);
 
 };
