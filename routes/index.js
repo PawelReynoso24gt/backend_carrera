@@ -167,6 +167,22 @@ module.exports = (app) => {
     router.get('/pedidos/:descripcion', pedidosController.find_pedido);
     router.delete('/pedidos/:idPedido', pedidosController.delete);
 
+    // * RUTAS DE STAND
+    router.get('/stand', standsController.find);
+    router.get('/stand/activas', standsController.findActivateStand);
+    router.get('/stand/inactivas', standsController.findaInactivateStand);
+    router.post('/stand/create', standsController.createStand);
+    router.put('/stand/update/:id', standsController.updateStand);
+    router.delete('/stand/:id', standsController.deleteStand);
+
+    // * RUTAS DE MUNICIPIOS
+    router.get('/municipios', municipiosController.find);
+    router.get('/municipios/activas', municipiosController.findActivateMunicipios);
+    router.get('/municipios/inactivas', municipiosController.findInactiveMunicipios);
+    router.post('/municipios/create', municipiosController.createMunicipio);
+    router.put('/municipios/update/:id', municipiosController.updateMunicipio);
+    router.delete('/municipios/:id', municipiosController.deleteMunicipio);
+
      // * RUTAS DE CATEGORIA
      router.get('/categorias', categoriasController.find_All);
      router.get('/categorias/:idCategoria', categoriasController.find_by_id);
