@@ -19,6 +19,7 @@ const trasladosController = require('../controllers/trasladosController');
 const productosController = require('../controllers/productosController');
 const rifasController = require('../controllers/rifasController');
 const pedidosController = require('../controllers/pedidosController');
+const detalleHorariosController = require('../controllers/detalle_horariosController');
 
 
 
@@ -172,6 +173,14 @@ module.exports = (app) => {
     router.post('/stand/create', standsController.createStand);
     router.put('/stand/update/:id', standsController.updateStand);
     router.delete('/stand/:id', standsController.deleteStand);
+
+    // * DETALLE HORARIOS
+    router.get('/detalle_horarios/activos', detalleHorariosController.find); // Listar todos los detalles de horarios activos
+    router.get('/detalle_horarios', detalleHorariosController.find_all); // Listar todos los detalles de horarios
+    router.get('/detalle_horarios/:id', detalleHorariosController.findById); // Obtener detalle de horario por ID
+    router.post('/detalle_horarios', detalleHorariosController.create); // Crear un detalle de horario
+    router.put('/detalle_horarios/:id', detalleHorariosController.update); // Actualizar detalle de horario
+    router.delete('/detalle_horarios/:id', detalleHorariosController.delete); // Eliminar un detalle de horario
     
     app.use('/', router);
 
