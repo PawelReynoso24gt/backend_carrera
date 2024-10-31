@@ -57,7 +57,7 @@ module.exports = {
         const datos = req.body;
         const datos_ingreso = {
             tipo: datos.tipo,
-            estado: datos.estado,
+            estado: 1,  // Estado activo por defecto
             descripcion: datos.descripcion
         };
 

@@ -1,31 +1,42 @@
-// ! Modelo de categoria_horarios
 'use strict';
 const { Model } = require('sequelize');
 
 module.exports = (sequelize, DataTypes) => {
-  class categoria_horarios extends Model {
+  class traslados extends Model {
     static associate(models) {
-      // * Relaciones
-      categoria_horarios.hasMany(models.detalle_horarios, {
-        foreignKey: 'idCategoriaHorario',
-        as: 'detalles'
+      // Relación con la tabla tipo_traslados
+      traslados.belongsTo(models.TipoTraslado, {
+        foreignKey: 'idTipoTraslado',
+        as: 'tipoTraslado'
       });
     }
   }
 
-  categoria_horarios.init({
-    idCategoriaHorario: {
+  traslados.init({
+    idTraslado: {
       type: DataTypes.INTEGER,
       autoIncrement: true,
       primaryKey: true
     },
-    categoria: {
+    fecha: {
+      type: DataTypes.DATE,
+      allowNull: false
+    },
+    descripcion: {
       type: DataTypes.STRING(255),
       allowNull: false
     },
     estado: {
       type: DataTypes.INTEGER,
       allowNull: false
+    },
+    idTipoTraslado: {
+      type: DataTypes.INTEGER,
+      allowNull: false,
+      references: {
+        model: 'TipoTraslado',
+        key: 'idTipoTraslado'
+      }
     },
     createdAt: {
       type: DataTypes.DATE,
@@ -39,10 +50,10 @@ module.exports = (sequelize, DataTypes) => {
     }
   }, {
     sequelize,
-    modelName: 'categoria_horarios',
-    tableName: 'categoria_horarios',
+    modelName: 'Traslado',
+    tableName: 'traslados',
     timestamps: true
   });
 
-  return categoria_horarios;
+  return traslados;
 };
