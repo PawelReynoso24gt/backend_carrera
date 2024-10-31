@@ -172,6 +172,7 @@ module.exports = (app) => {
     router.post('/stand/create', standsController.createStand);
     router.put('/stand/update/:id', standsController.updateStand);
     router.delete('/stand/:id', standsController.deleteStand);
+    
     app.use('/', router);
 
 };
