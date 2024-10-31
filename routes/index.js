@@ -23,7 +23,7 @@ const detalleHorariosController = require('../controllers/detalle_horariosContro
 const tipoPublicoController =  require('../controllers/tipo_publicosController');
 const fotosSedesController = require('../controllers/fotosSedesController');
 const personasController = require('../controllers/personasController');
-
+const categoriasController = require('../controllers/categoriaController');
 
 module.exports = (app) => {
 
@@ -201,13 +201,22 @@ module.exports = (app) => {
     router.delete('/fotos_sedes/:id', fotosSedesController.delete);
 
     // * RUTAS PARA PERSONAS
-    router.get('/personas', personasController.find); // Listar todas las personas
-    router.get('/personas/activos', personasController.findActive); // Listar todas las personas activas
-    router.get('/personas/inactivos', personasController.findInactive); // Listar todas las personas inactivas
-    router.get('/personas/:id', personasController.findById); // Obtener una persona por ID
-    router.post('/personas/create', personasController.create); // Crear una nueva persona
-    router.put('/personas/update/:id', personasController.update); // Actualizar una persona existente
-    router.delete('/personas/delete/:id', personasController.delete); // Eliminar una persona
+    router.get('/personas', personasController.find);
+    router.get('/personas/activos', personasController.findActive);
+    router.get('/personas/inactivos', personasController.findInactive);
+    router.get('/personas/:id', personasController.findById);
+    router.post('/personas/create', personasController.create);
+    router.put('/personas/update/:id', personasController.update);
+    router.delete('/personas/delete/:id', personasController.delete);
+
+    // * RUTAS DE CATEGORIAS (productos)
+    router.get('/categorias', categoriasController.find_All);
+    router.get('/categorias/:idCategoria', categoriasController.find_by_id);
+    router.get('/categorias/activas', categoriasController.find_active);
+    router.get('/categorias/inactivas', categoriasController.find_inactive);
+    router.post('/categorias', categoriasController.create);
+    router.put('/categorias/:idCategoria', categoriasController.update);
+    router.get('/categorias/:nombreCategoria', categoriasController.find_categoria);
     
     app.use('/', router);
 
