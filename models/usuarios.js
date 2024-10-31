@@ -27,7 +27,7 @@ module.exports = (sequelize, DataTypes) => {
         allowNull: true
     },
     tokenExpiresAt: {
-        type: DataTypes.DATETIME,
+        type: DataTypes.DATE,
         allowNull: true
     },
     estado: {
