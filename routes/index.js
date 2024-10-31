@@ -11,7 +11,7 @@ const sedesController = require('../controllers/sedesController');
 const eventosController = require ('../controllers/eventosController');
 const standsController = require('../controllers/standsController');
 const departamentosController = require('../controllers/departamentosController');
-const tipoPagosController = require('../controllers/tipoPagosController');const tipoPublicoController =  require('../controllers/tipo_publicosController');
+const tipoPagosController = require('../controllers/tipoPagosController');
 const categoriaBitacorasController = require('../controllers/categoria_bitacorasController');
 const tipoTrasladosController = require('../controllers/tipoTrasladosController');
 const trasladosController = require('../controllers/trasladosController');
@@ -109,7 +109,7 @@ module.exports = (app) => {
     router.put('/categoria_bitacoras/:id', categoriaBitacorasController.update);
     router.delete('/categoria_bitacoras/:id', categoriaBitacorasController.delete);
 
-        // * RUTAS DE CATEGORIA HORARIOS
+    // * RUTAS DE CATEGORIA HORARIOS
     router.get('/categoriaHorarios', categoriaHorariosController.find_All);
     router.get('/categoriaHorarios/activas', categoriaHorariosController.find_active);
     router.get('/categoriaHorarios/inactivas', categoriaHorariosController.find_inactive);
@@ -164,6 +164,7 @@ module.exports = (app) => {
     router.put('/pedidos/desactivar/:idPedido', pedidosController.deactivate);
     router.put('/pedidos/activar/:idPedido', pedidosController.activate);
     router.get('/pedidos/:descripcion', pedidosController.find_pedido);
+    
     // * RUTAS DE STAND
     router.get('/stand', standsController.find);
     router.get('/stand/activas', standsController.findActivateStand);
@@ -179,6 +180,7 @@ module.exports = (app) => {
     router.post('/municipios/create', municipiosController.createMunicipio);
     router.put('/municipios/update/:id', municipiosController.updateMunicipio);
     router.delete('/municipios/:id', municipiosController.deleteMunicipio);
+    
     app.use('/', router);
 
 };
