@@ -9,6 +9,7 @@ const tipoStandsController = require('../controllers/tipoStandsController');
 const categoriaHorariosController = require('../controllers/categoriaHorariosController');
 const sedesController = require('../controllers/sedesController');
 const eventosController = require ('../controllers/eventosController');
+const standsController = require('../controllers/standsController');
 
 module.exports = (app) => {
 
@@ -57,8 +58,13 @@ module.exports = (app) => {
     router.put('/eventos/activar/:idEvento', eventosController.activate);
     router.get('/eventos/:nombreEvento', eventosController.find_evento);
 
-
-
+    // * RUTAS DE STAND
+    router.get('/stand', standsController.find);
+    router.get('/stand/activas', standsController.findActivateStand);
+    router.get('/stand/inactivas', standsController.findaInactivateStand);
+    router.post('/stand/create', standsController.createStand);
+    router.put('/stand/update/:id', standsController.updateStand);
+    router.delete('/stand/:id', standsController.deleteTiposPago);
     app.use('/', router);
 
 };
