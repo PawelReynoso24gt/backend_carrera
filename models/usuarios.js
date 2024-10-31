@@ -27,7 +27,7 @@ module.exports = (sequelize, DataTypes) => {
         allowNull: true
     },
     tokenExpiresAt: {
-        type: DataTypes.DATETIME,
+        type: DataTypes.DATE,
         allowNull: true
     },
     estado: {
@@ -49,17 +49,18 @@ module.exports = (sequelize, DataTypes) => {
     createdAt: {
       type: DataTypes.DATE,
       allowNull: false,
-      defaultValue: sequelize.literal('CURRENT_TIMESTAMP')
+      defaultValue: DataTypes.NOW
     },
     updatedAt: {
-        type: DataTypes.DATE,
-        allowNull: false,
-        defaultValue: sequelize.literal('CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP')
+      type: DataTypes.DATE,
+      allowNull: false,
+      defaultValue: DataTypes.NOW 
     }
   }, {
     sequelize,
     modelName: 'usuarios',
-    tableName: 'usuarios'
+    tableName: 'usuarios',
+    timestamps: true
   });
 
   return usuarios;
