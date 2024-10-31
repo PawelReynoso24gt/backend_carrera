@@ -9,6 +9,8 @@ const tipoStandsController = require('../controllers/tipoStandsController');
 const categoriaHorariosController = require('../controllers/categoriaHorariosController');
 const sedesController = require('../controllers/sedesController');
 const eventosController = require ('../controllers/eventosController');
+const tipoPublicoController =  require('../controllers/tipo_publicosController');
+
 
 module.exports = (app) => {
 
@@ -57,7 +59,14 @@ module.exports = (app) => {
     router.put('/eventos/activar/:idEvento', eventosController.activate);
     router.get('/eventos/:nombreEvento', eventosController.find_evento);
 
-
+    // * RUTAS TIPO PUBLICO
+    router.get('/tipo_publicos', tipoPublicoController.find);
+    router.get('/tipo_publicos/activos', tipoPublicoController.findActive);
+    router.get('/tipo_publicos/inactivos', tipoPublicoController.findInactive);
+    router.get('/tipo_publicos/:id', tipoPublicoController.findById);
+    router.post('/tipo_publicos/create', tipoPublicoController.create);
+    router.put('/tipo_publicos/update/:id', tipoPublicoController.update);
+    router.delete('/tipo_publicos/delete/:id', tipoPublicoController.delete);
 
     app.use('/', router);
 
