@@ -76,6 +76,16 @@ module.exports = (app) => {
     router.put('/categoria_bitacoras/:id', categoriaBitacorasController.update);
     router.delete('/categoria_bitacoras/:id', categoriaBitacorasController.delete);
 
+        // * RUTAS DE CATEGORIA HORARIOS
+    router.get('/categoriaHorarios', categoriaHorariosController.find_All);
+    router.get('/categoriaHorarios/activas', categoriaHorariosController.find_active);
+    router.get('/categoriaHorarios/inactivas', categoriaHorariosController.find_inactive);
+    router.post('/categoriaHorarios', categoriaHorariosController.create);
+    router.put('/categoriaHorarios/:idCategoriaHorario', categoriaHorariosController.update);
+    router.put('/categoriaHorarios/desactivar/:idCategoriaHorario', categoriaHorariosController.deactivate);
+    router.put('/categoriaHorarios/activar/:idCategoriaHorario', categoriaHorariosController.activate);
+    router.get('/categoriaHorarios/:categoria', categoriaHorariosController.find_categoria);
+
     app.use('/', router);
 
 };
