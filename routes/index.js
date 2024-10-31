@@ -20,7 +20,7 @@ const rifasController = require('../controllers/rifasController');
 const pedidosController = require('../controllers/pedidosController');
 const municipiosController = require('../controllers/municipiosController');
 const tipoPublicoController =  require('../controllers/tipo_publicosController');
-
+const personasController = require('../controllers/personasController');
 
 
 module.exports = (app) => {
@@ -181,6 +181,15 @@ module.exports = (app) => {
     router.post('/municipios/create', municipiosController.createMunicipio);
     router.put('/municipios/update/:id', municipiosController.updateMunicipio);
     router.delete('/municipios/:id', municipiosController.deleteMunicipio);
+
+    // * RUTAS PARA PERSONAS
+    router.get('/personas', personasController.find); // Listar todas las personas
+    router.get('/personas/activos', personasController.findActive); // Listar todas las personas activas
+    router.get('/personas/inactivos', personasController.findInactive); // Listar todas las personas inactivas
+    router.get('/personas/:id', personasController.findById); // Obtener una persona por ID
+    router.post('/personas/create', personasController.create); // Crear una nueva persona
+    router.put('/personas/update/:id', personasController.update); // Actualizar una persona existente
+    router.delete('/personas/delete/:id', personasController.delete); // Eliminar una persona
     
     app.use('/', router);
 
