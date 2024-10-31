@@ -2,22 +2,23 @@
 const { Model } = require('sequelize');
 
 module.exports = (sequelize, DataTypes) => {
-  class categorias extends Model {
+  class TipoTraslado extends Model {
     static associate(models) {
-       // Una categoría tiene muchos productos
-        categorias.hasMany(models.productos, {
-        foreignKey: 'idCategoria'
-    });
+      // Relación con la tabla traslados
+      TipoTraslado.hasMany(models.Traslado, {
+        foreignKey: 'idTipoTraslado',
+        as: 'traslados'
+      });
     }
   }
 
-  categorias.init({
-    idCategoria: {
+  TipoTraslado.init({
+    idTipoTraslado: {
       type: DataTypes.INTEGER,
       autoIncrement: true,
       primaryKey: true
     },
-    nombreCategoria: {
+    tipo: {
       type: DataTypes.STRING(255),
       allowNull: false
     },
@@ -27,20 +28,20 @@ module.exports = (sequelize, DataTypes) => {
     },
     createdAt: {
       type: DataTypes.DATE,
-      allowNull: true,
+      allowNull: false,
       defaultValue: DataTypes.NOW
     },
     updatedAt: {
       type: DataTypes.DATE,
-      allowNull: true,
+      allowNull: false,
       defaultValue: DataTypes.NOW
     }
   }, {
     sequelize,
-    modelName: 'categorias',
-    tableName: 'categorias',
+    modelName: 'TipoTraslado', // Cambia esto a CamelCase
+    tableName: 'tipo_traslados',
     timestamps: true
   });
 
-  return categorias;
+  return TipoTraslado;
 };
