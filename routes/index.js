@@ -170,7 +170,7 @@ module.exports = (app) => {
     router.get('/stand/inactivas', standsController.findaInactivateStand);
     router.post('/stand/create', standsController.createStand);
     router.put('/stand/update/:id', standsController.updateStand);
-    router.delete('/stand/:id', standsController.deleteTiposPago);
+    router.delete('/stand/:id', standsController.deleteStand);
     app.use('/', router);
 
 };
