@@ -2,9 +2,11 @@ const { Router } = require('express');
 const router = Router();
 
 // Aqui van los imports
+//RUTAS
 const usuariosController = require('../controllers/usuariosController');
 const horariosController = require('../controllers/horariosController');
 const tipoStandsController = require('../controllers/tipoStandsController');
+const categoriaHorariosController = require('../controllers/categoriaHorariosController');
 const sedesController = require('../controllers/sedesController');
 const eventosController = require ('../controllers/eventosController');
 
