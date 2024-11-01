@@ -108,48 +108,40 @@ module.exports = {
         });
     },
 
-    // * Desactivar un traslado
-    async deactivate(req, res) {
+    // * Desactivar o activar un traslado
+    async changeState(req, res) {
         const { idTraslado } = req.params;
-
+    
+        // Buscar el traslado actual para obtener su estado
+        const traslado = await TRASLADOS.findByPk(idTraslado);
+    
+        if (!traslado) {
+            return res.status(404).send({ message: 'Traslado no encontrado.' });
+        }
+    
+        // Cambiar el estado: si es 1 (activo), cambiar a 0 (inactivo) y viceversa
+        const nuevoEstado = traslado.estado === 1 ? 0 : 1;
+    
         return TRASLADOS.update(
-            { estado: 0 }, // Inactivo
+            { estado: nuevoEstado }, 
             { where: { idTraslado } }
         )
         .then((affectedRows) => {
             if (affectedRows[0] === 0) {
                 return res.status(404).send({ message: 'Traslado no encontrado.' });
             }
-            res.status(200).send({ message: 'Traslado desactivado con éxito.' });
+            const mensaje = nuevoEstado === 1 
+                ? 'Traslado activado con éxito.' 
+                : 'Traslado desactivado con éxito.';
+            res.status(200).send({ message: mensaje });
         })
         .catch((error) => {
             res.status(500).send({
-                message: error.message || 'Error al desactivar el traslado.'
+                message: error.message || 'Error al cambiar el estado del traslado.'
             });
         });
     },
-
-    // * Activar un traslado
-    async activate(req, res) {
-        const { idTraslado } = req.params;
-
-        return TRASLADOS.update(
-            { estado: 1 }, // Activo
-            { where: { idTraslado } }
-        )
-        .then((affectedRows) => {
-            if (affectedRows[0] === 0) {
-                return res.status(404).send({ message: 'Traslado no encontrado.' });
-            }
-            res.status(200).send({ message: 'Traslado activado con éxito.' });
-        })
-        .catch((error) => {
-            res.status(500).send({
-                message: error.message || 'Error al activar el traslado.'
-            });
-        });
-    },
-
+    
     // * Buscar un traslado por descripción
     async find_traslado(req, res) {
         const { descripcion } = req.params;
@@ -175,6 +167,52 @@ module.exports = {
         .catch((error) => {
             res.status(500).send({
                 message: error.message || 'Error al buscar el traslado.'
+            });
+        });
+    },
+
+     // * Buscar un traslado por ID
+     async find_by_id(req, res) {
+        const { idTraslado } = req.params;
+
+        return TRASLADOS.findByPk(idTraslado, {
+            include: [{
+                model: TIPO_TRASLADOS,
+                as: 'tipoTraslado',
+                attributes: ['tipo']
+            }]
+        })
+        .then((traslado) => {
+            if (!traslado) {
+                return res.status(404).send({ message: 'Traslado no encontrado.' });
+            }
+            res.status(200).send(traslado);
+        })
+        .catch((error) => {
+            console.error('Error al buscar el traslado por ID:', error);
+            res.status(500).send({
+                message: error.message || 'Error al buscar el traslado por ID.'
+            });
+        });
+    },
+
+    // * Eliminar un traslado
+    async delete(req, res) {
+        const { idTraslado } = req.params;
+
+        return TRASLADOS.destroy({
+            where: { idTraslado }
+        })
+        .then((affectedRows) => {
+            if (affectedRows === 0) {
+                return res.status(404).send({ message: 'Traslado no encontrado.' });
+            }
+            res.status(200).send({ message: 'Traslado eliminado con éxito.' });
+        })
+        .catch((error) => {
+            console.error('Error al eliminar el traslado:', error);
+            res.status(500).send({
+                message: error.message || 'Error al eliminar el traslado.'
             });
         });
     }

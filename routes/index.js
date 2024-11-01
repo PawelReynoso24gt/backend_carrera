@@ -23,7 +23,7 @@ const detalleHorariosController = require('../controllers/detalle_horariosContro
 const tipoPublicoController =  require('../controllers/tipo_publicosController');
 const fotosSedesController = require('../controllers/fotosSedesController');
 const personasController = require('../controllers/personasController');
-
+const categoriasController = require('../controllers/categoriaController');
 
 module.exports = (app) => {
 
@@ -54,22 +54,21 @@ module.exports = (app) => {
 
     // * RUTAS DE SEDES
     router.get('/sedes', sedesController.find_All);
+    router.get('/sedes/:idSede', sedesController.find_by_id);
     router.get('/sedes/activas', sedesController.find_active);
     router.get('/sedes/inactivas', sedesController.find_inactive);
     router.post('/sedes', sedesController.create);
     router.put('/sedes/:idSede', sedesController.update);
-    router.put('/sedes/desactivar/:idSede', sedesController.deactivate);
-    router.put('/sedes/activar/:idSede', sedesController.activate);
     router.get('/sedes/:nombreSede', sedesController.find_sede);
+    router.delete('/sedes/:nombreSede', sedesController.delete);
 
     // * RUTAS DE EVENTOS
     router.get('/eventos', eventosController.find_All);
+    router.get('/eventos/:idEvento', eventosController.find_by_id);
     router.get('/eventos/activas', eventosController.find_active);
     router.get('/eventos/inactivas', eventosController.find_inactive);
     router.post('/eventos', eventosController.create);
     router.put('/eventos/:idEvento', eventosController.update);
-    router.put('/eventos/desactivar/:idEvento', eventosController.deactivate);
-    router.put('/eventos/activar/:idEvento', eventosController.activate);
     router.get('/eventos/:nombreEvento', eventosController.find_evento);
 
     // * RUTAS DE STAND
@@ -114,32 +113,33 @@ module.exports = (app) => {
 
     // * RUTAS DE CATEGORIA HORARIOS
     router.get('/categoriaHorarios', categoriaHorariosController.find_All);
+    router.get('/categoriaHorarios/:idCategoriaHorario', categoriaHorariosController.find_by_id);
     router.get('/categoriaHorarios/activas', categoriaHorariosController.find_active);
     router.get('/categoriaHorarios/inactivas', categoriaHorariosController.find_inactive);
     router.post('/categoriaHorarios', categoriaHorariosController.create);
     router.put('/categoriaHorarios/:idCategoriaHorario', categoriaHorariosController.update);
-    router.put('/categoriaHorarios/desactivar/:idCategoriaHorario', categoriaHorariosController.deactivate);
-    router.put('/categoriaHorarios/activar/:idCategoriaHorario', categoriaHorariosController.activate);
     router.get('/categoriaHorarios/:categoria', categoriaHorariosController.find_categoria);
+    router.delete('/categoriaHorarios/:idCategoriaHorario', categoriaHorariosController.delete);
+
 
     // * RUTAS DE TIPO TRASLADOS
     router.get('/tipoTraslados', tipoTrasladosController.find_All);
+    router.get('/tipoTraslados/:idTipoTraslado', tipoTrasladosController.find_by_id);
     router.get('/tipoTraslados/activas', tipoTrasladosController.find_active);
     router.get('/tipoTraslados/inactivas', tipoTrasladosController.find_inactive);
     router.post('/tipoTraslados', tipoTrasladosController.create);
     router.put('/tipoTraslados/:idTipoTraslado', tipoTrasladosController.update);
-    router.put('/tipoTraslados/desactivar/:idTipoTraslado', tipoTrasladosController.deactivate);
-    router.put('/tipoTraslados/activar/:idTipoTraslado', tipoTrasladosController.activate);
     router.get('/tipoTraslados/:tipo', tipoTrasladosController.find_tipo);
+    router.delete('/tipoTraslados/:idTipoTraslado', tipoTrasladosController.delete);
+
 
     // * RUTAS DE TRASLADOS
     router.get('/traslados', trasladosController.find_All);
+    router.get('/traslados/:idTraslado', trasladosController.find_by_id);
     router.get('/traslados/activas', trasladosController.find_active);
     router.get('/traslados/inactivas', trasladosController.find_inactive);
     router.post('/traslados', trasladosController.create);
     router.put('/traslados/:idTraslado', trasladosController.update);
-    router.put('/traslados/desactivar/:idTraslado', trasladosController.deactivate);
-    router.put('/traslados/activar/:idTraslado', trasladosController.activate);
     router.get('/traslados/:descripcion', trasladosController.find_traslado);
 
     // * PRODUCTOS
@@ -160,14 +160,14 @@ module.exports = (app) => {
     
     // * RUTAS DE PEDIDOS
     router.get('/pedidos', pedidosController.find_All);
+    router.get('/pedidos/:idPedido', pedidosController.find_by_id);
     router.get('/pedidos/activas', pedidosController.find_active);
     router.get('/pedidos/inactivas', pedidosController.find_inactive);
     router.post('/pedidos', pedidosController.create);
     router.put('/pedidos/:idPedido', pedidosController.update);
-    router.put('/pedidos/desactivar/:idPedido', pedidosController.deactivate);
-    router.put('/pedidos/activar/:idPedido', pedidosController.activate);
     router.get('/pedidos/:descripcion', pedidosController.find_pedido);
-    
+    router.delete('/pedidos/:idPedido', pedidosController.delete);
+
     // * RUTAS DE STAND
     router.get('/stand', standsController.find);
     router.get('/stand/activas', standsController.findActivateStand);
@@ -201,13 +201,22 @@ module.exports = (app) => {
     router.delete('/fotos_sedes/:id', fotosSedesController.delete);
 
     // * RUTAS PARA PERSONAS
-    router.get('/personas', personasController.find); // Listar todas las personas
-    router.get('/personas/activos', personasController.findActive); // Listar todas las personas activas
-    router.get('/personas/inactivos', personasController.findInactive); // Listar todas las personas inactivas
-    router.get('/personas/:id', personasController.findById); // Obtener una persona por ID
-    router.post('/personas/create', personasController.create); // Crear una nueva persona
-    router.put('/personas/update/:id', personasController.update); // Actualizar una persona existente
-    router.delete('/personas/delete/:id', personasController.delete); // Eliminar una persona
+    router.get('/personas', personasController.find);
+    router.get('/personas/activos', personasController.findActive);
+    router.get('/personas/inactivos', personasController.findInactive);
+    router.get('/personas/:id', personasController.findById);
+    router.post('/personas/create', personasController.create);
+    router.put('/personas/update/:id', personasController.update);
+    router.delete('/personas/delete/:id', personasController.delete);
+
+    // * RUTAS DE CATEGORIAS (productos)
+    router.get('/categorias', categoriasController.find_All);
+    router.get('/categorias/:idCategoria', categoriasController.find_by_id);
+    router.get('/categorias/activas', categoriasController.find_active);
+    router.get('/categorias/inactivas', categoriasController.find_inactive);
+    router.post('/categorias', categoriasController.create);
+    router.put('/categorias/:idCategoria', categoriasController.update);
+    router.get('/categorias/:nombreCategoria', categoriasController.find_categoria);
     
     app.use('/', router);
 

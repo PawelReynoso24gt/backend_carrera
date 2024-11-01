@@ -5,18 +5,13 @@ const TIPOS_PUBLICOS = db.tipo_publicos;
 // Métodos CRUD
 module.exports = {
 
-    // Obtener todos los tipos de público con estado activo
+    // Obtener todos los tipos de público
     async find(req, res) {
         try {
-            const tiposPublicos = await TIPOS_PUBLICOS.findAll({
-                where: {
-                    estado: 1
-                }
-            });
-            
-            return res.status(200).json(tiposPublicos);
+            const tipo_publicos = await TIPOS_PUBLICOS.findAll();
+            return res.status(200).json(tipo_publicos);
         } catch (error) {
-            console.error('Error al recuperar los tipos de público:', error);
+            console.error('Error al recuperar los tipos de publicos:', error);
             return res.status(500).json({
                 message: 'Ocurrió un error al recuperar los datos.'
             });

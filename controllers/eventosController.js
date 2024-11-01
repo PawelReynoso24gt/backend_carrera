@@ -116,47 +116,6 @@ module.exports = {
         });
     },
 
-    // * Desactivar un evento
-    async deactivate(req, res) {
-        const { idEvento } = req.params;
-
-        return EVENTOS.update(
-            { estado: 0 }, 
-            { where: { idEvento } }
-        )
-        .then((affectedRows) => {
-            if (affectedRows[0] === 0) {
-                return res.status(404).send({ message: 'Evento no encontrado.' });
-            }
-            res.status(200).send({ message: 'Evento desactivado con éxito.' });
-        })
-        .catch((error) => {
-            res.status(500).send({
-                message: error.message || 'Error al desactivar el evento.'
-            });
-        });
-    },
-
-    // * Activar un evento
-    async activate(req, res) {
-        const { idEvento } = req.params;
-
-        return EVENTOS.update(
-            { estado: 1 }, 
-            { where: { idEvento } }
-        )
-        .then((affectedRows) => {
-            if (affectedRows[0] === 0) {
-                return res.status(404).send({ message: 'Evento no encontrado.' });
-            }
-            res.status(200).send({ message: 'Evento activado con éxito.' });
-        })
-        .catch((error) => {
-            res.status(500).send({
-                message: error.message || 'Error al activar el evento.'
-            });
-        });
-    },
 
     // * Buscar un evento por nombre
     async find_evento(req, res) {
@@ -185,5 +144,50 @@ module.exports = {
                 message: error.message || 'Error al buscar el evento.'
             });
         });
+    },
+
+      // * Buscar un evento por ID
+      async find_by_id(req, res) {
+        const { idEvento } = req.params;
+
+        return EVENTOS.findByPk(idEvento, {
+            include: [{
+                model: SEDES,
+                as: 'sede',
+                attributes: ['nombreSede']
+            }]
+        })
+        .then((evento) => {
+            if (!evento) {
+                return res.status(404).send({ message: 'Evento no encontrado.' });
+            }
+            res.status(200).send(evento);
+        })
+        .catch((error) => {
+            res.status(500).send({
+                message: error.message || 'Error al buscar el evento por ID.'
+            });
+        });
+    },
+
+    // * Eliminar un evento por ID
+    async delete(req, res) {
+        const { idEvento } = req.params;
+
+        return EVENTOS.destroy({
+            where: { idEvento }
+        })
+        .then((deleted) => {
+            if (deleted === 0) {
+                return res.status(404).send({ message: 'Evento no encontrado.' });
+            }
+            res.status(200).send({ message: 'Evento eliminado con éxito.' });
+        })
+        .catch((error) => {
+            res.status(500).send({
+                message: error.message || 'Error al eliminar el evento.'
+            });
+        });
     }
+    
 };

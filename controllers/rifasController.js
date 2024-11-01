@@ -8,14 +8,10 @@ module.exports = {
     // Obtener todas las rifas con estado activo
     async find(req, res) {
         try {
-            const rifas = await RIFAS.findAll({
-                where: {
-                    estado: 1
-                }
-            });
+            const rifas = await RIFAS.findAll();
             return res.status(200).json(rifas);
         } catch (error) {
-            console.error('Error al recuperar las rifas:', error);
+            console.error('Error al recuperar los tipos de publicos:', error);
             return res.status(500).json({
                 message: 'Ocurrió un error al recuperar los datos.'
             });

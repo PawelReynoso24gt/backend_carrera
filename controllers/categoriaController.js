@@ -94,47 +94,6 @@ module.exports = {
         });
     },
 
-    // * Desactivar una categoría
-    async deactivate(req, res) {
-        const { idCategoria } = req.params;
-
-        return CATEGORIAS.update(
-            { estado: 0 }, // Estado inactivo
-            { where: { idCategoria } }
-        )
-        .then((affectedRows) => {
-            if (affectedRows[0] === 0) {
-                return res.status(404).send({ message: 'Categoría no encontrada.' });
-            }
-            res.status(200).send({ message: 'Categoría desactivada con éxito.' });
-        })
-        .catch((error) => {
-            res.status(500).send({
-                message: error.message || 'Error al desactivar la categoría.'
-            });
-        });
-    },
-
-    // * Activar una categoría
-    async activate(req, res) {
-        const { idCategoria } = req.params;
-
-        return CATEGORIAS.update(
-            { estado: 1 }, // Estado activo
-            { where: { idCategoria } }
-        )
-        .then((affectedRows) => {
-            if (affectedRows[0] === 0) {
-                return res.status(404).send({ message: 'Categoría no encontrada.' });
-            }
-            res.status(200).send({ message: 'Categoría activada con éxito.' });
-        })
-        .catch((error) => {
-            res.status(500).send({
-                message: error.message || 'Error al activar la categoría.'
-            });
-        });
-    },
 
     // * Buscar una categoría por nombre
     async find_categoria(req, res) {
@@ -156,6 +115,44 @@ module.exports = {
         .catch((error) => {
             res.status(500).send({
                 message: error.message || 'Error al buscar la categoría.'
+            });
+        });
+    },
+
+    // * Buscar una categoría por ID
+    async find_by_id(req, res) {
+        const { idCategoria } = req.params;
+
+        return CATEGORIAS.findByPk(idCategoria)
+        .then((categoria) => {
+            if (!categoria) {
+                return res.status(404).send({ message: 'Categoría no encontrada.' });
+            }
+            res.status(200).send(categoria);
+        })
+        .catch((error) => {
+            res.status(500).send({
+                message: error.message || 'Error al buscar la categoría por ID.'
+            });
+        });
+    },
+
+    // * Eliminar una categoría por ID
+    async delete(req, res) {
+        const { idCategoria } = req.params;
+
+        return CATEGORIAS.destroy({
+            where: { idCategoria }
+        })
+        .then((deleted) => {
+            if (deleted === 0) {
+                return res.status(404).send({ message: 'Categoría no encontrada.' });
+            }
+            res.status(200).send({ message: 'Categoría eliminada con éxito.' });
+        })
+        .catch((error) => {
+            res.status(500).send({
+                message: error.message || 'Error al eliminar la categoría.'
             });
         });
     }
