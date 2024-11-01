@@ -1,15 +1,13 @@
 // ! Controlador de usuarios
 'use strict';
 const Sequelize = require('sequelize');
+const crypto = require('crypto');
 const db = require('../models');
 const Usuarios = db.usuarios;
 
-function rot13(texto) {
-    return texto.replace(/[a-zA-Z]/g, function(c) {
-        return String.fromCharCode(
-            (c <= 'Z' ? 90 : 122) >= (c = c.charCodeAt(0) + 13) ? c : c - 26
-        );
-    });
+// Función para hashear la contraseña usando SHA-256
+function hashPassword(password) {
+    return crypto.createHash('sha256').update(password).digest('hex');
 }
 
 module.exports = {
@@ -82,9 +80,9 @@ module.exports = {
         const datos = req.body;
         const datos_ingreso = {
             usuario: datos.usuario,
-            contrasenia: rot13(datos.contrasenia), // Encriptar con ROT13
+            contrasenia: hashPassword(datos.contrasenia), // Encriptar con SHA-256
             estado: 1, // Asignar valor predeterminado de 1
-            idRol: datos.idRol, // Incluir el idRol en los datos de ingreso
+            idRol: datos.idRol,
             idSede: datos.idSede,
             idPersona: datos.idPersona
         };
@@ -106,7 +104,6 @@ module.exports = {
         const camposActualizados = {};
 
         if (datos.usuario !== undefined) camposActualizados.usuario = datos.usuario;
-        if (datos.contrasenia !== undefined) camposActualizados.contrasenia = rot13(datos.contrasenia); // Encriptar con ROT13 si se actualiza
         if (datos.estado !== undefined) camposActualizados.estado = datos.estado; // Permite actualizar el estado
         if (datos.idRol !== undefined) camposActualizados.idRol = datos.idRol; // Permite actualizar el rol
         if (datos.idSede !== undefined) camposActualizados.idSede = datos.idSede; // Permite actualizar la sede
@@ -141,12 +138,12 @@ module.exports = {
             }
 
             // Verificar la contraseña actual
-            if (user.contrasenia !== rot13(contraseniaActual)) {
+            if (user.contrasenia !== hashPassword(contraseniaActual)) {
                 return res.status(401).send({ message: 'Contraseña actual incorrecta' });
             }
 
-            // Actualizar la contraseña
-            user.contrasenia = rot13(nuevaContrasenia);
+            // Actualizar la contraseña con SHA-256
+            user.contrasenia = hashPassword(nuevaContrasenia);
             await user.save();
 
             return res.status(200).send('La contraseña ha sido actualizada');
