@@ -214,5 +214,7 @@ module.exports = {
             console.error('Error al eliminar usuario:', error);
             return res.status(500).json({ error: 'Error al eliminar usuario' });
         }
-    }
+    },
+
+    hashPassword
 };
