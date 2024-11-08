@@ -29,11 +29,11 @@ module.exports = (app) => {
 
     // * USUARIOS
     router.get('/usuarios/activos', usuariosController.find);
-    router.get('/usuarios', usuariosController.find_all_users);
-    router.get('/usuarios/:id', usuariosController.findById);
+    router.get('/usuarios', usuariosController.findAllUsers);
+    router.get('/usuariosById/:id', usuariosController.findById);
     router.post('/usuarios', usuariosController.create);
     router.put('/usuarios/:id', usuariosController.update);
-    router.put('/usuarios/:id/contrasenia', usuariosController.update_password);
+    router.put('/usuarios/:id/contrasenia', usuariosController.updatePassword);
     router.delete('/usuarios/:id', usuariosController.delete);
 
     // * HORARIOS
