@@ -46,7 +46,7 @@ module.exports = (app) => {
 
     // * TIPO STANDS
     router.get('/tipo_stands/activos', tipoStandsController.find);
-    router.get('/tipo_stands', tipoStandsController.find_all);
+    router.get('/tipo_stands', tipoStandsController.findAll);
     router.get('/tipo_stands/:id', tipoStandsController.findById);
     router.post('/tipo_stands', tipoStandsController.create);
     router.put('/tipo_stands/:id', tipoStandsController.update);

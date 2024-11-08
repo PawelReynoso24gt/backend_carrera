@@ -4,6 +4,24 @@ const Sequelize = require('sequelize');
 const db = require('../models');
 const TipoStands = db.tipo_stands;
 
+// Función para validar los datos de entrada para create y update
+function validateTipoStandData(data) {
+    const tipoRegex = /^[A-Za-z\s]+$/; // Solo letras y espacios
+    const descripcionRegex = /^[A-Za-z0-9.,()"\s]+$/; // Letras, números, comas, puntos, paréntesis, comillas y espacios
+
+    if (!data.tipo || !tipoRegex.test(data.tipo)) {
+        return 'El campo tipo solo debe contener letras y espacios';
+    }
+    if (data.estado !== undefined && data.estado !== 0 && data.estado !== 1) {
+        return 'El campo estado debe ser 0 o 1';
+    }
+    if (data.descripcion && !descripcionRegex.test(data.descripcion)) {
+        return 'El campo descripcion solo debe contener letras sin acentos, numeros, comas, puntos, parentesis, comillas y espacios';
+    }
+
+    return null;
+}
+
 module.exports = {
     // * Get tipos de stands activos
     async find(req, res) {
@@ -22,7 +40,7 @@ module.exports = {
     },
 
     // * Get todos los tipos de stands
-    async find_all(req, res) {
+    async findAll(req, res) {
         try {
             const tipoStands = await TipoStands.findAll();
             return res.status(200).send(tipoStands);
@@ -55,9 +73,16 @@ module.exports = {
     // * Crear tipo de stand
     async create(req, res) {
         const datos = req.body;
+
+        // Validar los datos antes de insertarlos
+        const error = validateTipoStandData(datos);
+        if (error) {
+            return res.status(400).json({ error });
+        }
+
         const datos_ingreso = {
             tipo: datos.tipo,
-            estado: 1,  // Estado activo por defecto
+            estado: 1,
             descripcion: datos.descripcion
         };
 
@@ -75,6 +100,12 @@ module.exports = {
         const datos = req.body;
         const id = req.params.id;
 
+        // Validar los datos antes de actualizarlos
+        const error = validateTipoStandData(datos);
+        if (error) {
+            return res.status(400).json({ error });
+        }
+
         const camposActualizados = {};
 
         if (datos.tipo !== undefined) camposActualizados.tipo = datos.tipo;
@@ -87,10 +118,10 @@ module.exports = {
             });
 
             if (rowsUpdated === 0) {
-                return res.status(404).send({ message: 'Tipo de stand no encontrado' });
+                return res.status(404).json({ error: 'Tipo de stand no encontrado' });
             }
 
-            return res.status(200).send('El tipo de stand ha sido actualizado');
+            return res.status(200).json({ message: 'El tipo de stand ha sido actualizado' });
         } catch (error) {
             console.log(error);
             return res.status(500).json({ error: 'Error al actualizar tipo de stand' });
