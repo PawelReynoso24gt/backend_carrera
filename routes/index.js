@@ -38,7 +38,7 @@ module.exports = (app) => {
 
     // * HORARIOS
     router.get('/horarios/activos', horariosController.find);
-    router.get('/horarios', horariosController.find_all);
+    router.get('/horarios', horariosController.findAll);
     router.get('/horarios/:id', horariosController.findById);
     router.post('/horarios', horariosController.create);
     router.put('/horarios/:id', horariosController.update);

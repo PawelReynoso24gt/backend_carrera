@@ -4,6 +4,33 @@ const Sequelize = require('sequelize');
 const db = require('../models');
 const Horarios = db.horarios;
 
+// * Funcion para validar los datos para create
+function validateData(data) {
+    const datetimeRegex = /^\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}$/;
+
+    if (!data.horarioInicio) {
+        return 'Campo horarioInicio es obligatorio';
+    }
+    if (!datetimeRegex.test(data.horarioInicio)) {
+        return 'El formato de horarioInicio es inválido. Debe ser YYYY-MM-DD HH:MM:SS';
+    }
+
+    if (!data.horarioFinal) {
+        return 'Campo horarioFinal es obligatorio';
+    }
+    if (!datetimeRegex.test(data.horarioFinal)) {
+        return 'El formato de horarioFinal es inválido. Debe ser YYYY-MM-DD HH:MM:SS';
+    }
+    if (data.horarioInicio >= data.horarioFinal) {
+        return 'El horario de inicio debe ser menor al horario final';
+    }
+    if (data.estado !== undefined && data.estado !== 0 && data.estado !== 1) {
+        return 'El campo estado debe ser 0 o 1';
+    }
+
+    return null;
+}
+
 module.exports = {
     // * Get horarios activos
     async find(req, res) {
@@ -22,7 +49,7 @@ module.exports = {
     },
 
     // * Get todos los horarios
-    async find_all(req, res) {
+    async findAll(req, res) {
         try {
             const horarios = await Horarios.findAll();
             return res.status(200).send(horarios);
@@ -55,31 +82,44 @@ module.exports = {
     // * Crear horario
     async create(req, res) {
         const datos = req.body;
-        const datos_ingreso = {
+    
+        // Validar los datos antes de insertarlos
+        const error = validateData(datos);
+        if (error) {
+            return res.status(400).json({ error });
+        }
+    
+        const data = {
             horarioInicio: datos.horarioInicio,
             horarioFinal: datos.horarioFinal,
-            estado: 1 // Estado activo por defecto
+            estado: 1
         };
 
         try {
-            const newHorario = await Horarios.create(datos_ingreso);
+            const newHorario = await Horarios.create(data);
             return res.status(201).send(newHorario);
         } catch (error) {
             console.log(error);
             return res.status(500).json({ error: 'Error al insertar horario' });
         }
-    },
+    },    
 
     // * Actualizar horario
     async update(req, res) {
         const datos = req.body;
         const id = req.params.id;
+    
+        // Validar los datos antes de actualizarlos
+        const error = validateData(datos);
+        if (error) {
+            return res.status(400).json({ error });
+        }
 
         const camposActualizados = {};
 
         if (datos.horarioInicio !== undefined) camposActualizados.horarioInicio = datos.horarioInicio;
         if (datos.horarioFinal !== undefined) camposActualizados.horarioFinal = datos.horarioFinal;
-        if (datos.estado !== undefined) camposActualizados.estado = datos.estado; // Permite actualizar el estado
+        if (datos.estado !== undefined) camposActualizados.estado = datos.estado;
 
         try {
             const [rowsUpdated] = await Horarios.update(camposActualizados, {
@@ -95,7 +135,7 @@ module.exports = {
             console.log(error);
             return res.status(500).json({ error: 'Error al actualizar horario' });
         }
-    },
+    },    
 
     // * Eliminar horario
     async delete(req, res) {
