@@ -75,7 +75,7 @@ module.exports = {
         });
     },
 
-    // * Actualizar los campos de una sede (el estado no se cambia aqui)
+    // * Actualizar los campos de una sede 
     async update(req, res) {
         const { idSede } = req.params;
         const { informacion, nombreSede } = req.body;
