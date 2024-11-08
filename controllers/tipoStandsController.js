@@ -6,8 +6,8 @@ const TipoStands = db.tipo_stands;
 
 // Función para validar los datos de entrada para create y update
 function validateTipoStandData(data) {
-    const tipoRegex = /^[A-Za-z\s]+$/; // Solo letras y espacios
-    const descripcionRegex = /^[A-Za-z0-9.,()"\s]+$/; // Letras, números, comas, puntos, paréntesis, comillas y espacios
+    const tipoRegex = /^[A-Za-zÀ-ÿ\s]+$/; // Solo letras y espacios
+    const descripcionRegex = /^[A-ZÀ-ÿa-z0-9.,()"\s]+$/; // Letras, números, comas, puntos, paréntesis, comillas y espacios
 
     if (!data.tipo || !tipoRegex.test(data.tipo)) {
         return 'El campo tipo solo debe contener letras y espacios';
@@ -16,7 +16,7 @@ function validateTipoStandData(data) {
         return 'El campo estado debe ser 0 o 1';
     }
     if (data.descripcion && !descripcionRegex.test(data.descripcion)) {
-        return 'El campo descripcion solo debe contener letras sin acentos, numeros, comas, puntos, parentesis, comillas y espacios';
+        return 'El campo descripcion solo debe contener letras, numeros, comas, puntos, parentesis, comillas y espacios';
     }
 
     return null;
