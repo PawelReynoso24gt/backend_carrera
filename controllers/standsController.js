@@ -61,12 +61,25 @@ module.exports = {
     createStand: async (req, res) => {
         const datos = req.body;
     
+        // Validación de campos requeridos
         if (!datos.nombreStand || !datos.direccion || !datos.idSede || !datos.idTipoStands) {
             return res.status(400).json({ message: 'Faltan campos requeridos.' });
         }
     
+        // Expresiones regulares para validar el formato de los campos, incluyendo espacios
+        const regexNombreStand = /^[A-Za-z0-9\s-]+$/;
+        const regexDireccion = /^[A-Za-z0-9\s-]+$/;
+    
+        if (!regexNombreStand.test(datos.nombreStand)) {
+            return res.status(400).json({ message: 'El nombre del stand solo debe contener letras, números, guiones y espacios.' });
+        }
+    
+        if (!regexDireccion.test(datos.direccion)) {
+            return res.status(400).json({ message: 'La dirección solo debe contener letras, números, guiones y espacios.' });
+        }
+    
         try {
-           
+            // Validación de existencia de idSede y idTipoStands
             const sedeExistente = await Sede.findByPk(datos.idSede);
             const tipoStandExistente = await TipoStands.findByPk(datos.idTipoStands);
     
@@ -77,7 +90,7 @@ module.exports = {
             if (!tipoStandExistente) {
                 return res.status(400).json({ error: 'El idTipoStands ingresado no existe.' });
             }
-            
+    
             const datos_ingreso = { 
                 tipo: datos.tipo,
                 estado: datos.estado !== undefined ? datos.estado : 1, 
@@ -96,24 +109,39 @@ module.exports = {
         }
     },
     
-
     updateStand: async (req, res) => {
         const datos = req.body;
         const id = req.params.id;
     
         const camposActualizados = {};
     
+        // Validación de nombreStand y direccion si están presentes en los datos
+        const regexNombreStand = /^[A-Za-z0-9\s-]+$/;
+        const regexDireccion = /^[A-Za-z0-9\s-]+$/;
+    
+        if (datos.nombreStand !== undefined) {
+            if (!regexNombreStand.test(datos.nombreStand)) {
+                return res.status(400).json({ message: 'El nombre del stand solo debe contener letras, números, guiones y espacios.' });
+            }
+            camposActualizados.nombreStand = datos.nombreStand;
+        }
+    
+        if (datos.direccion !== undefined) {
+            if (!regexDireccion.test(datos.direccion)) {
+                return res.status(400).json({ message: 'La dirección solo debe contener letras, números, guiones y espacios.' });
+            }
+            camposActualizados.direccion = datos.direccion;
+        }
+    
         if (datos.tipo !== undefined) camposActualizados.tipo = datos.tipo;
         if (datos.estado !== undefined) camposActualizados.estado = datos.estado;
-        if (datos.nombreStand !== undefined) camposActualizados.nombreStand = datos.nombreStand;
-        if (datos.direccion !== undefined) camposActualizados.direccion = datos.direccion;
         if (datos.idSede !== undefined) camposActualizados.idSede = datos.idSede;
         if (datos.idTipoStands !== undefined) camposActualizados.idTipoStands = datos.idTipoStands;
     
         try {
-      
+            // Validación de existencia de idSede y idTipoStands si están presentes en los datos
             if (datos.idSede) {
-                const sedeExistente = await SEDE.findByPk(datos.idSede);
+                const sedeExistente = await Sede.findByPk(datos.idSede);
                 if (!sedeExistente) {
                     return res.status(400).json({ error: 'El idSede ingresado no existe.' });
                 }
@@ -141,7 +169,8 @@ module.exports = {
             console.error(`Error al actualizar el stand con ID ${id}:`, error);
             return res.status(500).json({ error: 'Error al actualizar stand' });
         }
-    },   
+    },    
+    
 
     async deleteStand(req, res) {
         const id = req.params.id; 

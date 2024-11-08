@@ -57,16 +57,23 @@ module.exports = {
 
     createDepto(req, res) {
         const datos = req.body;
-
+    
+        // Validación del campo departamento
         if (!datos.departamento) {
             return res.status(400).json({ message: 'Faltan campos requeridos.' });
         }
-
+    
+        // Expresión regular para permitir solo letras mayúsculas y minúsculas
+        const regex = /^[A-Za-z]+$/;
+        if (!regex.test(datos.departamento)) {
+            return res.status(400).json({ message: 'El nombre del departamento solo debe contener letras.' });
+        }
+    
         const datos_ingreso = { 
             departamento: datos.departamento,
             estado: datos.estado !== undefined ? datos.estado : 1 
         };
-
+    
         return DEPARTAMENTOS.create(datos_ingreso)
             .then(departamentos => {
                 return res.status(201).json(departamentos);
@@ -76,16 +83,26 @@ module.exports = {
                 return res.status(500).json({ error: 'Error al insertar el departamento' });
             });
     },
-
+    
     updateDepto(req, res) {
         const datos = req.body;
         const id = req.params.id;
-
-        const camposActualizados = {};
     
-        if (datos.departamento !== undefined) camposActualizados.departamento = datos.departamento;
-        if (datos.estado !== undefined) camposActualizados.estado = datos.estado; 
-
+        const camposActualizados = {};
+        
+        // Validación del campo departamento si está presente en los datos
+        if (datos.departamento !== undefined) {
+            const regex = /^[A-Za-z]+$/;
+            if (!regex.test(datos.departamento)) {
+                return res.status(400).json({ message: 'El nombre del departamento solo debe contener letras.' });
+            }
+            camposActualizados.departamento = datos.departamento;
+        }
+    
+        if (datos.estado !== undefined) {
+            camposActualizados.estado = datos.estado; 
+        }
+    
         return DEPARTAMENTOS.update(
             camposActualizados,
             {
@@ -102,8 +119,7 @@ module.exports = {
             console.error(`Error al actualizar el departamento con ID ${id}:`, error);
             return res.status(500).json({ error: 'Error al actualizar departamento' });
         });
-    },  
-
+    },    
 
 
     async deleteDepto(req, res) {
