@@ -4,6 +4,7 @@ const Sequelize = require('sequelize');
 const db = require('../models');
 const Usuarios = db.usuarios;
 
+// SHA256
 function rot13(texto) {
     return texto.replace(/[a-zA-Z]/g, function(c) {
         return String.fromCharCode(
