@@ -57,16 +57,23 @@ module.exports = {
 
     createTipoPago(req, res) {
         const datos = req.body;
-
+    
+        // Validación del campo tipo
         if (!datos.tipo) {
             return res.status(400).json({ message: 'Faltan campos requeridos.' });
         }
-
+    
+        // Expresión regular para permitir solo letras mayúsculas y minúsculas
+        const regex = /^[A-Za-z]+$/;
+        if (!regex.test(datos.tipo)) {
+            return res.status(400).json({ message: 'El tipo de pago solo debe contener letras.' });
+        }
+    
         const datos_ingreso = { 
             tipo: datos.tipo,
             estado: datos.estado !== undefined ? datos.estado : 1 
         };
-
+    
         return TIPOPAGOS.create(datos_ingreso)
             .then(tipo_pagos => {
                 return res.status(201).json(tipo_pagos);
@@ -76,16 +83,26 @@ module.exports = {
                 return res.status(500).json({ error: 'Error al insertar el tipo pago' });
             });
     },
-
+    
     updateTipoPago(req, res) {
         const datos = req.body;
         const id = req.params.id;
-
-        const camposActualizados = {};
     
-        if (datos.tipo !== undefined) camposActualizados.tipo = datos.tipo;
-        if (datos.estado !== undefined) camposActualizados.estado = datos.estado; 
-
+        const camposActualizados = {};
+        
+        // Validación del campo tipo si está presente en los datos
+        if (datos.tipo !== undefined) {
+            const regex = /^[A-Za-z]+$/;
+            if (!regex.test(datos.tipo)) {
+                return res.status(400).json({ message: 'El tipo de pago solo debe contener letras.' });
+            }
+            camposActualizados.tipo = datos.tipo;
+        }
+    
+        if (datos.estado !== undefined) {
+            camposActualizados.estado = datos.estado; 
+        }
+    
         return TIPOPAGOS.update(
             camposActualizados,
             {
@@ -102,10 +119,8 @@ module.exports = {
             console.error(`Error al actualizar el tipo pago con ID ${id}:`, error);
             return res.status(500).json({ error: 'Error al actualizar tipo pago' });
         });
-    },  
-
-
-
+    },
+    
     async deleteTiposPago(req, res) {
         const id = req.params.id; 
     

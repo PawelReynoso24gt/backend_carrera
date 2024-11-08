@@ -62,12 +62,20 @@ module.exports = {
     createMunicipio: async (req, res) => {
         const datos = req.body;
     
+        // Validación de campos requeridos
         if (!datos.municipio || !datos.idDepartamento) {
             return res.status(400).json({ message: 'Faltan campos requeridos.' });
         }
     
+        // Expresión regular para validar el formato del campo municipio
+        const regexMunicipio = /^[A-Za-z0-9\s-]+$/;
+    
+        if (!regexMunicipio.test(datos.municipio)) {
+            return res.status(400).json({ message: 'El nombre del municipio solo debe contener letras, números, guiones y espacios.' });
+        }
+    
         try {
-        
+            // Validación de existencia del idDepartamento
             const departamentoExistente = await Departamentos.findByPk(datos.idDepartamento);
             
             if (!departamentoExistente) {
@@ -89,18 +97,27 @@ module.exports = {
         }
     },
     
-
     updateMunicipio: async (req, res) => {
         const datos = req.body;
         const id = req.params.id;
     
         const camposActualizados = {};
     
-        if (datos.municipio !== undefined) camposActualizados.municipio = datos.municipio;
+        // Expresión regular para validar el formato del campo municipio
+        const regexMunicipio = /^[A-Za-z0-9\s-]+$/;
+    
+        if (datos.municipio !== undefined) {
+            if (!regexMunicipio.test(datos.municipio)) {
+                return res.status(400).json({ message: 'El nombre del municipio solo debe contener letras, números, guiones y espacios.' });
+            }
+            camposActualizados.municipio = datos.municipio;
+        }
+    
         if (datos.estado !== undefined) camposActualizados.estado = datos.estado;
         if (datos.idDepartamento !== undefined) camposActualizados.idDepartamento = datos.idDepartamento;
     
         try {
+            // Validación de existencia de idDepartamento si está presente en los datos
             if (datos.idDepartamento) {
                 const departamentoExistente = await Departamentos.findByPk(datos.idDepartamento);
                 if (!departamentoExistente) {
@@ -123,7 +140,7 @@ module.exports = {
             return res.status(500).json({ error: 'Error al actualizar municipio' });
         }
     },
-
+    
     async deleteMunicipio(req, res) {
         const id = req.params.id; 
     
