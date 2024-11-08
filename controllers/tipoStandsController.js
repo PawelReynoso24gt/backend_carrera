@@ -9,14 +9,20 @@ function validateTipoStandData(data) {
     const tipoRegex = /^[A-Za-zÀ-ÿ\s]+$/; // Solo letras y espacios
     const descripcionRegex = /^[A-ZÀ-ÿa-z0-9.,()"\s]+$/; // Letras, números, comas, puntos, paréntesis, comillas y espacios
 
-    if (!data.tipo || !tipoRegex.test(data.tipo)) {
-        return 'El campo tipo solo debe contener letras y espacios';
+    if (data.tipo !== undefined) {
+        if (!tipoRegex.test(data.tipo)) {
+            return 'El campo tipo solo debe contener letras y espacios';
+        }
     }
-    if (data.estado !== undefined && data.estado !== 0 && data.estado !== 1) {
-        return 'El campo estado debe ser 0 o 1';
+    if (data.estado !== undefined) {
+        if (data.estado !== 0 && data.estado !== 1) {
+            return 'El campo estado debe ser 0 o 1';
+        }
     }
-    if (data.descripcion && !descripcionRegex.test(data.descripcion)) {
-        return 'El campo descripcion solo debe contener letras, numeros, comas, puntos, parentesis, comillas y espacios';
+    if (data.descripcion !== undefined) {
+        if (!descripcionRegex.test(data.descripcion)) {
+            return 'El campo descripcion solo debe contener letras, numeros, comas, puntos, parentesis, comillas y espacios';
+        }
     }
 
     return null;

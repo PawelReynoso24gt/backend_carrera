@@ -8,24 +8,25 @@ const Horarios = db.horarios;
 function validateData(data) {
     const datetimeRegex = /^\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}$/;
 
-    if (!data.horarioInicio) {
-        return 'Campo horarioInicio es obligatorio';
+    if (data.horarioInicio !== undefined) {
+        if (!datetimeRegex.test(data.horarioInicio)) {
+            return 'El formato de horarioInicio es inválido. Debe ser YYYY-MM-DD HH:MM:SS';
+        }
     }
-    if (!datetimeRegex.test(data.horarioInicio)) {
-        return 'El formato de horarioInicio es inválido. Debe ser YYYY-MM-DD HH:MM:SS';
+    if (data.horarioFinal !== undefined) {
+        if (!datetimeRegex.test(data.horarioFinal)) {
+            return 'El formato de horarioFinal es inválido. Debe ser YYYY-MM-DD HH:MM:SS';
+        }
     }
-
-    if (!data.horarioFinal) {
-        return 'Campo horarioFinal es obligatorio';
+    if (data.horarioInicio !== undefined && data.horarioFinal !== undefined) {
+        if (data.horarioInicio >= data.horarioFinal) {
+            return 'El horario de inicio debe ser menor al horario final';
+        }
     }
-    if (!datetimeRegex.test(data.horarioFinal)) {
-        return 'El formato de horarioFinal es inválido. Debe ser YYYY-MM-DD HH:MM:SS';
-    }
-    if (data.horarioInicio >= data.horarioFinal) {
-        return 'El horario de inicio debe ser menor al horario final';
-    }
-    if (data.estado !== undefined && data.estado !== 0 && data.estado !== 1) {
-        return 'El campo estado debe ser 0 o 1';
+    if (data.estado !== undefined) {
+        if (data.estado !== 0 && data.estado !== 1) {
+            return 'El campo estado debe ser 0 o 1';
+        }
     }
 
     return null;

@@ -186,7 +186,7 @@ module.exports = (app) => {
 
     // * DETALLE HORARIOS
     router.get('/detalle_horarios/activos', detalleHorariosController.find);
-    router.get('/detalle_horarios', detalleHorariosController.find_all);
+    router.get('/detalle_horarios', detalleHorariosController.findAll);
     router.get('/detalle_horarios/:id', detalleHorariosController.findById);
     router.post('/detalle_horarios', detalleHorariosController.create);
     router.put('/detalle_horarios/:id', detalleHorariosController.update);

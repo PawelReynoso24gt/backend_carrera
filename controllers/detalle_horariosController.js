@@ -4,6 +4,32 @@ const Sequelize = require('sequelize');
 const db = require('../models');
 const DetalleHorarios = db.detalle_horarios;
 
+// Función para validar los datos de entrada para create y update
+function validateDetalleHorarioData(data) {
+    if (data.cantidadPersonas !== undefined) {
+        if (isNaN(data.cantidadPersonas) || data.cantidadPersonas < 0) {
+            return 'El campo cantidadPersonas debe ser un número positivo';
+        }
+    }
+    if (data.estado !== undefined) {
+        if (data.estado !== 0 && data.estado !== 1) {
+            return 'El campo estado debe ser 0 o 1';
+        }
+    }
+    if (data.idHorario !== undefined) {
+        if (isNaN(data.idHorario) || data.idHorario <= 0) {
+            return 'El campo idHorario debe ser un número positivo';
+        }
+    }
+    if (data.idCategoriaHorario !== undefined) {
+        if (isNaN(data.idCategoriaHorario) || data.idCategoriaHorario <= 0) {
+            return 'El campo idCategoriaHorario debe ser un número positivo';
+        }
+    }
+    
+    return null;
+}
+
 module.exports = {
     // * Get detalles de horarios activos
     async find(req, res) {
@@ -23,7 +49,7 @@ module.exports = {
     },
 
     // * Get todos los detalles de horarios
-    async find_all(req, res) {
+    async findAll(req, res) {
         try {
             const detalles = await DetalleHorarios.findAll({
                 include: ['horario', 'categoriaHorario']
@@ -60,6 +86,13 @@ module.exports = {
     // * Crear detalle de horario
     async create(req, res) {
         const datos = req.body;
+    
+        // Validar los datos antes de insertarlos
+        const error = validateDetalleHorarioData(datos);
+        if (error) {
+            return res.status(400).json({ error });
+        }
+    
         const datos_ingreso = {
             cantidadPersonas: datos.cantidadPersonas,
             estado: 1,
@@ -81,6 +114,13 @@ module.exports = {
         const datos = req.body;
         const id = req.params.id;
 
+        // Validar los datos antes de actualizarlos
+        const error = validateDetalleHorarioData(datos);
+        if (error) {
+            console.error('Error al validar los datos:', error);
+            return res.status(400).json({ error });
+        }
+    
         const camposActualizados = {};
 
         if (datos.cantidadPersonas !== undefined) camposActualizados.cantidadPersonas = datos.cantidadPersonas;
