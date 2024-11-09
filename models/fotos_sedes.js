@@ -1,29 +1,25 @@
-// ! Modelo de sedes
+// ! Modelo de fotos_sedes
 'use strict';
 const { Model } = require('sequelize');
 
 module.exports = (sequelize, DataTypes) => {
-  class sedes extends Model {
+  class fotos_sedes extends Model {
     static associate(models) {
-      // * Una sede tiene muchas rifas
-      sedes.hasMany(models.rifas, {
-        foreignKey: 'idSede'
-      });
-      // * Una sede tiene muchas fotos
-      sedes.hasMany(models.fotos_sedes, {
+      // * Relaciones
+      fotos_sedes.belongsTo(models.sedes, {
         foreignKey: 'idSede',
-        as: 'fotos'
+        as: 'sede'
       });
     }
   }
 
-  sedes.init({
-    idSede: {
+  fotos_sedes.init({
+    idFotoSede: {
       type: DataTypes.INTEGER,
       autoIncrement: true,
       primaryKey: true
     },
-    informacion: {
+    foto: {
       type: DataTypes.TEXT,
       allowNull: false
     },
@@ -31,9 +27,13 @@ module.exports = (sequelize, DataTypes) => {
       type: DataTypes.INTEGER,
       allowNull: false
     },
-    nombreSede: {
-      type: DataTypes.STRING(255),
-      allowNull: false
+    idSede: {
+      type: DataTypes.INTEGER,
+      allowNull: false,
+      references: {
+        model: 'sedes',
+        key: 'idSede'
+      }
     },
     createdAt: {
       type: DataTypes.DATE,
@@ -47,10 +47,10 @@ module.exports = (sequelize, DataTypes) => {
     }
   }, {
     sequelize,
-    modelName: 'sedes',
-    tableName: 'sedes',
+    modelName: 'fotos_sedes',
+    tableName: 'fotos_sedes',
     timestamps: true
   });
 
-  return sedes;
+  return fotos_sedes;
 };

@@ -46,13 +46,22 @@ module.exports = {
             return res.status(400).json({ message: 'Faltan campos requeridos.' });
         }
 
+        // Validación de la categoría con expresión regular
+        const regexCategoria = /^[A-Za-záéíóúÁÉÍÓÚÑñ\s]+$/;
+        if (!regexCategoria.test(datos.categoria)) {
+            return res.status(400).json({ message: 'La categoría contiene caracteres no válidos.' });
+        }
+
         const nuevaCategoriaBitacora = { 
             categoria: datos.categoria
         };
 
         try {
-            const categoriaBitacora = await CATEGORIA_BITACORAS.create(nuevaCategoriaBitacora);
-            return res.status(201).json(categoriaBitacora);
+            const categoriaBitacoraCreada = await CATEGORIA_BITACORAS.create(nuevaCategoriaBitacora);
+            return res.status(201).json({
+                message: 'Categoría de bitácora creada exitosamente.',
+                categoriaBitacora: categoriaBitacoraCreada
+            });
         } catch (error) {
             console.error('Error al insertar la categoría de bitácora:', error);
             return res.status(500).json({ error: 'Error al insertar la categoría de bitácora' });
@@ -65,8 +74,15 @@ module.exports = {
         const id = req.params.id;
 
         const camposActualizados = {};
-    
-        if (datos.categoria !== undefined) camposActualizados.categoria = datos.categoria;
+        
+        if (datos.categoria !== undefined) {
+            // Validación de la categoría con expresión regular
+            const regexCategoria = /^[A-Za-záéíóúÁÉÍÓÚÑñ\s]+$/;
+            if (!regexCategoria.test(datos.categoria)) {
+                return res.status(400).json({ message: 'La categoría contiene caracteres no válidos.' });
+            }
+            camposActualizados.categoria = datos.categoria;
+        }
 
         try {
             const [rowsUpdated] = await CATEGORIA_BITACORAS.update(
@@ -75,15 +91,24 @@ module.exports = {
                     where: { idCategoriaBitacora: id } 
                 }
             );
+
             if (rowsUpdated === 0) {
                 return res.status(404).json({ message: 'Categoría de bitácora no encontrada' });
             }
-            return res.status(200).json({ message: 'La categoría de bitácora ha sido actualizada' });
+
+            // Obtener el registro actualizado
+            const categoriaBitacoraActualizada = await CATEGORIA_BITACORAS.findByPk(id);
+
+            // Devolver un mensaje junto con el objeto actualizado
+            return res.status(200).json({
+                message: 'La categoría de bitácora ha sido actualizada',
+                categoriaBitacora: categoriaBitacoraActualizada
+            });
         } catch (error) {
             console.error(`Error al actualizar la categoría de bitácora con ID ${id}:`, error);
             return res.status(500).json({ error: 'Error al actualizar categoría de bitácora' });
         }
-    },  
+    },
 
     // Eliminar una categoría de bitácora
     async delete(req, res) {

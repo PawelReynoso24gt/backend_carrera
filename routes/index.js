@@ -20,36 +20,38 @@ const productosController = require('../controllers/productosController');
 const rifasController = require('../controllers/rifasController');
 const pedidosController = require('../controllers/pedidosController');
 const municipiosController = require('../controllers/municipiosController');
-const tipoPublicoController =  require('../controllers/tipo_publicosController');
+const detalleHorariosController = require('../controllers/detalle_horariosController');
+const tipoPublicoController =  require('../controllers/tipoPublicosController');
+const fotosSedesController = require('../controllers/fotosSedesController');
 const personasController = require('../controllers/personasController');
-
+const categoriasController = require('../controllers/categoriaController');
 
 module.exports = (app) => {
 
     // * USUARIOS
-    router.get('/usuarios/activos', usuariosController.find); // Listar todos los usuarios activos
-    router.get('/usuarios', usuariosController.find_all_users); // Listar todos los usuarios
-    router.get('/usuarios/:id', usuariosController.findById); // Obtener usuario por ID
-    router.post('/usuarios', usuariosController.create); // Crear un usuario
-    router.put('/usuarios/:id', usuariosController.update); // Actualizar usuario
-    router.put('/usuarios/:id/contrasenia', usuariosController.update_password); // Actualizar contraseña del usuario
-    router.delete('/usuarios/:id', usuariosController.delete); // Eliminar un usuario
+    router.get('/usuarios/activos', usuariosController.find);
+    router.get('/usuarios', usuariosController.findAllUsers);
+    router.get('/usuariosById/:id', usuariosController.findById);
+    router.post('/usuarios', usuariosController.create);
+    router.put('/usuarios/:id', usuariosController.update);
+    router.put('/usuarios/:id/contrasenia', usuariosController.updatePassword);
+    router.delete('/usuarios/:id', usuariosController.delete);
 
     // * HORARIOS
-    router.get('/horarios/activos', horariosController.find); // Listar todos los horarios activos
-    router.get('/horarios', horariosController.find_all); // Listar todos los horarios
-    router.get('/horarios/:id', horariosController.findById); // Obtener horario por ID
-    router.post('/horarios', horariosController.create); // Crear un horario
-    router.put('/horarios/:id', horariosController.update); // Actualizar horario
-    router.delete('/horarios/:id', horariosController.delete); // Eliminar un horario
+    router.get('/horarios/activos', horariosController.find);
+    router.get('/horarios', horariosController.findAll);
+    router.get('/horarios/:id', horariosController.findById);
+    router.post('/horarios', horariosController.create);
+    router.put('/horarios/:id', horariosController.update);
+    router.delete('/horarios/:id', horariosController.delete);
 
     // * TIPO STANDS
-    router.get('/tipo_stands/activos', tipoStandsController.find); // Listar todos los tipos de stands activos
-    router.get('/tipo_stands', tipoStandsController.find_all); // Listar todos los tipos de stands
-    router.get('/tipo_stands/:id', tipoStandsController.findById); // Obtener tipo de stand por ID
-    router.post('/tipo_stands', tipoStandsController.create); // Crear un tipo de stand
-    router.put('/tipo_stands/:id', tipoStandsController.update); // Actualizar tipo de stand
-    router.delete('/tipo_stands/:id', tipoStandsController.delete); // Eliminar un tipo de stand
+    router.get('/tipo_stands/activos', tipoStandsController.find);
+    router.get('/tipo_stands', tipoStandsController.findAll);
+    router.get('/tipo_stands/:id', tipoStandsController.findById);
+    router.post('/tipo_stands', tipoStandsController.create);
+    router.put('/tipo_stands/:id', tipoStandsController.update);
+    router.delete('/tipo_stands/:id', tipoStandsController.delete);
 
     // * RUTAS DE SEDES
     router.get('/sedes', sedesController.findAll);
@@ -88,7 +90,7 @@ module.exports = (app) => {
 
     // * RUTAS DE TIPOS PAGOS
     router.get('/tipospagos', tipoPagosController.find);
-    router.get('tipopago/activas', tipoPagosController.findActivateTipoPago);
+    router.get('/tipopago/activas', tipoPagosController.findActivateTipoPago);
     router.get('/tipopago/inactivas', tipoPagosController.findaInactivateTipoPago);
     router.post('/tipopagos/create', tipoPagosController.createTipoPago);
     router.put('/tipopagos/:id', tipoPagosController.updateTipoPago);
@@ -153,6 +155,8 @@ module.exports = (app) => {
 
     // * PRODUCTOS
     router.get('/productos', productosController.find); 
+    router.get('/productos/activos', productosController.findActive);
+    router.get('/productos/inactivos', productosController.findInactive);
     router.get('/productos/:id', productosController.findById); 
     router.post('/productos', productosController.create); 
     router.put('/productos/:id', productosController.update);
@@ -193,14 +197,39 @@ module.exports = (app) => {
     router.put('/municipios/update/:id', municipiosController.updateMunicipio);
     router.delete('/municipios/:id', municipiosController.deleteMunicipio);
 
+    // * DETALLE HORARIOS
+    router.get('/detalle_horarios/activos', detalleHorariosController.find);
+    router.get('/detalle_horarios', detalleHorariosController.findAll);
+    router.get('/detalle_horarios/:id', detalleHorariosController.findById);
+    router.post('/detalle_horarios', detalleHorariosController.create);
+    router.put('/detalle_horarios/:id', detalleHorariosController.update);
+    router.delete('/detalle_horarios/:id', detalleHorariosController.delete);
+
+    // * FOTOS SEDES
+    router.get('/fotos_sedes/activos', fotosSedesController.find);
+    router.get('/fotos_sedes', fotosSedesController.find_all);
+    router.get('/fotos_sedes/:id', fotosSedesController.findById);
+    router.post('/fotos_sedes', fotosSedesController.create);
+    router.put('/fotos_sedes/:id', fotosSedesController.update);
+    router.delete('/fotos_sedes/:id', fotosSedesController.delete);
+
     // * RUTAS PARA PERSONAS
-    router.get('/personas', personasController.find); // Listar todas las personas
-    router.get('/personas/activos', personasController.findActive); // Listar todas las personas activas
-    router.get('/personas/inactivos', personasController.findInactive); // Listar todas las personas inactivas
-    router.get('/personas/:id', personasController.findById); // Obtener una persona por ID
-    router.post('/personas/create', personasController.create); // Crear una nueva persona
-    router.put('/personas/update/:id', personasController.update); // Actualizar una persona existente
-    router.delete('/personas/delete/:id', personasController.delete); // Eliminar una persona
+    router.get('/personas', personasController.find);
+    router.get('/personas/activos', personasController.findActive);
+    router.get('/personas/inactivos', personasController.findInactive);
+    router.get('/personas/:id', personasController.findById);
+    router.post('/personas/create', personasController.create);
+    router.put('/personas/update/:id', personasController.update);
+    router.delete('/personas/delete/:id', personasController.delete);
+
+    // * RUTAS DE CATEGORIAS (productos)
+    router.get('/categorias', categoriasController.find_All);
+    router.get('/categorias/:idCategoria', categoriasController.find_by_id);
+    router.get('/categorias/activas', categoriasController.find_active);
+    router.get('/categorias/inactivas', categoriasController.find_inactive);
+    router.post('/categorias', categoriasController.create);
+    router.put('/categorias/:idCategoria', categoriasController.update);
+    router.get('/categorias/:nombreCategoria', categoriasController.find_categoria);
     
     app.use('/', router);
 
