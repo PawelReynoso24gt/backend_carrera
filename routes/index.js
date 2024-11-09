@@ -20,7 +20,7 @@ const rifasController = require('../controllers/rifasController');
 const pedidosController = require('../controllers/pedidosController');
 const municipiosController = require('../controllers/municipiosController');
 const detalleHorariosController = require('../controllers/detalle_horariosController');
-const tipoPublicoController =  require('../controllers/tipo_publicosController');
+const tipoPublicoController =  require('../controllers/tipoPublicosController');
 const fotosSedesController = require('../controllers/fotosSedesController');
 const personasController = require('../controllers/personasController');
 const categoriasController = require('../controllers/categoriaController');
@@ -144,6 +144,8 @@ module.exports = (app) => {
 
     // * PRODUCTOS
     router.get('/productos', productosController.find); 
+    router.get('/productos/activos', productosController.findActive);
+    router.get('/productos/inactivos', productosController.findInactive);
     router.get('/productos/:id', productosController.findById); 
     router.post('/productos', productosController.create); 
     router.put('/productos/:id', productosController.update);
