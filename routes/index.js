@@ -7,7 +7,6 @@ const usuariosController = require('../controllers/usuariosController');
 const horariosController = require('../controllers/horariosController');
 const tipoStandsController = require('../controllers/tipoStandsController');
 const categoriaHorariosController = require('../controllers/categoriaHorariosController');
-const categoriasController = require('../controllers/categoriaController');
 const sedesController = require('../controllers/sedesController');
 const eventosController = require ('../controllers/eventosController');
 const standsController = require('../controllers/standsController');
