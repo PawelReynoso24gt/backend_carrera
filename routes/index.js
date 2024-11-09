@@ -107,9 +107,9 @@ module.exports = (app) => {
     // * RUTAS PARA CATEGORÍA DE BITÁCORAS
     router.get('/categoria_bitacoras', categoriaBitacorasController.find);
     router.get('/categoria_bitacoras/:id', categoriaBitacorasController.findById);
-    router.post('/categoria_bitacoras', categoriaBitacorasController.create);
-    router.put('/categoria_bitacoras/:id', categoriaBitacorasController.update);
-    router.delete('/categoria_bitacoras/:id', categoriaBitacorasController.delete);
+    router.post('/categoria_bitacoras/create', categoriaBitacorasController.create);
+    router.put('/categoria_bitacoras/update/:id', categoriaBitacorasController.update);
+    router.delete('/categoria_bitacoras/delete/:id', categoriaBitacorasController.delete);
 
     // * RUTAS DE CATEGORIA HORARIOS
     router.get('/categoriaHorarios', categoriaHorariosController.find_All);
