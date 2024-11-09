@@ -6,15 +6,24 @@ const FotosSedes = db.fotos_sedes;
 
 // Función para validar los datos de la foto de la sede
 function validarDatosFotoSede(datos) {
-    if (!datos.foto || !datos.idSede) {
-        return { error: 'Los campos foto e idSede son requeridos.' };
+    if (datos.foto !== undefined) {
+        const base64Pattern = /^data:image\/(jpeg|png|jpg|gif);base64,/;
+        if (!base64Pattern.test(datos.foto)) {
+            return { error: 'La foto debe estar en formato Base64.' };
+        }
     }
-    const base64Pattern = /^data:image\/(jpeg|png|jpg|gif);base64,/;
-    if (!base64Pattern.test(datos.foto)) {
-        return { error: 'La foto debe estar en formato Base64.' };
+    if (datos.idSede !== undefined) {
+        if (isNaN(datos.idSede)) {
+            return { error: 'El campo idSede debe ser un número válido.' };
+        }
     }
-    if (isNaN(datos.idSede)) {
-        return { error: 'El campo idSede debe ser un número válido.' };
+    if (datos.estado !== undefined) {
+        if (datos.estado !== 0 && datos.estado !== 1) {
+            return { error: 'El campo estado debe ser 0 o 1.' };
+        }
+    }
+    if (datos.foto === undefined && datos.idSede === undefined && datos.estado === undefined) {
+        return { error: 'Al menos un campo (foto, idSede o estado) debe estar presente.' };
     }
 
     return null;
