@@ -4,6 +4,22 @@ const Sequelize = require('sequelize');
 const db = require('../models');
 const FotosSedes = db.fotos_sedes;
 
+// Función para validar los datos de la foto de la sede
+function validarDatosFotoSede(datos) {
+    if (!datos.foto || !datos.idSede) {
+        return { error: 'Los campos foto e idSede son requeridos.' };
+    }
+    const base64Pattern = /^data:image\/(jpeg|png|jpg|gif);base64,/;
+    if (!base64Pattern.test(datos.foto)) {
+        return { error: 'La foto debe estar en formato Base64.' };
+    }
+    if (isNaN(datos.idSede)) {
+        return { error: 'El campo idSede debe ser un número válido.' };
+    }
+
+    return null;
+}
+
 module.exports = {
     // * Get fotos de sedes activas
     async find(req, res) {
@@ -60,9 +76,15 @@ module.exports = {
     // * Crear foto de sede
     async create(req, res) {
         const datos = req.body;
+
+        const error = validarDatosFotoSede(datos);
+        if (error) {
+            return res.status(400).json(error);
+        }
+
         const datos_ingreso = {
             foto: datos.foto,
-            estado: datos.estado,
+            estado: 1,
             idSede: datos.idSede
         };
 
@@ -79,6 +101,11 @@ module.exports = {
     async update(req, res) {
         const datos = req.body;
         const id = req.params.id;
+
+        const error = validarDatosFotoSede(datos);
+        if (error) {
+            return res.status(400).json(error);
+        }
 
         const camposActualizados = {};
 

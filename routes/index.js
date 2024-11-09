@@ -29,16 +29,16 @@ module.exports = (app) => {
 
     // * USUARIOS
     router.get('/usuarios/activos', usuariosController.find);
-    router.get('/usuarios', usuariosController.find_all_users);
-    router.get('/usuarios/:id', usuariosController.findById);
+    router.get('/usuarios', usuariosController.findAllUsers);
+    router.get('/usuariosById/:id', usuariosController.findById);
     router.post('/usuarios', usuariosController.create);
     router.put('/usuarios/:id', usuariosController.update);
-    router.put('/usuarios/:id/contrasenia', usuariosController.update_password);
+    router.put('/usuarios/:id/contrasenia', usuariosController.updatePassword);
     router.delete('/usuarios/:id', usuariosController.delete);
 
     // * HORARIOS
     router.get('/horarios/activos', horariosController.find);
-    router.get('/horarios', horariosController.find_all);
+    router.get('/horarios', horariosController.findAll);
     router.get('/horarios/:id', horariosController.findById);
     router.post('/horarios', horariosController.create);
     router.put('/horarios/:id', horariosController.update);
@@ -46,7 +46,7 @@ module.exports = (app) => {
 
     // * TIPO STANDS
     router.get('/tipo_stands/activos', tipoStandsController.find);
-    router.get('/tipo_stands', tipoStandsController.find_all);
+    router.get('/tipo_stands', tipoStandsController.findAll);
     router.get('/tipo_stands/:id', tipoStandsController.findById);
     router.post('/tipo_stands', tipoStandsController.create);
     router.put('/tipo_stands/:id', tipoStandsController.update);
@@ -89,7 +89,7 @@ module.exports = (app) => {
 
     // * RUTAS DE TIPOS PAGOS
     router.get('/tipospagos', tipoPagosController.find);
-    router.get('tipopago/activas', tipoPagosController.findActivateTipoPago);
+    router.get('/tipopago/activas', tipoPagosController.findActivateTipoPago);
     router.get('/tipopago/inactivas', tipoPagosController.findaInactivateTipoPago);
     router.post('/tipopagos/create', tipoPagosController.createTipoPago);
     router.put('/tipopagos/:id', tipoPagosController.updateTipoPago);
@@ -188,7 +188,7 @@ module.exports = (app) => {
 
     // * DETALLE HORARIOS
     router.get('/detalle_horarios/activos', detalleHorariosController.find);
-    router.get('/detalle_horarios', detalleHorariosController.find_all);
+    router.get('/detalle_horarios', detalleHorariosController.findAll);
     router.get('/detalle_horarios/:id', detalleHorariosController.findById);
     router.post('/detalle_horarios', detalleHorariosController.create);
     router.put('/detalle_horarios/:id', detalleHorariosController.update);

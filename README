@@ -1,0 +1,7 @@
+Instalar jest para testes
+
+npm install jest
+
+Para ejecutar las pruebas es con el siguiente comando:
+
+npx jest
