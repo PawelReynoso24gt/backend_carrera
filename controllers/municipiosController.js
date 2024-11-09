@@ -67,11 +67,11 @@ module.exports = {
             return res.status(400).json({ message: 'Faltan campos requeridos.' });
         }
     
-        // Expresión regular para validar el formato del campo municipio
-        const regexMunicipio = /^[A-Za-z0-9\s-]+$/;
+        // Expresión regular para validar el formato del campo municipio (permitiendo tildes, letras, números, guiones y espacios)
+        const regexMunicipio = /^[A-Za-z0-9áéíóúÁÉÍÓÚüÜ\s-]+$/;
     
         if (!regexMunicipio.test(datos.municipio)) {
-            return res.status(400).json({ message: 'El nombre del municipio solo debe contener letras, números, guiones y espacios.' });
+            return res.status(400).json({ message: 'El nombre del municipio solo debe contener letras, números, guiones, espacios y tildes.' });
         }
     
         try {
@@ -103,12 +103,12 @@ module.exports = {
     
         const camposActualizados = {};
     
-        // Expresión regular para validar el formato del campo municipio
-        const regexMunicipio = /^[A-Za-z0-9\s-]+$/;
+        // Expresión regular para validar el formato del campo municipio (permitiendo tildes, letras, números, guiones y espacios)
+        const regexMunicipio = /^[A-Za-z0-9áéíóúÁÉÍÓÚüÜ\s-]+$/;
     
         if (datos.municipio !== undefined) {
             if (!regexMunicipio.test(datos.municipio)) {
-                return res.status(400).json({ message: 'El nombre del municipio solo debe contener letras, números, guiones y espacios.' });
+                return res.status(400).json({ message: 'El nombre del municipio solo debe contener letras, números, guiones, espacios y tildes.' });
             }
             camposActualizados.municipio = datos.municipio;
         }
@@ -140,6 +140,7 @@ module.exports = {
             return res.status(500).json({ error: 'Error al actualizar municipio' });
         }
     },
+    
     
     async deleteMunicipio(req, res) {
         const id = req.params.id; 

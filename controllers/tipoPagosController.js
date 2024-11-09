@@ -63,10 +63,10 @@ module.exports = {
             return res.status(400).json({ message: 'Faltan campos requeridos.' });
         }
     
-        // Expresión regular para permitir solo letras mayúsculas y minúsculas
-        const regex = /^[A-Za-z]+$/;
+        // Expresión regular para permitir letras, tildes y espacios
+        const regex = /^[A-Za-zÁÉÍÓÚáéíóú\s]+$/;
         if (!regex.test(datos.tipo)) {
-            return res.status(400).json({ message: 'El tipo de pago solo debe contener letras.' });
+            return res.status(400).json({ message: 'El tipo de pago solo debe contener letras y espacios.' });
         }
     
         const datos_ingreso = { 
@@ -92,9 +92,9 @@ module.exports = {
         
         // Validación del campo tipo si está presente en los datos
         if (datos.tipo !== undefined) {
-            const regex = /^[A-Za-z]+$/;
+            const regex = /^[A-Za-zÁÉÍÓÚáéíóú\s]+$/;
             if (!regex.test(datos.tipo)) {
-                return res.status(400).json({ message: 'El tipo de pago solo debe contener letras.' });
+                return res.status(400).json({ message: 'El tipo de pago solo debe contener letras y espacios.' });
             }
             camposActualizados.tipo = datos.tipo;
         }
@@ -120,6 +120,7 @@ module.exports = {
             return res.status(500).json({ error: 'Error al actualizar tipo pago' });
         });
     },
+    
     
     async deleteTiposPago(req, res) {
         const id = req.params.id; 

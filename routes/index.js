@@ -89,7 +89,7 @@ module.exports = (app) => {
 
     // * RUTAS DE TIPOS PAGOS
     router.get('/tipospagos', tipoPagosController.find);
-    router.get('tipopago/activas', tipoPagosController.findActivateTipoPago);
+    router.get('/tipopago/activas', tipoPagosController.findActivateTipoPago);
     router.get('/tipopago/inactivas', tipoPagosController.findaInactivateTipoPago);
     router.post('/tipopagos/create', tipoPagosController.createTipoPago);
     router.put('/tipopagos/:id', tipoPagosController.updateTipoPago);
