@@ -24,7 +24,6 @@ const detalleHorariosController = require('../controllers/detalle_horariosContro
 const tipoPublicoController =  require('../controllers/tipoPublicosController');
 const fotosSedesController = require('../controllers/fotosSedesController');
 const personasController = require('../controllers/personasController');
-const categoriasController = require('../controllers/categoriaController');
 
 module.exports = (app) => {
 
@@ -223,13 +222,13 @@ module.exports = (app) => {
     router.delete('/personas/delete/:id', personasController.delete);
 
     // * RUTAS DE CATEGORIAS (productos)
-    router.get('/categorias', categoriasController.find_All);
-    router.get('/categorias/:idCategoria', categoriasController.find_by_id);
-    router.get('/categorias/activas', categoriasController.find_active);
-    router.get('/categorias/inactivas', categoriasController.find_inactive);
+    router.get('/categorias', categoriasController.findAll);
+    router.get('/categorias/:idCategoria', categoriasController.findById);
+    router.get('/categorias/activas', categoriasController.findActive);
+    router.get('/categorias/inactivas', categoriasController.findInactive);
     router.post('/categorias', categoriasController.create);
     router.put('/categorias/:idCategoria', categoriasController.update);
-    router.get('/categorias/:nombreCategoria', categoriasController.find_categoria);
+    router.get('/categorias/:nombreCategoria', categoriasController.findCategoria);
     
     app.use('/', router);
 
