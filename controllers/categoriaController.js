@@ -8,7 +8,7 @@ const CATEGORIAS = db.categorias;
 module.exports = {
 
     // * Listar todas las categorías
-    async find_All(req, res) {
+    async findAll(req, res) {
         return CATEGORIAS.findAll()
         .then((categorias) => {
             res.status(200).send(categorias);
@@ -21,7 +21,7 @@ module.exports = {
     },
 
     // * Listar todas las categorías activas
-    async find_active(req, res) {
+    async findActive(req, res) {
         return CATEGORIAS.findAll({
             where: {
                 estado: 1 
@@ -38,7 +38,7 @@ module.exports = {
     },
 
     // * Listar todas las categorías inactivas
-    async find_inactive(req, res) {
+    async findInactive(req, res) {
         return CATEGORIAS.findAll({
             where: {
                 estado: 0 
@@ -57,46 +57,73 @@ module.exports = {
     // * Crear una nueva categoría
     async create(req, res) {
         const { nombreCategoria } = req.body;
+    
+        if (!nombreCategoria) {
+            return res.status(400).json({ message: 'Falta el campo requerido: nombreCategoria.' });
+        }
 
-        return CATEGORIAS.create({
-            nombreCategoria,
-            estado: 1 // Estado activo por defecto
-        })
-        .then((categoria) => {
-            res.status(201).send(categoria);
-        })
-        .catch((error) => {
-            res.status(500).send({
+        const regex = /^[A-Za-zÁÉÍÓÚáéíóúÑñ\s]+$/;
+
+        if (!regex.test(nombreCategoria)) {
+            return res.status(400).json({ message: 'El nombre de la categoría solo debe contener letras y espacios.' });
+        }   
+        
+        try {
+
+            const nuevaCategoria = await CATEGORIAS.create({
+                nombreCategoria,
+                estado: 1 
+            });
+    
+            return res.status(201).json(nuevaCategoria);
+    
+        } catch (error) {
+            console.error('Error al crear la categoría:', error);
+            return res.status(500).json({
                 message: error.message || 'Error al crear la categoría.'
             });
-        });
+        }
     },
 
     // * Actualizar una categoría
     async update(req, res) {
-        const { idCategoria } = req.params;
-        const { nombreCategoria } = req.body;
+        const datos = req.body;
+        const id = req.params.id;
+    
+        const camposActualizados = {};
 
-        return CATEGORIAS.update(
-            { nombreCategoria },
-            { where: { idCategoria } }
-        )
-        .then((affectedRows) => {
-            if (affectedRows[0] === 0) {
-                return res.status(404).send({ message: 'Categoría no encontrada.' });
+        if (datos.nombreCategoria !== undefined) {
+
+            const regex = /^[A-Za-zÁÉÍÓÚáéíóúÑñ\s]+$/;
+
+            if (!regex.test(datos.nombreCategoria)) {
+                return res.status(400).json({ message: 'La categoría solo debe contener letras y espacios.' });
             }
-            res.status(200).send({ message: 'Categoría actualizada con éxito.' });
-        })
-        .catch((error) => {
-            res.status(500).send({
-                message: error.message || 'Error al actualizar la categoría.'
+
+            camposActualizados.nombreCategoria = datos.nombreCategoria;
+        }
+
+
+        if (datos.estado !== undefined) camposActualizados.estado = datos.estado;
+    
+        try {    
+            const [rowsUpdated] = await CATEGORIAS.update(camposActualizados, {
+                where: { idCategoria: id }
             });
-        });
+            if (rowsUpdated === 0) {
+                return res.status(404).json({ message: 'Categoría de producto no encontrada' });
+            }
+            return res.status(200).json({ message: 'La categoría de producto ha sido actualizada' });
+    
+        } catch (error) {
+            console.error(`Error al actualizar la categoría de producto con ID ${id}:`, error);
+            return res.status(500).json({ error: 'Error al actualizar la categoría de producto' });
+        }
     },
 
 
     // * Buscar una categoría por nombre
-    async find_categoria(req, res) {
+    async findCategoria(req, res) {
         const { nombreCategoria } = req.params;
 
         return CATEGORIAS.findOne({
@@ -120,10 +147,10 @@ module.exports = {
     },
 
     // * Buscar una categoría por ID
-    async find_by_id(req, res) {
-        const { idCategoria } = req.params;
+    async findById(req, res) {
+        const { id } = req.params;
 
-        return CATEGORIAS.findByPk(idCategoria)
+        return CATEGORIAS.findByPk(id)
         .then((categoria) => {
             if (!categoria) {
                 return res.status(404).send({ message: 'Categoría no encontrada.' });
