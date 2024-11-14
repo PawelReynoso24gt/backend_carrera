@@ -7,7 +7,7 @@ const TIPO_TRASLADOS = db.TipoTraslado;
 module.exports = {
 
     // * Listar todos los tipos de traslados
-    async find_All(req, res) {
+    async findAll(req, res) {
         return TIPO_TRASLADOS.findAll()
         .then((tipoTraslados) => {
             res.status(200).send(tipoTraslados);
@@ -20,7 +20,7 @@ module.exports = {
     },
 
     // * Listar todos los tipos de traslados activos
-    async find_active(req, res) {
+    async findActive(req, res) {
         return TIPO_TRASLADOS.findAll({
             where: {
                 estado: 1 
@@ -37,7 +37,7 @@ module.exports = {
     },
 
     // * Listar todos los tipos de traslados inactivos
-    async find_inactive(req, res) {
+    async findInactive(req, res) {
         return TIPO_TRASLADOS.findAll({
             where: {
                 estado: 0 
@@ -56,46 +56,83 @@ module.exports = {
     // * Crear un nuevo tipo de traslado
     async create(req, res) {
         const { tipo } = req.body;
+    
 
-        return TIPO_TRASLADOS.create({
-            tipo,
-            estado: 1 // Estado activo por defecto
-        })
-        .then((tipoTraslado) => {
-            res.status(201).send(tipoTraslado);
-        })
-        .catch((error) => {
-            res.status(500).send({
+        if (!tipo) {
+            return res.status(400).json({ message: 'Falta el campo requerido: tipo.' });
+        }
+
+        const regex = /^[A-Za-zÁÉÍÓÚáéíóúÑñ\s]+$/;
+    
+        if (!regex.test(tipo)) {
+            return res.status(400).json({ message: 'El tipo de traslado solo debe contener letras y espacios.' });
+        }
+    
+        try {
+            const datos_ingreso = {
+                tipo,
+                estado: 1 
+            };
+    
+            const tipoTrasladoCreado = await TIPO_TRASLADOS.create(datos_ingreso);
+            return res.status(201).json(tipoTrasladoCreado);
+    
+        } catch (error) {
+            console.error('Error al crear el tipo de traslado:', error);
+            return res.status(500).json({
                 message: error.message || 'Error al crear el tipo de traslado.'
             });
-        });
+        }
     },
+
+
+    
 
     // * Actualizar un tipo de traslado
-    async update(req, res) {
-        const { idTipoTraslado } = req.params;
-        const { tipo } = req.body;
+   async update(req, res) {
+    const { tipo, estado } = req.body;
+    const idTipoTraslado = req.params.id;
 
-        return TIPO_TRASLADOS.update(
-            { tipo },
-            { where: { idTipoTraslado } }
-        )
-        .then((affectedRows) => {
-            if (affectedRows[0] === 0) {
-                return res.status(404).send({ message: 'Tipo de traslado no encontrado.' });
-            }
-            res.status(200).send({ message: 'Tipo de traslado actualizado con éxito.' });
-        })
-        .catch((error) => {
-            res.status(500).send({
-                message: error.message || 'Error al actualizar el tipo de traslado.'
-            });
+    const camposActualizados = {};
+
+
+    if (tipo !== undefined) {
+
+        const regex = /^[A-Za-zÁÉÍÓÚáéíóúÑñ\s]+$/;
+
+        if (!regex.test(tipo)) {
+            return res.status(400).json({ message: 'El tipo de traslado solo debe contener letras y espacios.' });
+        }
+
+        camposActualizados.tipo = tipo;
+    }
+
+    if (estado !== undefined) {
+        camposActualizados.estado = estado;
+    }
+
+    try {
+
+        const [rowsUpdated] = await TIPO_TRASLADOS.update(camposActualizados, {
+            where: { idTipoTraslado }
         });
+
+        if (rowsUpdated === 0) {
+            return res.status(404).json({ message: 'Tipo de traslado no encontrado.' });
+        }
+
+        return res.status(200).json({ message: 'Tipo de traslado actualizado con éxito.' });
+
+    } catch (error) {
+        console.error(`Error al actualizar el tipo de traslado con ID ${idTipoTraslado}:`, error);
+        return res.status(500).json({ error: 'Error al actualizar el tipo de traslado.' });
+    }
     },
+
 
 
     // * Buscar un tipo de traslado por nombre
-    async find_tipo(req, res) {
+    async findTipo(req, res) {
         const { tipo } = req.params;
 
         return TIPO_TRASLADOS.findOne({
@@ -119,7 +156,7 @@ module.exports = {
     },
 
   // * Buscar un tipo de traslado por ID
-async find_by_id(req, res) {
+async findById(req, res) {
     const { idTipoTraslado } = req.params;
 
     return TIPO_TRASLADOS.findByPk(idTipoTraslado)

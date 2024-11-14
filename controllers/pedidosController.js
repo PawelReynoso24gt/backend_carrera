@@ -9,7 +9,7 @@ const USUARIOS = db.usuarios;
 module.exports = {
 
     // * Listar todos los pedidos con su sede y usuario
-    async find_All(req, res) {
+    async findAll(req, res) {
         return PEDIDOS.findAll({
             include: [
                 {
@@ -35,7 +35,7 @@ module.exports = {
     },
 
     // * Listar todos los pedidos activos
-    async find_active(req, res) {
+    async findActive(req, res) {
         return PEDIDOS.findAll({
             where: {
                 estado: 1
@@ -64,7 +64,7 @@ module.exports = {
     },
 
      // * Listar todos los pedidos activos
-     async find_inactive(req, res) {
+     async findInactive(req, res) {
         return PEDIDOS.findAll({
             where: {
                 estado: 0
@@ -95,49 +95,117 @@ module.exports = {
     // * Crear un nuevo pedido
     async create(req, res) {
         const { fecha, descripcion, idSede, idUsuario } = req.body;
-
-        return PEDIDOS.create({
-            fecha,
-            descripcion,
-            estado: 1, // Activo por defecto
-            idSede,
-            idUsuario
-        })
-        .then((pedido) => {
-            res.status(201).send(pedido);
-        })
-        .catch((error) => {
-            res.status(500).send({
+    
+        // Validación: Verificar que los campos obligatorios estén presentes
+        if (!fecha) {
+            return res.status(400).json({ message: 'Falta el campo requerido: fecha.' });
+        }
+        if (!descripcion) {
+            return res.status(400).json({ message: 'Falta el campo requerido: descripcion.' });
+        }
+        if (!idSede) {
+            return res.status(400).json({ message: 'Falta el campo requerido: idSede.' });
+        }
+        if (!idUsuario) {
+            return res.status(400).json({ message: 'Falta el campo requerido: idUsuario.' });
+        }
+    
+        // Validación con expresión regular: La descripción solo debe contener letras, números y algunos signos permitidos
+        const regexDescripcion = /^[A-Za-zÁÉÍÓÚáéíóúÑñ0-9\s.,-]+$/;
+        if (!regexDescripcion.test(descripcion)) {
+            return res.status(400).json({ message: 'La descripción solo debe contener letras, números, espacios y los signos permitidos (.,-).' });
+        }
+    
+        try {
+            // Validación: Verificar si la sede y el usuario existen
+            const sedeExistente = await SEDES.findByPk(idSede);
+            if (!sedeExistente) {
+                return res.status(400).json({ message: 'El idSede proporcionado no existe.' });
+            }
+    
+            const usuarioExistente = await USUARIOS.findByPk(idUsuario);
+            if (!usuarioExistente) {
+                return res.status(400).json({ message: 'El idUsuario proporcionado no existe.' });
+            }
+    
+            // Creación del nuevo pedido
+            const pedidoCreado = await PEDIDOS.create({
+                fecha,
+                descripcion,
+                estado: 1, // Activo por defecto
+                idSede,
+                idUsuario
+            });
+            return res.status(201).json(pedidoCreado);
+    
+        } catch (error) {
+            console.error('Error al crear el pedido:', error);
+            return res.status(500).json({
                 message: error.message || 'Error al crear el pedido.'
             });
-        });
+        }
     },
+    
 
     // * Actualizar un pedido
     async update(req, res) {
-        const { idPedido } = req.params;
         const { fecha, descripcion, idSede, idUsuario } = req.body;
-
-        return PEDIDOS.update(
-            { fecha, descripcion, idSede, idUsuario },
-            { where: { idPedido } }
-        )
-        .then((affectedRows) => {
-            if (affectedRows[0] === 0) {
-                return res.status(404).send({ message: 'Pedido no encontrado.' });
+        const idPedido = req.params.id;
+    
+        const camposActualizados = {};
+    
+        if (fecha !== undefined) {
+            camposActualizados.fecha = fecha;
+        }
+    
+        if (descripcion !== undefined) {
+            const regexDescripcion = /^[A-Za-zÁÉÍÓÚáéíóúÑñ0-9\s.,-]+$/;
+            if (!regexDescripcion.test(descripcion)) {
+                return res.status(400).json({ message: 'La descripción solo debe contener letras, números, espacios y los signos permitidos (.,-).' });
             }
-            res.status(200).send({ message: 'Pedido actualizado con éxito.' });
-        })
-        .catch((error) => {
-            res.status(500).send({
-                message: error.message || 'Error al actualizar el pedido.'
+            camposActualizados.descripcion = descripcion;
+        }
+    
+        if (idSede !== undefined) {
+
+            const sedeExistente = await SEDES.findByPk(idSede);
+            if (!sedeExistente) {
+                return res.status(400).json({ message: 'El idSede proporcionado no existe.' });
+            }
+            camposActualizados.idSede = idSede;
+        }
+    
+        if (idUsuario !== undefined) {
+
+            const usuarioExistente = await USUARIOS.findByPk(idUsuario);
+            if (!usuarioExistente) {
+                return res.status(400).json({ message: 'El idUsuario proporcionado no existe.' });
+            }
+            camposActualizados.idUsuario = idUsuario;
+        }
+    
+        try {
+
+            const [rowsUpdated] = await PEDIDOS.update(camposActualizados, {
+                where: { idPedido }
             });
-        });
+    
+            if (rowsUpdated === 0) {
+                return res.status(404).json({ message: 'Pedido no encontrado.' });
+            }
+    
+            return res.status(200).json({ message: 'Pedido actualizado con éxito.' });
+    
+        } catch (error) {
+            console.error(`Error al actualizar el pedido con ID ${idPedido}:`, error);
+            return res.status(500).json({ error: 'Error al actualizar el pedido.' });
+        }
     },
+    
 
 
     // * Buscar un pedido por descripción
-    async find_pedido(req, res) {
+    async findPedido(req, res) {
         const { descripcion } = req.params;
 
         return PEDIDOS.findOne({
@@ -173,7 +241,7 @@ module.exports = {
     },
 
        // * Buscar un pedido por ID
-       async find_by_id(req, res) {
+       async findById(req, res) {
         const { idPedido } = req.params;
 
         return PEDIDOS.findByPk(idPedido, {

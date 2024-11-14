@@ -53,23 +53,23 @@ module.exports = (app) => {
     router.delete('/tipo_stands/:id', tipoStandsController.delete);
 
     // * RUTAS DE SEDES
-    router.get('/sedes', sedesController.find_All);
-    router.get('/sedes/:idSede', sedesController.find_by_id);
-    router.get('/sedes/activas', sedesController.find_active);
-    router.get('/sedes/inactivas', sedesController.find_inactive);
+    router.get('/sedes', sedesController.findAll);
+    router.get('/sedes/:idSede', sedesController.findById);
+    router.get('/sedes/activas', sedesController.findActive);
+    router.get('/sedes/inactivas', sedesController.findInactive);
     router.post('/sedes', sedesController.create);
     router.put('/sedes/:idSede', sedesController.update);
-    router.get('/sedes/:nombreSede', sedesController.find_sede);
-    router.delete('/sedes/:nombreSede', sedesController.delete);
+    router.get('/sedes/:nombreSede', sedesController.findSede);
+    router.delete('/sedes/:idSede', sedesController.delete);
 
     // * RUTAS DE EVENTOS
-    router.get('/eventos', eventosController.find_All);
-    router.get('/eventos/:idEvento', eventosController.find_by_id);
-    router.get('/eventos/activas', eventosController.find_active);
-    router.get('/eventos/inactivas', eventosController.find_inactive);
+    router.get('/eventos', eventosController.findAll);
+    router.get('/eventos/:idEvento', eventosController.findById);
+    router.get('/eventos/activas', eventosController.findActive);
+    router.get('/eventos/inactivas', eventosController.findInactive);
     router.post('/eventos', eventosController.create);
     router.put('/eventos/:idEvento', eventosController.update);
-    router.get('/eventos/:nombreEvento', eventosController.find_evento);
+    router.get('/eventos/:nombreEvento', eventosController.findEvento);
 
     // * RUTAS DE STAND
     router.get('/stand', standsController.find);
@@ -112,35 +112,45 @@ module.exports = (app) => {
     router.delete('/categoria_bitacoras/delete/:id', categoriaBitacorasController.delete);
 
     // * RUTAS DE CATEGORIA HORARIOS
-    router.get('/categoriaHorarios', categoriaHorariosController.find_All);
-    router.get('/categoriaHorarios/:idCategoriaHorario', categoriaHorariosController.find_by_id);
-    router.get('/categoriaHorarios/activas', categoriaHorariosController.find_active);
-    router.get('/categoriaHorarios/inactivas', categoriaHorariosController.find_inactive);
+    router.get('/categoriaHorarios', categoriaHorariosController.findAll);
+    router.get('/categoriaHorarios/activas', categoriaHorariosController.findActive);
+    router.get('/categoriaHorarios/inactivas', categoriaHorariosController.findInactive);
+    router.get('/categoriaHorarios/:id', categoriaHorariosController.findById);
     router.post('/categoriaHorarios', categoriaHorariosController.create);
-    router.put('/categoriaHorarios/:idCategoriaHorario', categoriaHorariosController.update);
-    router.get('/categoriaHorarios/:categoria', categoriaHorariosController.find_categoria);
+    router.put('/categoriaHorarios/:id', categoriaHorariosController.update);
+    router.get('/categoriaHorarios/:categoria', categoriaHorariosController.findCategoria);
     router.delete('/categoriaHorarios/:idCategoriaHorario', categoriaHorariosController.delete);
+
+     // * RUTAS DE CATEGORIAS
+     router.get('/categorias', categoriasController.findAll);
+     router.get('/categorias/activas', categoriasController.findActive);
+     router.get('/categorias/inactivas', categoriasController.findInactive);
+     router.get('/categorias/:nombreCategoria', categoriasController.findCategoria);
+     router.get('/categorias/:id', categoriasController.findById);
+     router.post('/categorias', categoriasController.create);
+     router.put('/categorias/:id', categoriasController.update);
+     router.delete('/categorias/:idCategoria', categoriasController.delete);
 
 
     // * RUTAS DE TIPO TRASLADOS
-    router.get('/tipoTraslados', tipoTrasladosController.find_All);
-    router.get('/tipoTraslados/:idTipoTraslado', tipoTrasladosController.find_by_id);
-    router.get('/tipoTraslados/activas', tipoTrasladosController.find_active);
-    router.get('/tipoTraslados/inactivas', tipoTrasladosController.find_inactive);
+    router.get('/tipoTraslados', tipoTrasladosController.findAll);
+    router.get('/tipoTraslados/:idTipoTraslado', tipoTrasladosController.findById);
+    router.get('/tipoTraslados/activas', tipoTrasladosController.findActive);
+    router.get('/tipoTraslados/inactivas', tipoTrasladosController.findInactive);
+    router.get('/tipoTraslados/:tipo', tipoTrasladosController.findTipo);
     router.post('/tipoTraslados', tipoTrasladosController.create);
-    router.put('/tipoTraslados/:idTipoTraslado', tipoTrasladosController.update);
-    router.get('/tipoTraslados/:tipo', tipoTrasladosController.find_tipo);
+    router.put('/tipoTraslados/:id', tipoTrasladosController.update);
     router.delete('/tipoTraslados/:idTipoTraslado', tipoTrasladosController.delete);
 
 
     // * RUTAS DE TRASLADOS
-    router.get('/traslados', trasladosController.find_All);
-    router.get('/traslados/:idTraslado', trasladosController.find_by_id);
-    router.get('/traslados/activas', trasladosController.find_active);
-    router.get('/traslados/inactivas', trasladosController.find_inactive);
+    router.get('/traslados', trasladosController.findAll);
+    router.get('/traslados/:idTraslado', trasladosController.findById);
+    router.get('/traslados/activas', trasladosController.findActive);
+    router.get('/traslados/inactivas', trasladosController.findInactive);
     router.post('/traslados', trasladosController.create);
-    router.put('/traslados/:idTraslado', trasladosController.update);
-    router.get('/traslados/:descripcion', trasladosController.find_traslado);
+    router.put('/traslados/:id', trasladosController.update);
+    router.get('/traslados/:descripcion', trasladosController.findTraslado);
 
     // * PRODUCTOS
     router.get('/productos', productosController.find); 
@@ -161,13 +171,13 @@ module.exports = (app) => {
     router.delete('/rifas/:id', rifasController.delete);
     
     // * RUTAS DE PEDIDOS
-    router.get('/pedidos', pedidosController.find_All);
-    router.get('/pedidos/:idPedido', pedidosController.find_by_id);
-    router.get('/pedidos/activas', pedidosController.find_active);
-    router.get('/pedidos/inactivas', pedidosController.find_inactive);
+    router.get('/pedidos', pedidosController.findAll);
+    router.get('/pedidos/:idPedido', pedidosController.findById);
+    router.get('/pedidos/activas', pedidosController.findActive);
+    router.get('/pedidos/inactivas', pedidosController.findInactive);
     router.post('/pedidos', pedidosController.create);
-    router.put('/pedidos/:idPedido', pedidosController.update);
-    router.get('/pedidos/:descripcion', pedidosController.find_pedido);
+    router.put('/pedidos/:id', pedidosController.update);
+    router.get('/pedidos/:descripcion', pedidosController.findPedido);
     router.delete('/pedidos/:idPedido', pedidosController.delete);
 
     // * RUTAS DE STAND
@@ -212,13 +222,13 @@ module.exports = (app) => {
     router.delete('/personas/delete/:id', personasController.delete);
 
     // * RUTAS DE CATEGORIAS (productos)
-    router.get('/categorias', categoriasController.find_All);
-    router.get('/categorias/:idCategoria', categoriasController.find_by_id);
-    router.get('/categorias/activas', categoriasController.find_active);
-    router.get('/categorias/inactivas', categoriasController.find_inactive);
+    router.get('/categorias', categoriasController.findAll);
+    router.get('/categorias/:idCategoria', categoriasController.findById);
+    router.get('/categorias/activas', categoriasController.findActive);
+    router.get('/categorias/inactivas', categoriasController.findInactive);
     router.post('/categorias', categoriasController.create);
     router.put('/categorias/:idCategoria', categoriasController.update);
-    router.get('/categorias/:nombreCategoria', categoriasController.find_categoria);
+    router.get('/categorias/:nombreCategoria', categoriasController.findCategoria);
     
     app.use('/', router);
 
