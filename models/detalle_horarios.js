@@ -14,6 +14,11 @@ module.exports = (sequelize, DataTypes) => {
         foreignKey: 'idCategoriaHorario',
         as: 'categoriaHorario'
       });
+      // Relación con comisiones
+      this.hasMany(models.comisiones, {
+        foreignKey: 'idDetalleHorario',
+        as: 'comisiones'
+      });
     }
   }
 

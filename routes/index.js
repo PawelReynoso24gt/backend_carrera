@@ -24,6 +24,7 @@ const tipoPublicoController =  require('../controllers/tipoPublicosController');
 const fotosSedesController = require('../controllers/fotosSedesController');
 const personasController = require('../controllers/personasController');
 const categoriasController = require('../controllers/categoriaController');
+const comisionesController = require('../controllers/comisionesController');
 
 module.exports = (app) => {
 
@@ -122,14 +123,14 @@ module.exports = (app) => {
     router.delete('/categoriaHorarios/:idCategoriaHorario', categoriaHorariosController.delete);
 
      // * RUTAS DE CATEGORIAS
-     router.get('/categorias', categoriasController.findAll);
-     router.get('/categorias/activas', categoriasController.findActive);
-     router.get('/categorias/inactivas', categoriasController.findInactive);
-     router.get('/categorias/:nombreCategoria', categoriasController.findCategoria);
-     router.get('/categorias/:id', categoriasController.findById);
-     router.post('/categorias', categoriasController.create);
-     router.put('/categorias/:id', categoriasController.update);
-     router.delete('/categorias/:idCategoria', categoriasController.delete);
+    router.get('/categorias', categoriasController.findAll);
+    router.get('/categorias/activas', categoriasController.findActive);
+    router.get('/categorias/inactivas', categoriasController.findInactive);
+    router.get('/categorias/:nombreCategoria', categoriasController.findCategoria);
+    router.get('/categorias/:id', categoriasController.findById);
+    router.post('/categorias', categoriasController.create);
+    router.put('/categorias/:id', categoriasController.update);
+    router.delete('/categorias/:idCategoria', categoriasController.delete);
 
 
     // * RUTAS DE TIPO TRASLADOS
@@ -230,6 +231,16 @@ module.exports = (app) => {
     router.put('/categorias/:idCategoria', categoriasController.update);
     router.get('/categorias/:nombreCategoria', categoriasController.findCategoria);
     
+    // * RUTAS DE COMISIONES
+    router.get('/comisiones', comisionesController.find);
+    router.get('/comisiones/activos', comisionesController.findActive); 
+    router.get('/comisiones/inactivos', comisionesController.findInactive);
+    router.get('/comisiones/:id', comisionesController.findById);
+    router.post('/comisiones/create', comisionesController.create);
+    router.put('/comisiones/update/:id', comisionesController.update); 
+    router.delete('/comisiones/delete/:id', comisionesController.delete); 
+
+
     app.use('/', router);
 
 };
