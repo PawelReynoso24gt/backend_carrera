@@ -241,6 +241,13 @@ module.exports = (app) => {
     router.put('/comisiones/update/:id', comisionesController.update); 
     router.delete('/comisiones/delete/:id', comisionesController.delete); 
 
+    // * RUTAS DE MATERIALES
+    router.get('/materiales/all', materialesController.find);
+    router.get('/materiales/:id', materialesController.findById);
+    router.get('/materialesByName', materialesController.findByName);
+    router.post('/materiales', materialesController.create);
+    router.put('/materiales/:id', materialesController.update);
+    router.delete('/materiales/:id', materialesController.delete);
 
     app.use('/', router);
 
