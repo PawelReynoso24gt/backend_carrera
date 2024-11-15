@@ -24,6 +24,7 @@ const tipoPublicoController =  require('../controllers/tipo_publicosController')
 const fotosSedesController = require('../controllers/fotosSedesController');
 const personasController = require('../controllers/personasController');
 const categoriasController = require('../controllers/categoriaController');
+const materialesController = require('../controllers/materialesController');
 
 module.exports = (app) => {
 
@@ -217,6 +218,13 @@ module.exports = (app) => {
     router.post('/categorias', categoriasController.create);
     router.put('/categorias/:idCategoria', categoriasController.update);
     router.get('/categorias/:nombreCategoria', categoriasController.find_categoria);
+
+    // * RUTAS DE MATERIALES
+    router.get('/materiales/activos', materialesController.find);
+    router.get('/materiales/:id', materialesController.findById);
+    router.post('/materiales', materialesController.create);
+    router.put('/materiales/:id', materialesController.update);
+    router.delete('/materiales/:id', materialesController.delete);
     
     app.use('/', router);
 
