@@ -6,9 +6,9 @@ module.exports = (sequelize, DataTypes) => {
   class materiales extends Model {
     static associate(models) {
       // Relación con la tabla comisiones
-      /*materiales.belongsTo(models.Comision, {
+      materiales.belongsTo(models.comisiones, {
         foreignKey: 'idComision'
-      });*/
+      });
     }
   }
 
