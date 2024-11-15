@@ -7,7 +7,7 @@ const CATEGORIA_HORARIOS = db.categoria_horarios;
 module.exports = {
 
     // * Listar todas las categorías de horarios
-    async find_All(req, res) {
+    async findAll(req, res) {
         return CATEGORIA_HORARIOS.findAll()
         .then((categorias) => {
             res.status(200).send(categorias);
@@ -20,7 +20,7 @@ module.exports = {
     },
 
     // * Listar todas las categorías de horarios activas
-    async find_active(req, res) {
+    async findActive(req, res) {
         return CATEGORIA_HORARIOS.findAll({
             where: {
                 estado: 1 
@@ -37,7 +37,7 @@ module.exports = {
     },
 
     // * Listar todas las categorías de horarios inactivas
-    async find_inactive(req, res) {
+    async findInactive(req, res) {
         return CATEGORIA_HORARIOS.findAll({
             where: {
                 estado: 0 
@@ -55,46 +55,73 @@ module.exports = {
 
     // * Crear una nueva categoría de horario
     async create(req, res) {
-        const { categoria } = req.body;
+        const datos = req.body;
+    
+        if (!datos.categoria) {
+            return res.status(400).json({ message: 'Falta el campo requerido: categoria.' });
+        }
 
-        return CATEGORIA_HORARIOS.create({
-            categoria,
-            estado: 1
-        })
-        .then((categoriaHorario) => {
-            res.status(201).send(categoriaHorario);
-        })
-        .catch((error) => {
-            res.status(500).send({
-                message: error.message || 'Error al crear la categoría de horario.'
-            });
-        });
+        const regex = /^[A-Za-zÁÉÍÓÚáéíóúÑñ\s]+$/;
+
+        if (!regex.test(datos.categoria)) {
+            return res.status(400).json({ message: 'El nombre de la categoría solo debe contener letras y espacios.' });
+        }
+        
+        try {
+
+            const datos_ingreso = { 
+                categoria: datos.categoria,
+                estado: datos.estado !== undefined ? datos.estado : 1
+            };
+    
+            const categoriaHorarioCreado = await CATEGORIA_HORARIOS.create(datos_ingreso);
+            return res.status(201).json(categoriaHorarioCreado);
+    
+        } catch (error) {
+            console.error('Error al crear la categoría de horario:', error);
+            return res.status(500).json({ error: 'Error al crear la categoría de horario.' });
+        }
     },
+    
 
     // * Actualizar una categoría de horario
-    async update(req, res) {
-        const { idCategoriaHorario } = req.params;
-        const { categoria } = req.body;
+    async update (req, res) {
+        const datos = req.body;
+        const id = req.params.id;
+    
+        const camposActualizados = {};
 
-        return CATEGORIA_HORARIOS.update(
-            { categoria },
-            { where: { idCategoriaHorario } }
-        )
-        .then((affectedRows) => {
-            if (affectedRows[0] === 0) {
-                return res.status(404).send({ message: 'Categoría de horario no encontrada.' });
+        if (datos.categoria !== undefined) {
+
+            const regex = /^[A-Za-zÁÉÍÓÚáéíóúÑñ\s]+$/;
+
+            if (!regex.test(datos.categoria)) {
+                return res.status(400).json({ message: 'La categoría horario solo debe contener letras y espacios.' });
             }
-            res.status(200).send({ message: 'Categoría de horario actualizada con éxito.' });
-        })
-        .catch((error) => {
-            res.status(500).send({
-                message: error.message || 'Error al actualizar la categoría de horario.'
+
+            camposActualizados.categoria = datos.categoria;
+        }
+
+        if (datos.estado !== undefined) camposActualizados.estado = datos.estado;
+    
+        try {    
+            const [rowsUpdated] = await CATEGORIA_HORARIOS.update(camposActualizados, {
+                where: { idCategoriaHorario: id }
             });
-        });
+            if (rowsUpdated === 0) {
+                return res.status(404).json({ message: 'Categoría de horario no encontrada' });
+            }
+            return res.status(200).json({ message: 'La categoría de horario ha sido actualizada' });
+    
+        } catch (error) {
+            console.error(`Error al actualizar la categoría de horario con ID ${id}:`, error);
+            return res.status(500).json({ error: 'Error al actualizar la categoría de horario' });
+        }
     },
+    
 
     // * Buscar una categoría de horario por nombre
-    async find_categoria(req, res) {
+    async findCategoria(req, res) {
         const { categoria } = req.params;
 
         return CATEGORIA_HORARIOS.findOne({
@@ -118,10 +145,10 @@ module.exports = {
     },
 
      // * Buscar una categoría de horario por ID
-     async find_by_id(req, res) {
-        const { idCategoriaHorario } = req.params;
+     async findById(req, res) {
+        const { id } = req.params;
 
-        return CATEGORIA_HORARIOS.findByPk(idCategoriaHorario)
+        return CATEGORIA_HORARIOS.findByPk(id)
         .then((categoriaHorario) => {
             if (!categoriaHorario) {
                 return res.status(404).send({ message: 'Categoría de horario no encontrada.' });

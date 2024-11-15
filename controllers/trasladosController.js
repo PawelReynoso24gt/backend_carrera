@@ -8,7 +8,7 @@ const TIPO_TRASLADOS = db.TipoTraslado;
 module.exports = {
 
     // * Listar todos los traslados con el tipo de traslado
-    async find_All(req, res) {
+    async findAll(req, res) {
         return TRASLADOS.findAll({
             include: [{
                 model: TIPO_TRASLADOS,
@@ -27,7 +27,7 @@ module.exports = {
     },
 
     // * Listar todos los traslados activos
-    async find_active(req, res) {
+    async findActive(req, res) {
         return TRASLADOS.findAll({
             where: {
                 estado: 1
@@ -49,7 +49,7 @@ module.exports = {
     },
 
     // * Listar todos los traslados inactivos
-    async find_inactive(req, res) {
+    async findInactive(req, res) {
         return TRASLADOS.findAll({
             where: {
                 estado: 0 
@@ -69,81 +69,100 @@ module.exports = {
     // * Crear un nuevo traslado
     async create(req, res) {
         const { fecha, descripcion, idTipoTraslado } = req.body;
+ 
+        if (!fecha) {
+            return res.status(400).json({ message: 'Falta el campo requerido: fecha.' });
+        }
+        if (!descripcion) {
+            return res.status(400).json({ message: 'Falta el campo requerido: descripcion.' });
+        }
+        if (!idTipoTraslado) {
+            return res.status(400).json({ message: 'Falta el campo requerido: idTipoTraslado.' });
+        }
+    
+        const regexDescripcion = /^[A-Za-zÁÉÍÓÚáéíóúÑñ0-9\s.,-]+$/;
+        if (!regexDescripcion.test(descripcion)) {
+            return res.status(400).json({ message: 'La descripción solo debe contener letras, números, espacios y los signos permitidos (.,-).' });
+        }
+    
+        try {
 
-        return TRASLADOS.create({
-            fecha,
-            descripcion,
-            estado: 1, // Activo por defecto
-            idTipoTraslado
-        })
-        .then((traslado) => {
-            res.status(201).send(traslado);
-        })
-        .catch((error) => {
-            res.status(500).send({
+            const tipoTrasladoExistente = await TIPO_TRASLADOS.findByPk(idTipoTraslado);
+            if (!tipoTrasladoExistente) {
+                return res.status(400).json({ message: 'El idTipoTraslado proporcionado no existe.' });
+            }
+
+            const datosIngreso = {
+                fecha,
+                descripcion,
+                estado: 1, 
+                idTipoTraslado
+            };
+    
+            const trasladoCreado = await TRASLADOS.create(datosIngreso);
+            return res.status(201).json(trasladoCreado);
+    
+        } catch (error) {
+            console.error('Error al crear el traslado:', error);
+            return res.status(500).json({
                 message: error.message || 'Error al crear el traslado.'
             });
-        });
+        }
     },
+    
 
     // * Actualizar un traslado
     async update(req, res) {
-        const { idTraslado } = req.params;
-        const { fecha, descripcion, idTipoTraslado } = req.body;
-
-        return TRASLADOS.update(
-            { fecha, descripcion, idTipoTraslado },
-            { where: { idTraslado } }
-        )
-        .then((affectedRows) => {
-            if (affectedRows[0] === 0) {
-                return res.status(404).send({ message: 'Traslado no encontrado.' });
-            }
-            res.status(200).send({ message: 'Traslado actualizado con éxito.' });
-        })
-        .catch((error) => {
-            res.status(500).send({
-                message: error.message || 'Error al actualizar el traslado.'
-            });
-        });
-    },
-
-    // * Desactivar o activar un traslado
-    async changeState(req, res) {
-        const { idTraslado } = req.params;
+        const { fecha, descripcion, idTipoTraslado, estado } = req.body;
+        const idTraslado = req.params.id;
     
-        // Buscar el traslado actual para obtener su estado
-        const traslado = await TRASLADOS.findByPk(idTraslado);
-    
-        if (!traslado) {
-            return res.status(404).send({ message: 'Traslado no encontrado.' });
+        const camposActualizados = {};
+
+        if (fecha !== undefined) {
+            camposActualizados.fecha = fecha;
         }
     
-        // Cambiar el estado: si es 1 (activo), cambiar a 0 (inactivo) y viceversa
-        const nuevoEstado = traslado.estado === 1 ? 0 : 1;
-    
-        return TRASLADOS.update(
-            { estado: nuevoEstado }, 
-            { where: { idTraslado } }
-        )
-        .then((affectedRows) => {
-            if (affectedRows[0] === 0) {
-                return res.status(404).send({ message: 'Traslado no encontrado.' });
+        if (descripcion !== undefined) {
+            const regexDescripcion = /^[A-Za-zÁÉÍÓÚáéíóúÑñ0-9\s.,-]+$/;
+            if (!regexDescripcion.test(descripcion)) {
+                return res.status(400).json({ message: 'La descripción solo debe contener letras, números, espacios y los signos permitidos (.,-).' });
             }
-            const mensaje = nuevoEstado === 1 
-                ? 'Traslado activado con éxito.' 
-                : 'Traslado desactivado con éxito.';
-            res.status(200).send({ message: mensaje });
-        })
-        .catch((error) => {
-            res.status(500).send({
-                message: error.message || 'Error al cambiar el estado del traslado.'
+            camposActualizados.descripcion = descripcion;
+        }
+    
+        if (idTipoTraslado !== undefined) {
+                const tipoTrasladoExistente = await TIPO_TRASLADOS.findByPk(idTipoTraslado);
+            if (!tipoTrasladoExistente) {
+                return res.status(400).json({ message: 'El idTipoTraslado proporcionado no existe.' });
+            }
+            camposActualizados.idTipoTraslado = idTipoTraslado;
+        }
+    
+        if (estado !== undefined) {
+            camposActualizados.estado = estado;
+        }
+    
+        try {
+            // Actualización del traslado
+            const [rowsUpdated] = await TRASLADOS.update(camposActualizados, {
+                where: { idTraslado }
             });
-        });
+    
+            if (rowsUpdated === 0) {
+                return res.status(404).json({ message: 'Traslado no encontrado.' });
+            }
+    
+            return res.status(200).json({ message: 'Traslado actualizado con éxito.' });
+    
+        } catch (error) {
+            console.error(`Error al actualizar el traslado con ID ${idTraslado}:`, error);
+            return res.status(500).json({ error: 'Error al actualizar el traslado.' });
+        }
     },
     
+    
     // * Buscar un traslado por descripción
-    async find_traslado(req, res) {
+    async findTraslado(req, res) {
         const { descripcion } = req.params;
 
         return TRASLADOS.findOne({
@@ -172,7 +191,7 @@ module.exports = {
     },
 
      // * Buscar un traslado por ID
-     async find_by_id(req, res) {
+     async findById(req, res) {
         const { idTraslado } = req.params;
 
         return TRASLADOS.findByPk(idTraslado, {

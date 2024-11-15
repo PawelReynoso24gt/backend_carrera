@@ -1,6 +1,7 @@
 'use strict';
 const db = require("../models");
 const PERSONAS = db.personas;
+const MUNICIPIOS = db.municipios;
 
 // Métodos CRUD
 module.exports = {
@@ -8,7 +9,12 @@ module.exports = {
     // Obtener todas las personas
     async find(req, res) {
         try {
-            const personas = await PERSONAS.findAll();
+            const personas = await PERSONAS.findAll({
+                include: {
+                    model: MUNICIPIOS,
+                    attributes: ["idMunicipio", "municipio"],
+                }
+            });
             return res.status(200).json(personas);
         } catch (error) {
             console.error('Error al recuperar las personas:', error);
@@ -24,6 +30,10 @@ module.exports = {
             const personas = await PERSONAS.findAll({
                 where: {
                     estado: 1
+                },
+                include: {
+                    model: MUNICIPIOS,
+                    attributes: ["idMunicipio", "municipio"],
                 }
             });
             return res.status(200).json(personas);
@@ -41,6 +51,10 @@ module.exports = {
             const personas = await PERSONAS.findAll({
                 where: {
                     estado: 0
+                },
+                include: {
+                    model: MUNICIPIOS,
+                    attributes: ["idMunicipio", "municipio"],
                 }
             });
             return res.status(200).json(personas);
@@ -57,7 +71,12 @@ module.exports = {
         const id = req.params.id;
 
         try {
-            const persona = await PERSONAS.findByPk(id);
+            const persona = await PERSONAS.findByPk(id, {
+                include: {
+                    model: MUNICIPIOS,
+                    attributes: ["idMunicipio", "municipio"],
+                }
+            });
 
             if (!persona) {
                 return res.status(404).json({ message: 'Persona no encontrada' });
@@ -76,8 +95,33 @@ module.exports = {
     async create(req, res) {
         const datos = req.body;
 
-        if (!datos.nombre || !datos.fechaNacimiento || !datos.telefono || !datos.domicilio || !datos.CUI || !datos.correo || !datos.idMunicipio) {
+        // Verificar campos requeridos
+        if (!datos.nombre || !datos.fechaNacimiento || !datos.telefono || !datos.domicilio || !datos.CUI || !datos.correo || !datos.estado || !datos.idMunicipio) {
             return res.status(400).json({ message: 'Faltan campos requeridos.' });
+        }
+
+        // Expresiones regulares para validaciones
+        const regexNombre = /^[A-Za-záéíóúÁÉÍÓÚÑñ\s]+$/; // Solo letras y espacios
+        const regexTelefono = /^\d{8}$/; // 8 dígitos
+        const regexDomicilio = /^[A-Za-záéíóúÁÉÍÓÚÑñ0-9\s\.\-]+$/; // Letras, dígitos, espacios, puntos y guiones
+        const regexCUI = /^\d{13}$/; // 13 dígitos
+        const regexCorreo = /^[^\s@]+@[^\s@]+\.[^\s@]+$/; // Formato de correo electrónico
+
+        // Validaciones
+        if (!regexNombre.test(datos.nombre)) {
+            return res.status(400).json({ message: 'El nombre solo puede contener letras y espacios.' });
+        }
+        if (!regexTelefono.test(datos.telefono)) {
+            return res.status(400).json({ message: 'El teléfono debe contener exactamente 8 dígitos.' });
+        }
+        if (!regexDomicilio.test(datos.domicilio)) {
+            return res.status(400).json({ message: 'El domicilio solo puede contener letras, dígitos, espacios, puntos y guiones.' });
+        }
+        if (!regexCUI.test(datos.CUI)) {
+            return res.status(400).json({ message: 'El CUI debe contener exactamente 13 dígitos.' });
+        }
+        if (!regexCorreo.test(datos.correo)) {
+            return res.status(400).json({ message: 'El correo electrónico no es válido.' });
         }
 
         const nuevaPersona = { 
@@ -87,6 +131,7 @@ module.exports = {
             domicilio: datos.domicilio,
             CUI: datos.CUI,
             correo: datos.correo,
+            estado: datos.estado !== undefined ? datos.estado : 1,
             idMunicipio: datos.idMunicipio
         };
 
@@ -105,13 +150,39 @@ module.exports = {
         const id = req.params.id;
 
         const camposActualizados = {};
-    
+
+        // Expresiones regulares para validaciones
+        const regexNombre = /^[A-Za-záéíóúÁÉÍÓÚÑñ\s]+$/; // Solo letras y espacios
+        const regexTelefono = /^\d{8}$/; // 8 dígitos
+        const regexDomicilio = /^[A-Za-záéíóúÁÉÍÓÚÑñ0-9\s\.\-]+$/; // Letras, dígitos, espacios, puntos y guiones
+        const regexCUI = /^\d{13}$/; // 13 dígitos
+        const regexCorreo = /^[^\s@]+@[^\s@]+\.[^\s@]+$/; // Formato de correo electrónico
+
+        // Validaciones
+        if (datos.nombre !== undefined && !regexNombre.test(datos.nombre)) {
+            return res.status(400).json({ message: 'El nombre solo puede contener letras y espacios.' });
+        }
+        if (datos.telefono !== undefined && !regexTelefono.test(datos.telefono)) {
+            return res.status(400).json({ message: 'El teléfono debe contener exactamente 8 dígitos.' });
+        }
+        if (datos.domicilio !== undefined && !regexDomicilio.test(datos.domicilio)) {
+            return res.status(400).json({ message: 'El domicilio solo puede contener letras, dígitos, espacios, puntos y guiones.' });
+        }
+        if (datos.CUI !== undefined && !regexCUI.test(datos.CUI)) {
+            return res.status(400).json({ message: 'El CUI debe contener exactamente 13 dígitos.' });
+        }
+        if (datos.correo !== undefined && !regexCorreo.test(datos.correo)) {
+            return res.status(400).json({ message: 'El correo electrónico no es válido.' });
+        }
+
+        // Asignar campos actualizados
         if (datos.nombre !== undefined) camposActualizados.nombre = datos.nombre;
         if (datos.fechaNacimiento !== undefined) camposActualizados.fechaNacimiento = datos.fechaNacimiento;
         if (datos.telefono !== undefined) camposActualizados.telefono = datos.telefono;
         if (datos.domicilio !== undefined) camposActualizados.domicilio = datos.domicilio;
         if (datos.CUI !== undefined) camposActualizados.CUI = datos.CUI;
         if (datos.correo !== undefined) camposActualizados.correo = datos.correo;
+        if (datos.estado !== undefined) camposActualizados.estado = datos.estado;
         if (datos.idMunicipio !== undefined) camposActualizados.idMunicipio = datos.idMunicipio;
 
         try {
