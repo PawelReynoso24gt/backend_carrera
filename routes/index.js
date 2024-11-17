@@ -12,7 +12,7 @@ const eventosController = require ('../controllers/eventosController');
 const standsController = require('../controllers/standsController');
 const departamentosController = require('../controllers/departamentosController');
 const tipoPagosController = require('../controllers/tipoPagosController');
-const categoriaBitacorasController = require('../controllers/categoria_bitacorasController');
+const categoriaBitacorasController = require('../controllers/categoriaBitacorasController');
 const tipoTrasladosController = require('../controllers/tipoTrasladosController');
 const trasladosController = require('../controllers/trasladosController');
 const productosController = require('../controllers/productosController');
@@ -25,6 +25,7 @@ const fotosSedesController = require('../controllers/fotosSedesController');
 const personasController = require('../controllers/personasController');
 const categoriasController = require('../controllers/categoriaController');
 const comisionesController = require('../controllers/comisionesController');
+const actividadesController = require('../controllers/actividadesController');
 
 module.exports = (app) => {
 
@@ -240,7 +241,14 @@ module.exports = (app) => {
     router.put('/comisiones/update/:id', comisionesController.update); 
     router.delete('/comisiones/delete/:id', comisionesController.delete); 
 
-
+    // * RUTAS DE ACTIVIDADES
+    router.get('/actividades', actividadesController.find);
+    router.get('/actividades/activos', actividadesController.findActive); 
+    router.get('/actividades/inactivos', actividadesController.findInactive);
+    router.get('/actividades/:id', actividadesController.findById);
+    router.post('/actividades/create', actividadesController.create);
+    router.put('/actividades/update/:id', actividadesController.update); 
+    router.delete('/actividades/delete/:id', actividadesController.delete); 
     app.use('/', router);
 
 };
