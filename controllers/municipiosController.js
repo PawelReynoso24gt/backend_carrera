@@ -82,10 +82,11 @@ module.exports = {
                 return res.status(400).json({ error: 'El idDepartamento ingresado no existe.' });
             }
     
+            // Creación de los datos a insertar
             const datos_ingreso = { 
                 municipio: datos.municipio,
                 estado: datos.estado !== undefined ? datos.estado : 1,
-                idDepartamento: datos.idDepartamento
+                idDepartamento: datos.idDepartamento // Usar directamente el idDepartamento recibido
             };
     
             const municipioCreado = await Municipios.create(datos_ingreso);
@@ -96,6 +97,8 @@ module.exports = {
             return res.status(500).json({ error: 'Error al insertar el municipio' });
         }
     },
+    
+    
     
     updateMunicipio: async (req, res) => {
         const datos = req.body;

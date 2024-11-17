@@ -7,7 +7,6 @@ const usuariosController = require('../controllers/usuariosController');
 const horariosController = require('../controllers/horariosController');
 const tipoStandsController = require('../controllers/tipoStandsController');
 const categoriaHorariosController = require('../controllers/categoriaHorariosController');
-const categoriasController = require('../controllers/categoriaController');
 const sedesController = require('../controllers/sedesController');
 const eventosController = require ('../controllers/eventosController');
 const standsController = require('../controllers/standsController');
@@ -24,6 +23,8 @@ const detalleHorariosController = require('../controllers/detalle_horariosContro
 const tipoPublicoController =  require('../controllers/tipoPublicosController');
 const fotosSedesController = require('../controllers/fotosSedesController');
 const personasController = require('../controllers/personasController');
+const categoriasController = require('../controllers/categoriaController');
+const comisionesController = require('../controllers/comisionesController');
 
 module.exports = (app) => {
 
@@ -107,9 +108,9 @@ module.exports = (app) => {
     // * RUTAS PARA CATEGORÍA DE BITÁCORAS
     router.get('/categoria_bitacoras', categoriaBitacorasController.find);
     router.get('/categoria_bitacoras/:id', categoriaBitacorasController.findById);
-    router.post('/categoria_bitacoras', categoriaBitacorasController.create);
-    router.put('/categoria_bitacoras/:id', categoriaBitacorasController.update);
-    router.delete('/categoria_bitacoras/:id', categoriaBitacorasController.delete);
+    router.post('/categoria_bitacoras/create', categoriaBitacorasController.create);
+    router.put('/categoria_bitacoras/update/:id', categoriaBitacorasController.update);
+    router.delete('/categoria_bitacoras/delete/:id', categoriaBitacorasController.delete);
 
     // * RUTAS DE CATEGORIA HORARIOS
     router.get('/categoriaHorarios', categoriaHorariosController.findAll);
@@ -122,14 +123,14 @@ module.exports = (app) => {
     router.delete('/categoriaHorarios/:idCategoriaHorario', categoriaHorariosController.delete);
 
      // * RUTAS DE CATEGORIAS
-     router.get('/categorias', categoriasController.findAll);
-     router.get('/categorias/activas', categoriasController.findActive);
-     router.get('/categorias/inactivas', categoriasController.findInactive);
-     router.get('/categorias/:nombreCategoria', categoriasController.findCategoria);
-     router.get('/categorias/:id', categoriasController.findById);
-     router.post('/categorias', categoriasController.create);
-     router.put('/categorias/:id', categoriasController.update);
-     router.delete('/categorias/:idCategoria', categoriasController.delete);
+    router.get('/categorias', categoriasController.findAll);
+    router.get('/categorias/activas', categoriasController.findActive);
+    router.get('/categorias/inactivas', categoriasController.findInactive);
+    router.get('/categorias/:nombreCategoria', categoriasController.findCategoria);
+    router.get('/categorias/:id', categoriasController.findById);
+    router.post('/categorias', categoriasController.create);
+    router.put('/categorias/:id', categoriasController.update);
+    router.delete('/categorias/:idCategoria', categoriasController.delete);
 
 
     // * RUTAS DE TIPO TRASLADOS
@@ -228,7 +229,7 @@ module.exports = (app) => {
     router.get('/categorias/inactivas', categoriasController.findInactive);
     router.post('/categorias', categoriasController.create);
     router.put('/categorias/:idCategoria', categoriasController.update);
-    router.get('/categorias/:nombreCategoria', categoriasController.findCategoria);
+    router.get('/categorias/:nombreCategoria', categoriasController.find_categoria);
     
     app.use('/', router);
 
