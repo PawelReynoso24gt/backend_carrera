@@ -25,6 +25,8 @@ const fotosSedesController = require('../controllers/fotosSedesController');
 const personasController = require('../controllers/personasController');
 const categoriasController = require('../controllers/categoriaController');
 const comisionesController = require('../controllers/comisionesController');
+const rolesController = require('../controllers/rolesController');
+const talonariosController = require('../controllers/talonariosController');
 const actividadesController = require('../controllers/actividadesController');
 
 module.exports = (app) => {
@@ -240,6 +242,23 @@ module.exports = (app) => {
     router.post('/comisiones/create', comisionesController.create);
     router.put('/comisiones/update/:id', comisionesController.update); 
     router.delete('/comisiones/delete/:id', comisionesController.delete); 
+
+    // * RUTAS DE ROLES
+    router.get('/roles', rolesController.find);
+    router.get('/roles/activos', rolesController.findActivateRol); 
+    router.get('/roles/inactivos', rolesController.findaInactivateRol);
+    router.post('/roles/create', rolesController.createRol);
+    router.put('/roles/update/:id', rolesController.updateRol); 
+    router.delete('/roles/delete/:id', rolesController.deleteRol); 
+
+    // * RUTAS DE TALONARIOS
+    router.get('/talonarios', talonariosController.find);
+    router.get('/talonarios/activos', talonariosController.findActivateTalo); 
+    router.get('/talonarios/inactivos', talonariosController.findaInactivateTalo);
+    router.post('/talonarios/create', talonariosController.createTalo);
+    router.put('/talonarios/update/:id', talonariosController.updateTalo); 
+    router.delete('/talonarios/delete/:id', talonariosController.deleteTalo); 
+
 
     // * RUTAS DE ACTIVIDADES
     router.get('/actividades', actividadesController.find);

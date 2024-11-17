@@ -8,6 +8,9 @@ module.exports = (sequelize, DataTypes) => {
                 rifas.belongsTo(models.sedes, {
                 foreignKey: 'idSede'
             });
+                rifas.hasMany(models.talonarios, {
+                foreignKey: 'idRifa'
+              });
         }
     }
 
