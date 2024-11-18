@@ -2,24 +2,28 @@
 const { Model } = require('sequelize');
 
 module.exports = (sequelize, DataTypes) => {
-    class actividades extends Model {
+    class publicaciones extends Model {
         static associate(models) {
-            // Relación con comisiones
-            this.belongsTo(models.comisiones, {
-                foreignKey: 'idComision',
-                as: 'comision'
+            // * Una publicación pertenece a una sede
+            publicaciones.belongsTo(models.sedes, {
+                foreignKey: 'idSede',
+                as: 'sede'
             });
         }
     }
 
-    actividades.init({
-        idActividad: {
+    publicaciones.init({
+        idPublicacion: {
             type: DataTypes.INTEGER,
             autoIncrement: true,
             primaryKey: true,
         },
-        actividad: {
+        nombrePublicacion: {
             type: DataTypes.STRING,
+            allowNull: false,
+        },
+        fechaPublicacion: {
+            type: DataTypes.DATE,
             allowNull: false,
         },
         descripcion: {
@@ -30,16 +34,16 @@ module.exports = (sequelize, DataTypes) => {
             type: DataTypes.INTEGER,
             allowNull: false
         },
-        idComision: {
+        idSede: {
             type: DataTypes.INTEGER,
             allowNull: false,
         }, 
     }, {
         sequelize,
-        modelName: 'actividades',
-        tableName: 'actividades',
+        modelName: 'publicaciones',
+        tableName: 'publicaciones',
         timestamps: true,
     });
 
-    return actividades;
+    return publicaciones;
 };
