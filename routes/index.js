@@ -1,5 +1,6 @@
 const { Router } = require('express');
 const router = Router();
+const authenticateToken = require('../middlewares/authenticateToken');
 
 // Aqui van los imports
 //RUTAS
@@ -33,6 +34,13 @@ const voluntariosController = require('../controllers/voluntariosController');
 
 module.exports = (app) => {
 
+    // * LOGIN AND LOGOUT
+    router.post('/usuarios/login', usuariosController.login); // Ruta para iniciar sesión, no requiere autenticación
+    router.post('/usuarios', usuariosController.create); // Ruta para crear un usuario, no requiere autenticación
+
+    // ! Todas las rutas a continuación requieren autenticación
+    router.use(authenticateToken); // Middleware para proteger las rutas con autenticación
+
     // * USUARIOS
     router.get('/usuarios/activos', usuariosController.find);
     router.get('/usuarios', usuariosController.findAllUsers);
@@ -40,6 +48,7 @@ module.exports = (app) => {
     router.post('/usuarios', usuariosController.create);
     router.put('/usuarios/:id', usuariosController.update);
     router.put('/usuarios/:id/contrasenia', usuariosController.updatePassword);
+    router.put('/usuarios/logout/:id', usuariosController.logout);
     router.delete('/usuarios/:id', usuariosController.delete);
 
     // * HORARIOS
