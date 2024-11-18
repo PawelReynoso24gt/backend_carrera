@@ -28,6 +28,7 @@ const comisionesController = require('../controllers/comisionesController');
 const rolesController = require('../controllers/rolesController');
 const talonariosController = require('../controllers/talonariosController');
 const actividadesController = require('../controllers/actividadesController');
+const voluntariosController = require('../controllers/voluntariosController');
 
 module.exports = (app) => {
 
