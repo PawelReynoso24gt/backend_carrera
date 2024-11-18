@@ -260,6 +260,13 @@ module.exports = (app) => {
     router.put('/talonarios/update/:id', talonariosController.updateTalo); 
     router.delete('/talonarios/delete/:id', talonariosController.deleteTalo); 
 
+    // * RUTAS DE VOLUNTARIOS
+    router.get('/voluntarios', voluntariosController.find);
+    router.get('/voluntarios/activos', voluntariosController.findActivateVol); 
+    router.get('/voluntarios/inactivos', voluntariosController.findaInactivateVol);
+    router.post('/voluntarios/create', voluntariosController.createVol);
+    router.put('/voluntarios/update/:id', voluntariosController.updateVol); 
+    router.delete('/voluntarios/delete/:id', voluntariosController.deleteVol); 
 
     // * RUTAS DE ACTIVIDADES
     router.get('/actividades', actividadesController.find);
