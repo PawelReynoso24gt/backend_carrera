@@ -31,6 +31,7 @@ const actividadesController = require('../controllers/actividadesController');
 const voluntariosController = require('../controllers/voluntariosController');
 const publicacionesController = require('../controllers/publicacionesController');
 const publicacionGeneralController = require('../controllers/publicacionGeneralesController');
+const publicacionEventoController = require('../controllers/publicacionEventosController');
 
 module.exports = (app) => {
 
@@ -296,6 +297,15 @@ module.exports = (app) => {
     router.post('/publicacionesGeneral/create', publicacionGeneralController.create);
     router.put('/publicacionesGeneral/update/:id', publicacionGeneralController.update); 
     router.delete('/publicacionesGeneral/delete/:id', publicacionGeneralController.delete);
+
+    // * RUTAS DE PUBLICACIONES DE EVENTOS
+    router.get('/publicacionesEvento', publicacionEventoController.find);
+    router.get('/publicacionesEvento/activos', publicacionEventoController.findActive); 
+    router.get('/publicacionesEvento/inactivos', publicacionEventoController.findInactive);
+    router.get('/publicacionesEvento/:id', publicacionEventoController.findById);
+    router.post('/publicacionesEvento/create', publicacionEventoController.create);
+    router.put('/publicacionesEvento/update/:id', publicacionEventoController.update); 
+    router.delete('/publicacionesEvento/delete/:id', publicacionEventoController.delete);
 
     app.use('/', router);
 
