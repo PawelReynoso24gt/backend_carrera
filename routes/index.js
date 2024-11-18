@@ -27,6 +27,7 @@ const categoriasController = require('../controllers/categoriaController');
 const comisionesController = require('../controllers/comisionesController');
 const rolesController = require('../controllers/rolesController');
 const talonariosController = require('../controllers/talonariosController');
+const voluntariosController = require('../controllers/voluntariosController');
 
 module.exports = (app) => {
 
@@ -257,6 +258,14 @@ module.exports = (app) => {
     router.post('/talonarios/create', talonariosController.createTalo);
     router.put('/talonarios/update/:id', talonariosController.updateTalo); 
     router.delete('/talonarios/delete/:id', talonariosController.deleteTalo); 
+
+    // * RUTAS DE VOLUNTARIOS
+    router.get('/voluntarios', voluntariosController.find);
+    router.get('/voluntarios/activos', voluntariosController.findActivateVol); 
+    router.get('/voluntarios/inactivos', voluntariosController.findaInactivateVol);
+    router.post('/voluntarios/create', voluntariosController.createVol);
+    router.put('/voluntarios/update/:id', voluntariosController.updateVol); 
+    router.delete('/voluntarios/delete/:id', voluntariosController.deleteVol); 
 
 
     app.use('/', router);
