@@ -12,7 +12,7 @@ const eventosController = require ('../controllers/eventosController');
 const standsController = require('../controllers/standsController');
 const departamentosController = require('../controllers/departamentosController');
 const tipoPagosController = require('../controllers/tipoPagosController');
-const categoriaBitacorasController = require('../controllers/categoria_bitacorasController');
+const categoriaBitacorasController = require('../controllers/categoriaBitacorasController');
 const tipoTrasladosController = require('../controllers/tipoTrasladosController');
 const trasladosController = require('../controllers/trasladosController');
 const productosController = require('../controllers/productosController');
@@ -26,6 +26,10 @@ const personasController = require('../controllers/personasController');
 const categoriasController = require('../controllers/categoriaController');
 const materialesController = require('../controllers/materialesController');
 const comisionesController = require('../controllers/comisionesController');
+const rolesController = require('../controllers/rolesController');
+const talonariosController = require('../controllers/talonariosController');
+const actividadesController = require('../controllers/actividadesController');
+const voluntariosController = require('../controllers/voluntariosController');
 
 module.exports = (app) => {
 
@@ -248,7 +252,38 @@ module.exports = (app) => {
     router.post('/materiales', materialesController.create);
     router.put('/materiales/:id', materialesController.update);
     router.delete('/materiales/:id', materialesController.delete);
+    // * RUTAS DE ROLES
+    router.get('/roles', rolesController.find);
+    router.get('/roles/activos', rolesController.findActivateRol); 
+    router.get('/roles/inactivos', rolesController.findaInactivateRol);
+    router.post('/roles/create', rolesController.createRol);
+    router.put('/roles/update/:id', rolesController.updateRol); 
+    router.delete('/roles/delete/:id', rolesController.deleteRol); 
 
+    // * RUTAS DE TALONARIOS
+    router.get('/talonarios', talonariosController.find);
+    router.get('/talonarios/activos', talonariosController.findActivateTalo); 
+    router.get('/talonarios/inactivos', talonariosController.findaInactivateTalo);
+    router.post('/talonarios/create', talonariosController.createTalo);
+    router.put('/talonarios/update/:id', talonariosController.updateTalo); 
+    router.delete('/talonarios/delete/:id', talonariosController.deleteTalo); 
+
+    // * RUTAS DE VOLUNTARIOS
+    router.get('/voluntarios', voluntariosController.find);
+    router.get('/voluntarios/activos', voluntariosController.findActivateVol); 
+    router.get('/voluntarios/inactivos', voluntariosController.findaInactivateVol);
+    router.post('/voluntarios/create', voluntariosController.createVol);
+    router.put('/voluntarios/update/:id', voluntariosController.updateVol); 
+    router.delete('/voluntarios/delete/:id', voluntariosController.deleteVol); 
+
+    // * RUTAS DE ACTIVIDADES
+    router.get('/actividades', actividadesController.find);
+    router.get('/actividades/activos', actividadesController.findActive); 
+    router.get('/actividades/inactivos', actividadesController.findInactive);
+    router.get('/actividades/:id', actividadesController.findById);
+    router.post('/actividades/create', actividadesController.create);
+    router.put('/actividades/update/:id', actividadesController.update); 
+    router.delete('/actividades/delete/:id', actividadesController.delete); 
     app.use('/', router);
 
 };

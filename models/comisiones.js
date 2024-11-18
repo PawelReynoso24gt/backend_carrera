@@ -5,16 +5,22 @@ module.exports = (sequelize, DataTypes) => {
     class comisiones extends Model {
         static associate(models) {
            // Relación con eventos
-        this.belongsTo(models.eventos, {
-            foreignKey: 'idEvento',
-            as: 'evento'
-        });
+            this.belongsTo(models.eventos, {
+                foreignKey: 'idEvento',
+                as: 'evento'
+            });
 
         // Relación con detalle_horarios
-        this.belongsTo(models.detalle_horarios, {
-            foreignKey: 'idDetalleHorario',
-            as: 'detalleHorario'
-        }); 
+            this.belongsTo(models.detalle_horarios, {
+                foreignKey: 'idDetalleHorario',
+                as: 'detalleHorario'
+            }); 
+
+            // Relación con actividades
+            this.hasMany(models.actividades, {
+                foreignKey: 'idComision',
+                as: 'actividades'
+            });
         }
     }
 
