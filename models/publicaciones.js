@@ -9,6 +9,12 @@ module.exports = (sequelize, DataTypes) => {
                 foreignKey: 'idSede',
                 as: 'sede'
             });
+
+            // * Una publicación tiene muchas publicaciones generales
+            publicaciones.hasMany(models.publicacion_generales, {
+                foreignKey: 'idPublicacion',
+                as: 'publicacionesGenerales'
+            });
         }
     }
 
