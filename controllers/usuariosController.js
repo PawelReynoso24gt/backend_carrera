@@ -4,6 +4,7 @@ const Sequelize = require('sequelize');
 const crypto = require('crypto'); // Libreria para hashear passwords
 const db = require('../models');
 const USERS = db.usuarios;
+const ROLES = db.roles;
 
 // Función para hashear la contraseña usando SHA-256
 function hashPassword(password) {
@@ -53,7 +54,8 @@ module.exports = {
     async find(req, res) {
         try {
             const users = await USERS.findAll({
-                where: { estado: 1 }
+                where: { estado: 1 },
+                include : { model : ROLES, attributes: ['idRol', 'rol'] }
             });
     
             const dataUsers = users.map(user => {
