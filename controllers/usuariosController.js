@@ -55,7 +55,7 @@ module.exports = {
         try {
             const users = await USERS.findAll({
                 where: { estado: 1 },
-                include : { model : ROLES, attributes: ['idRol', 'rol'] }
+                include : { model : ROLES, attributes: ['idRol', 'roles'] }
             });
     
             const dataUsers = users.map(user => {
@@ -65,6 +65,7 @@ module.exports = {
     
             return res.status(200).send(dataUsers);
         } catch (error) {
+            console.error('Error al recuperar los datos:', error);
             return res.status(500).send({ message: 'Ocurrió un error al recuperar los datos.' });
         }
     },
