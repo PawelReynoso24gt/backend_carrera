@@ -32,6 +32,7 @@ const voluntariosController = require('../controllers/voluntariosController');
 const publicacionesController = require('../controllers/publicacionesController');
 const publicacionGeneralController = require('../controllers/publicacionGeneralesController');
 const publicacionEventoController = require('../controllers/publicacionEventosController');
+const publicacionRifasController = require('../controllers/publicacionRifasController');
 
 module.exports = (app) => {
 
@@ -306,6 +307,15 @@ module.exports = (app) => {
     router.post('/publicacionesEvento/create', publicacionEventoController.create);
     router.put('/publicacionesEvento/update/:id', publicacionEventoController.update); 
     router.delete('/publicacionesEvento/delete/:id', publicacionEventoController.delete);
+
+    // * RUTAS DE PUBLICACIONES DE RIFAS
+    router.get('/publicacionesRifas', publicacionRifasController.find);
+    router.get('/publicacionesRifas/activos', publicacionRifasController.findActive); 
+    router.get('/publicacionesRifas/inactivos', publicacionRifasController.findInactive);
+    router.get('/publicacionesRifas/:id', publicacionRifasController.findById);
+    router.post('/publicacionesRifas/create', publicacionRifasController.create);
+    router.put('/publicacionesRifas/update/:id', publicacionRifasController.update); 
+    router.delete('/publicacionesRifas/delete/:id', publicacionRifasController.delete);
 
     app.use('/', router);
 
