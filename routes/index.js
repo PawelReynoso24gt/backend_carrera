@@ -1,5 +1,6 @@
 const { Router } = require('express');
 const router = Router();
+const authenticateToken = require('../middlewares/authenticateToken');
 
 // Aqui van los imports
 //RUTAS
@@ -24,6 +25,7 @@ const tipoPublicoController =  require('../controllers/tipoPublicosController');
 const fotosSedesController = require('../controllers/fotosSedesController');
 const personasController = require('../controllers/personasController');
 const categoriasController = require('../controllers/categoriaController');
+const materialesController = require('../controllers/materialesController');
 const comisionesController = require('../controllers/comisionesController');
 const rolesController = require('../controllers/rolesController');
 const talonariosController = require('../controllers/talonariosController');
@@ -36,6 +38,13 @@ const publicacionRifasController = require('../controllers/publicacionRifasContr
 
 module.exports = (app) => {
 
+    // * LOGIN AND LOGOUT
+    router.post('/usuarios/login', usuariosController.login); // Ruta para iniciar sesión, no requiere autenticación
+    router.post('/usuarios', usuariosController.create); // Ruta para crear un usuario, no requiere autenticación
+
+    // ! Todas las rutas a continuación requieren autenticación
+    router.use(authenticateToken); // Middleware para proteger las rutas con autenticación
+
     // * USUARIOS
     router.get('/usuarios/activos', usuariosController.find);
     router.get('/usuarios', usuariosController.findAllUsers);
@@ -43,6 +52,7 @@ module.exports = (app) => {
     router.post('/usuarios', usuariosController.create);
     router.put('/usuarios/:id', usuariosController.update);
     router.put('/usuarios/:id/contrasenia', usuariosController.updatePassword);
+    router.put('/usuarios/logout/:id', usuariosController.logout);
     router.delete('/usuarios/:id', usuariosController.delete);
 
     // * HORARIOS
@@ -248,6 +258,13 @@ module.exports = (app) => {
     router.put('/comisiones/update/:id', comisionesController.update); 
     router.delete('/comisiones/delete/:id', comisionesController.delete); 
 
+    // * RUTAS DE MATERIALES
+    router.get('/materiales/all', materialesController.find);
+    router.get('/materiales/:id', materialesController.findById);
+    router.get('/materialesByName', materialesController.findByName);
+    router.post('/materiales', materialesController.create);
+    router.put('/materiales/:id', materialesController.update);
+    router.delete('/materiales/:id', materialesController.delete);
     // * RUTAS DE ROLES
     router.get('/roles', rolesController.find);
     router.get('/roles/activos', rolesController.findActivateRol); 
