@@ -4,6 +4,7 @@ const Sequelize = require('sequelize');
 const crypto = require('crypto'); // Libreria para hashear passwords
 const db = require('../models');
 const USERS = db.usuarios;
+const ROLES = db.roles;
 
 // Función para hashear la contraseña usando SHA-256
 function hashPassword(password) {
@@ -53,6 +54,11 @@ module.exports = {
     async find(req, res) {
         try {
             const users = await USERS.findAll({
+                include: [
+                    {
+                      model: ROLES,
+                      attributes: ['roles'], 
+                    }],
                 where: { estado: 1 }
             });
     
@@ -68,22 +74,22 @@ module.exports = {
     },
 
     // * Get todos los usuarios
-    async findAllUsers(req, res) {
-        try {
-            const users = await USERS.findAll();
-
-            const dataUsers = users.map(user => {
-                const { contrasenia, token, tokenExpiresAt, ...userWithoutPasswordAndTokens } = user.dataValues;
-                return userWithoutPasswordAndTokens;
+        async findAllUsers(req, res) {
+            return USERS.findAll({
+                include: [{
+                    model: ROLES,
+                    attributes: ['roles'] 
+                }]
+            })
+            .then((users) => {
+                res.status(200).send(users);
+            })
+            .catch((error) => {
+                res.status(500).send({
+                    message: error.message || 'Error al listar los usuarios.'
+                });
             });
-    
-            return res.status(200).send(dataUsers);
-        } catch (error) {
-            return res.status(500).send({
-                message: 'Ocurrió un error al recuperar los datos.'
-            });
-        }
-    },
+        },
 
     // * Get usuario por ID
     async findById(req, res) {

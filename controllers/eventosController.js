@@ -137,7 +137,7 @@ module.exports = {
     // * Actualizar un evento (el estado no se cambia aquí)
     async update(req, res) {
         const { idEvento } = req.params;
-        const { nombreEvento, fechaHoraInicio, fechaHoraFin, descripcion, direccion, idSede } = req.body;
+        const { nombreEvento, fechaHoraInicio, fechaHoraFin, descripcion, direccion, idSede, estado } = req.body;
     
         const camposActualizados = {};
     
@@ -176,6 +176,12 @@ module.exports = {
             }
             camposActualizados.idSede = idSede;
         }
+
+           
+        if (estado !== undefined) {
+            camposActualizados.estado = estado;
+        }
+
     
         try {
             // Actualización del evento

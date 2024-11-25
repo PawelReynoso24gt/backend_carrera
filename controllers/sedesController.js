@@ -94,7 +94,7 @@ module.exports = {
     // * Actualizar los campos de una sede 
     async update(req, res) {
         const { idSede } = req.params;
-        const { informacion, nombreSede } = req.body;
+        const { informacion, nombreSede, estado } = req.body;
     
         const camposActualizados = {};
     
@@ -109,6 +109,12 @@ module.exports = {
             }
             camposActualizados.nombreSede = nombreSede;
         }
+
+        
+        if (estado !== undefined) {
+            camposActualizados.estado = estado;
+        }
+
     
         try {
 
