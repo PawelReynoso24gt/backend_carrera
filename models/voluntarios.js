@@ -2,27 +2,34 @@
 const { Model } = require('sequelize');
 
 module.exports = (sequelize, DataTypes) => {
-  class roles extends Model {
+  class voluntarios extends Model {
     static associate(models) {
-        // * Relación con usuarios
-        this.hasMany(models.usuarios, {
-          foreignKey: 'idRol'
+        voluntarios.belongsTo(models.personas, {
+            foreignKey: 'idPersona'
         });
     }
   }
 
-  roles.init({
-    idRol: {
+  voluntarios.init({
+    idVoluntario: {
       type: DataTypes.INTEGER,
       autoIncrement: true,
       primaryKey: true
     },
-    roles: {
-      type: DataTypes.STRING(255),
+    fechaRegistro: {
+      type: DataTypes.DATE,
       allowNull: false
     },
+    fechaSalida: {
+        type: DataTypes.DATE,
+        allowNull: false
+    },
     estado: {
-        type: DataTypes.STRING(255),
+        type: DataTypes.INTEGER,
+        allowNull: false
+    },
+    idPersona: {
+        type: DataTypes.INTEGER,
         allowNull: false
     },
     createdAt: {
@@ -37,10 +44,10 @@ module.exports = (sequelize, DataTypes) => {
     }
   }, {
     sequelize,
-    modelName: 'roles',
-    tableName: 'roles',
+    modelName: 'voluntarios',
+    tableName: 'voluntarios',
     timestamps: true
   });
 
-  return roles;
+  return voluntarios;
 };

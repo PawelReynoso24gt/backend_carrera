@@ -1,5 +1,6 @@
 const { Router } = require('express');
 const router = Router();
+const authenticateToken = require('../middlewares/authenticateToken');
 
 // Aqui van los imports
 //RUTAS
@@ -12,7 +13,7 @@ const eventosController = require ('../controllers/eventosController');
 const standsController = require('../controllers/standsController');
 const departamentosController = require('../controllers/departamentosController');
 const tipoPagosController = require('../controllers/tipoPagosController');
-const categoriaBitacorasController = require('../controllers/categoria_bitacorasController');
+const categoriaBitacorasController = require('../controllers/categoriaBitacorasController');
 const tipoTrasladosController = require('../controllers/tipoTrasladosController');
 const trasladosController = require('../controllers/trasladosController');
 const productosController = require('../controllers/productosController');
@@ -24,11 +25,25 @@ const tipoPublicoController =  require('../controllers/tipoPublicosController');
 const fotosSedesController = require('../controllers/fotosSedesController');
 const personasController = require('../controllers/personasController');
 const categoriasController = require('../controllers/categoriaController');
+const materialesController = require('../controllers/materialesController');
 const comisionesController = require('../controllers/comisionesController');
 const rolesController = require('../controllers/rolesController');
 const talonariosController = require('../controllers/talonariosController');
+const actividadesController = require('../controllers/actividadesController');
+const voluntariosController = require('../controllers/voluntariosController');
+const publicacionesController = require('../controllers/publicacionesController');
+const publicacionGeneralController = require('../controllers/publicacionGeneralesController');
+const publicacionEventoController = require('../controllers/publicacionEventosController');
+const publicacionRifasController = require('../controllers/publicacionRifasController');
 
 module.exports = (app) => {
+
+    // * LOGIN AND LOGOUT
+    router.post('/usuarios/login', usuariosController.login); // Ruta para iniciar sesión, no requiere autenticación
+    router.post('/usuarios', usuariosController.create); // Ruta para crear un usuario, no requiere autenticación
+
+    // ! Todas las rutas a continuación requieren autenticación
+    router.use(authenticateToken); // Middleware para proteger las rutas con autenticación
 
     // * USUARIOS
     router.get('/usuarios/activos', usuariosController.find);
@@ -37,6 +52,7 @@ module.exports = (app) => {
     router.post('/usuarios', usuariosController.create);
     router.put('/usuarios/:id', usuariosController.update);
     router.put('/usuarios/:id/contrasenia', usuariosController.updatePassword);
+    router.put('/usuarios/logout/:id', usuariosController.logout);
     router.delete('/usuarios/:id', usuariosController.delete);
 
     // * HORARIOS
@@ -242,6 +258,13 @@ module.exports = (app) => {
     router.put('/comisiones/update/:id', comisionesController.update); 
     router.delete('/comisiones/delete/:id', comisionesController.delete); 
 
+    // * RUTAS DE MATERIALES
+    router.get('/materiales/all', materialesController.find);
+    router.get('/materiales/:id', materialesController.findById);
+    router.get('/materialesByName', materialesController.findByName);
+    router.post('/materiales', materialesController.create);
+    router.put('/materiales/:id', materialesController.update);
+    router.delete('/materiales/:id', materialesController.delete);
     // * RUTAS DE ROLES
     router.get('/roles', rolesController.find);
     router.get('/roles/activos', rolesController.findActivateRol); 
@@ -258,6 +281,58 @@ module.exports = (app) => {
     router.put('/talonarios/update/:id', talonariosController.updateTalo); 
     router.delete('/talonarios/delete/:id', talonariosController.deleteTalo); 
 
+    // * RUTAS DE VOLUNTARIOS
+    router.get('/voluntarios', voluntariosController.find);
+    router.get('/voluntarios/activos', voluntariosController.findActivateVol); 
+    router.get('/voluntarios/inactivos', voluntariosController.findaInactivateVol);
+    router.post('/voluntarios/create', voluntariosController.createVol);
+    router.put('/voluntarios/update/:id', voluntariosController.updateVol); 
+    router.delete('/voluntarios/delete/:id', voluntariosController.deleteVol); 
+
+    // * RUTAS DE ACTIVIDADES
+    router.get('/actividades', actividadesController.find);
+    router.get('/actividades/activos', actividadesController.findActive); 
+    router.get('/actividades/inactivos', actividadesController.findInactive);
+    router.get('/actividades/:id', actividadesController.findById);
+    router.post('/actividades/create', actividadesController.create);
+    router.put('/actividades/update/:id', actividadesController.update); 
+    router.delete('/actividades/delete/:id', actividadesController.delete); 
+
+    // * RUTAS DE PUBLICACIONES
+    router.get('/publicaciones', publicacionesController.find);
+    router.get('/publicaciones/activos', publicacionesController.findActive); 
+    router.get('/publicaciones/inactivos', publicacionesController.findInactive);
+    router.get('/publicaciones/:id', publicacionesController.findById);
+    router.post('/publicaciones/create', publicacionesController.create);
+    router.put('/publicaciones/update/:id', publicacionesController.update); 
+    router.delete('/publicaciones/delete/:id', publicacionesController.delete);
+
+    // * RUTAS DE PUBLICACIONES DE EVENTOS
+    router.get('/publicacionesGeneral', publicacionGeneralController.find);
+    router.get('/publicacionesGeneral/activos', publicacionGeneralController.findActive); 
+    router.get('/publicacionesGeneral/inactivos', publicacionGeneralController.findInactive);
+    router.get('/publicacionesGeneral/:id', publicacionGeneralController.findById);
+    router.post('/publicacionesGeneral/create', publicacionGeneralController.create);
+    router.put('/publicacionesGeneral/update/:id', publicacionGeneralController.update); 
+    router.delete('/publicacionesGeneral/delete/:id', publicacionGeneralController.delete);
+
+    // * RUTAS DE PUBLICACIONES DE EVENTOS
+    router.get('/publicacionesEvento', publicacionEventoController.find);
+    router.get('/publicacionesEvento/activos', publicacionEventoController.findActive); 
+    router.get('/publicacionesEvento/inactivos', publicacionEventoController.findInactive);
+    router.get('/publicacionesEvento/:id', publicacionEventoController.findById);
+    router.post('/publicacionesEvento/create', publicacionEventoController.create);
+    router.put('/publicacionesEvento/update/:id', publicacionEventoController.update); 
+    router.delete('/publicacionesEvento/delete/:id', publicacionEventoController.delete);
+
+    // * RUTAS DE PUBLICACIONES DE RIFAS
+    router.get('/publicacionesRifas', publicacionRifasController.find);
+    router.get('/publicacionesRifas/activos', publicacionRifasController.findActive); 
+    router.get('/publicacionesRifas/inactivos', publicacionRifasController.findInactive);
+    router.get('/publicacionesRifas/:id', publicacionRifasController.findById);
+    router.post('/publicacionesRifas/create', publicacionRifasController.create);
+    router.put('/publicacionesRifas/update/:id', publicacionRifasController.update); 
+    router.delete('/publicacionesRifas/delete/:id', publicacionRifasController.delete);
 
     app.use('/', router);
 

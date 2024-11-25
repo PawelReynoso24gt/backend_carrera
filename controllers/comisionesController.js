@@ -111,7 +111,8 @@ module.exports = {
 
     // Crear una nueva comisión
     async create(req, res) {
-        const { comision, descripcion, estado = 1, idEvento, idDetalleHorario } = req.body;
+        const { comision, descripcion, idEvento, idDetalleHorario } = req.body;
+        const estado = req.body.estado !== undefined ? req.body.estado : 1; // Valor predeterminado de estado: 1
 
         if (!comision || !descripcion || !idEvento || !idDetalleHorario) {
             return res.status(400).json({ message: 'Faltan campos requeridos.' });
@@ -123,15 +124,27 @@ module.exports = {
             return res.status(400).json({ message: 'El nombre de la comisión solo puede contener letras y espacios.' });
         }
 
-        const nuevaComision = { 
-            comision,
-            descripcion,
-            estado,
-            idEvento,
-            idDetalleHorario
-        };
-
         try {
+            // Verificar si el evento existe
+            const eventoExistente = await db.eventos.findByPk(idEvento);
+            if (!eventoExistente) {
+                return res.status(400).json({ message: 'El idEvento proporcionado no existe.' });
+            }
+
+            // Verificar si el detalle horario existe
+            const detalleHorarioExistente = await db.detalle_horarios.findByPk(idDetalleHorario);
+            if (!detalleHorarioExistente) {
+                return res.status(400).json({ message: 'El idDetalleHorario proporcionado no existe.' });
+            }
+
+            const nuevaComision = {
+                comision,
+                descripcion,
+                estado,
+                idEvento,
+                idDetalleHorario
+            };
+
             const comisionCreada = await COMISIONES.create(nuevaComision);
             return res.status(201).json({
                 message: 'Comisión creada con éxito',
@@ -149,7 +162,7 @@ module.exports = {
         const id = req.params.id;
 
         const camposActualizados = {};
-    
+
         // Validación del nombre de la comisión
         if (comision !== undefined) {
             const regexComision = /^[A-Za-zÁÉÍÓÚáéíóúÑñ\s]+$/;
@@ -170,8 +183,21 @@ module.exports = {
             camposActualizados.estado = estado;
         }
 
-        if (idEvento !== undefined) camposActualizados.idEvento = idEvento;
-        if (idDetalleHorario !== undefined) camposActualizados.idDetalleHorario = idDetalleHorario;
+        if (idEvento !== undefined) {
+            const eventoExistente = await db.eventos.findByPk(idEvento);
+            if (!eventoExistente) {
+                return res.status(400).json({ message: 'El idEvento proporcionado no existe.' });
+            }
+            camposActualizados.idEvento = idEvento;
+        }
+
+        if (idDetalleHorario !== undefined) {
+            const detalleHorarioExistente = await db.detalle_horarios.findByPk(idDetalleHorario);
+            if (!detalleHorarioExistente) {
+                return res.status(400).json({ message: 'El idDetalleHorario proporcionado no existe.' });
+            }
+            camposActualizados.idDetalleHorario = idDetalleHorario;
+        }
 
         try {
             const [rowsUpdated] = await COMISIONES.update(
@@ -194,7 +220,7 @@ module.exports = {
             console.error(`Error al actualizar la comisión con ID ${id}:`, error);
             return res.status(500).json({ error: 'Error al actualizar la comisión' });
         }
-    },  
+    },
 
     // Eliminar una comisión
     async delete(req, res) {
