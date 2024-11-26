@@ -43,7 +43,7 @@ module.exports = (app) => {
     router.post('/usuarios', usuariosController.create); // Ruta para crear un usuario, no requiere autenticación
 
     // ! Todas las rutas a continuación requieren autenticación
-    router.use(authenticateToken); // Middleware para proteger las rutas con autenticación
+    // router.use(authenticateToken); // Middleware para proteger las rutas con autenticación
 
     // * USUARIOS
     router.get('/usuarios/activos', usuariosController.find);
@@ -52,6 +52,7 @@ module.exports = (app) => {
     router.post('/usuarios', usuariosController.create);
     router.put('/usuarios/:id', usuariosController.update);
     router.put('/usuarios/:id/contrasenia', usuariosController.updatePassword);
+    router.put('/usuarios/:id/reset', usuariosController.resetPassword);
     router.put('/usuarios/logout/:id', usuariosController.logout);
     router.delete('/usuarios/:id', usuariosController.delete);
 

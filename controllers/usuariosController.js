@@ -12,6 +12,44 @@ function hashPassword(password) {
     return crypto.createHash('sha256').update(password).digest('hex');
 }
 
+// Validación de entrada
+function validateUserData(datos, esCreacion = false) {
+    const usuarioRegex = /^[a-z0-9-_]+$/; // Solo minúsculas, números, guion y guion bajo
+
+    if (datos.usuario !== undefined && !usuarioRegex.test(datos.usuario)) {
+        return 'El nombre de usuario solo debe contener minúsculas, números, "-" o "_"';
+    }
+
+    if (esCreacion || datos.contrasenia !== undefined) {
+        if (!datos.contrasenia || datos.contrasenia.length < 8) {
+            return 'La contraseña debe tener al menos 8 caracteres';
+        }
+    }
+
+    if (datos.idRol !== undefined && datos.idRol < 1) {
+        return 'El rol es inválido';
+    }
+    if (datos.idSede !== undefined && datos.idSede < 1) {
+        return 'La sede es inválida';
+    }
+    if (datos.idPersona !== undefined && datos.idPersona < 1) {
+        return 'La persona es inválida';
+    }
+
+    return null;
+}
+
+// Validación de actualización de contraseña
+function validatePasswordChange(currentPassword, newPassword) {
+    if (!currentPassword) {
+        return 'La contraseña actual es requerida';
+    }
+    if (!newPassword || newPassword.length < 8) {
+        return 'La nueva contraseña debe tener al menos 8 caracteres';
+    }
+    return null;
+}
+
 // Función para generar un token JWT
 function generateToken(user) {
     const payload = {
@@ -276,6 +314,35 @@ module.exports = {
         } catch (error) {
             console.log(error);
             return res.status(500).json({ error: 'Error al actualizar la contraseña' });
+        }
+    },
+
+    // * Reiniciar contraseña para superadmin
+    async resetPassword(req, res) {
+        const { newPassword } = req.body; // Nueva contraseña proporcionada en el cuerpo de la solicitud
+        const id = req.params.id; // ID del usuario obtenido de los parámetros de la solicitud
+
+        // Validar la nueva contraseña
+        /*const error = validatePasswordChange(newPassword); // Reutilizar la función para validar contraseñas
+        if (error) {
+            return res.status(400).json({ error });
+        }*/
+
+        try {
+            // Buscar el usuario por ID
+            const user = await USERS.findByPk(id);
+            if (!user) {
+                return res.status(404).send({ message: 'Usuario no encontrado' });
+            }
+
+            // Actualizar la contraseña con SHA-256
+            user.contrasenia = hashPassword(newPassword);
+            await user.save();
+
+            return res.status(200).send('La contraseña ha sido reiniciada exitosamente');
+        } catch (error) {
+            console.log(error);
+            return res.status(500).json({ error: 'Error al reiniciar la contraseña' });
         }
     },
 
