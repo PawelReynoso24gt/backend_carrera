@@ -194,9 +194,9 @@ module.exports = (app) => {
     router.get('/pedidos/:idPedido', pedidosController.findById);
     router.get('/pedidos/activas', pedidosController.findActive);
     router.get('/pedidos/inactivas', pedidosController.findInactive);
+    router.get('/pedidos/:descripcion', pedidosController.findPedido);
     router.post('/pedidos', pedidosController.create);
     router.put('/pedidos/:id', pedidosController.update);
-    router.get('/pedidos/:descripcion', pedidosController.findPedido);
     router.delete('/pedidos/:idPedido', pedidosController.delete);
 
     // * RUTAS DE STAND
@@ -245,9 +245,10 @@ module.exports = (app) => {
     router.get('/categorias/:idCategoria', categoriasController.findById);
     router.get('/categorias/activas', categoriasController.findActive);
     router.get('/categorias/inactivas', categoriasController.findInactive);
+    router.get('/categorias/:nombreCategoria', categoriasController.findCategoria);
     router.post('/categorias', categoriasController.create);
     router.put('/categorias/:idCategoria', categoriasController.update);
-    router.get('/categorias/:nombreCategoria', categoriasController.findCategoria);
+
     
     // * RUTAS DE COMISIONES
     router.get('/comisiones', comisionesController.find);
@@ -265,6 +266,7 @@ module.exports = (app) => {
     router.post('/materiales', materialesController.create);
     router.put('/materiales/:id', materialesController.update);
     router.delete('/materiales/:id', materialesController.delete);
+
     // * RUTAS DE ROLES
     router.get('/roles', rolesController.find);
     router.get('/roles/activos', rolesController.findActivateRol); 
