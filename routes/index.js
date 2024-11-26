@@ -58,9 +58,9 @@ module.exports = (app) => {
     router.get('/sedes/:idSede', sedesController.findById);
     router.get('/sedes/activas', sedesController.findActive);
     router.get('/sedes/inactivas', sedesController.findInactive);
+    router.get('/sedes/:nombreSede', sedesController.findSede);
     router.post('/sedes', sedesController.create);
     router.put('/sedes/:idSede', sedesController.update);
-    router.get('/sedes/:nombreSede', sedesController.findSede);
     router.delete('/sedes/:idSede', sedesController.delete);
 
     // * RUTAS DE EVENTOS
@@ -116,10 +116,10 @@ module.exports = (app) => {
     router.get('/categoriaHorarios', categoriaHorariosController.findAll);
     router.get('/categoriaHorarios/activas', categoriaHorariosController.findActive);
     router.get('/categoriaHorarios/inactivas', categoriaHorariosController.findInactive);
+    router.get('/categoriaHorarios/:categoria', categoriaHorariosController.findCategoria);
     router.get('/categoriaHorarios/:id', categoriaHorariosController.findById);
     router.post('/categoriaHorarios', categoriaHorariosController.create);
     router.put('/categoriaHorarios/:id', categoriaHorariosController.update);
-    router.get('/categoriaHorarios/:categoria', categoriaHorariosController.findCategoria);
     router.delete('/categoriaHorarios/:idCategoriaHorario', categoriaHorariosController.delete);
 
      // * RUTAS DE CATEGORIAS
@@ -149,9 +149,10 @@ module.exports = (app) => {
     router.get('/traslados/:idTraslado', trasladosController.findById);
     router.get('/traslados/activas', trasladosController.findActive);
     router.get('/traslados/inactivas', trasladosController.findInactive);
+    router.get('/traslados/:descripcion', trasladosController.findTraslado);
     router.post('/traslados', trasladosController.create);
     router.put('/traslados/:id', trasladosController.update);
-    router.get('/traslados/:descripcion', trasladosController.findTraslado);
+
 
     // * PRODUCTOS
     router.get('/productos', productosController.find); 
@@ -176,9 +177,9 @@ module.exports = (app) => {
     router.get('/pedidos/:idPedido', pedidosController.findById);
     router.get('/pedidos/activas', pedidosController.findActive);
     router.get('/pedidos/inactivas', pedidosController.findInactive);
+    router.get('/pedidos/:descripcion', pedidosController.findPedido);
     router.post('/pedidos', pedidosController.create);
     router.put('/pedidos/:id', pedidosController.update);
-    router.get('/pedidos/:descripcion', pedidosController.findPedido);
     router.delete('/pedidos/:idPedido', pedidosController.delete);
 
     // * RUTAS DE STAND
@@ -229,7 +230,7 @@ module.exports = (app) => {
     router.get('/categorias/inactivas', categoriasController.findInactive);
     router.post('/categorias', categoriasController.create);
     router.put('/categorias/:idCategoria', categoriasController.update);
-    router.get('/categorias/:nombreCategoria', categoriasController.find_categoria);
+    router.get('/categorias/:nombreCategoria', categoriasController.findCategoria);
     
     app.use('/', router);
 
