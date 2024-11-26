@@ -73,9 +73,9 @@ module.exports = (app) => {
 
     // * RUTAS DE SEDES
     router.get('/sedes', sedesController.findAll);
-    router.get('/sedes/:idSede', sedesController.findById);
     router.get('/sedes/activas', sedesController.findActive);
     router.get('/sedes/inactivas', sedesController.findInactive);
+    router.get('/sedes/:idSede', sedesController.findById);
     router.post('/sedes', sedesController.create);
     router.put('/sedes/:idSede', sedesController.update);
     router.get('/sedes/:nombreSede', sedesController.findSede);
@@ -83,9 +83,9 @@ module.exports = (app) => {
 
     // * RUTAS DE EVENTOS
     router.get('/eventos', eventosController.findAll);
-    router.get('/eventos/:idEvento', eventosController.findById);
     router.get('/eventos/activas', eventosController.findActive);
     router.get('/eventos/inactivas', eventosController.findInactive);
+    router.get('/eventos/:idEvento', eventosController.findById);
     router.post('/eventos', eventosController.create);
     router.put('/eventos/:idEvento', eventosController.update);
     router.get('/eventos/:nombreEvento', eventosController.findEvento);

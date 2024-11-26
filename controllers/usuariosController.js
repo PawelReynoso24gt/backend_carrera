@@ -128,8 +128,12 @@ module.exports = {
     async find(req, res) {
         try {
             const users = await USERS.findAll({
-                where: { estado: 1 },
-                include: { model: ROLES, attributes: ['idRol', 'roles'] }
+                include: [
+                    {
+                      model: ROLES,
+                      attributes: ['roles'], 
+                    }],
+                where: { estado: 1 }
             });
     
             const dataUsers = users.map(user => {
@@ -144,23 +148,23 @@ module.exports = {
         }
     },
 
-    // * Obtener todos los usuarios
-    async findAllUsers(req, res) {
-        try {
-            const users = await USERS.findAll();
-
-            const dataUsers = users.map(user => {
-                const { contrasenia, token, tokenExpiresAt, ...userWithoutPasswordAndTokens } = user.dataValues;
-                return userWithoutPasswordAndTokens;
+    // * Get todos los usuarios
+        async findAllUsers(req, res) {
+            return USERS.findAll({
+                include: [{
+                    model: ROLES,
+                    attributes: ['roles'] 
+                }]
+            })
+            .then((users) => {
+                res.status(200).send(users);
+            })
+            .catch((error) => {
+                res.status(500).send({
+                    message: error.message || 'Error al listar los usuarios.'
+                });
             });
-
-            return res.status(200).send(dataUsers);
-        } catch (error) {
-            return res.status(500).send({
-                message: 'Ocurrió un error al recuperar los datos.'
-            });
-        }
-    },
+        },
 
     // * Obtener usuario por ID
     async findById(req, res) {
