@@ -13,12 +13,10 @@ module.exports = {
             include: [
                 {
                     model: ROLES,
-                    as: 'rol',
-                    attributes: ['nombreRol']
+                    attributes: ['roles']
                 },
                 {
                     model: PERMISOS,
-                    as: 'permiso',
                     attributes: ['nombrePermiso']
                 }
             ]
@@ -101,5 +99,85 @@ module.exports = {
                 message: error.message || 'Error al eliminar la asignación de permiso.'
             });
         });
-    }
+    },
+
+    
+    async updateBatch(req, res) {
+        try {
+          const { roleId, permisos } = req.body;
+      
+          if (!roleId || !Array.isArray(permisos)) {
+            return res.status(400).json({ message: "Datos inválidos." });
+          }
+      
+          for (const permiso of permisos) {
+            const { idPermiso, estado } = permiso;
+      
+            const existingAssignment = await db.asignacion_permisos.findOne({
+              where: { idRol: roleId, idPermiso },
+            });
+      
+            if (existingAssignment) {
+
+              if (existingAssignment.estado !== estado) {
+                await db.asignacion_permisos.update(
+                  { estado },
+                  { where: { idRol: roleId, idPermiso } }
+                );
+              }
+            } else if (estado === 1) {
+
+              await db.asignacion_permisos.create({
+                idRol: roleId,
+                idPermiso,
+                estado: 1,
+              });
+            }
+          }
+      
+          return res.status(200).json({ message: "Permisos actualizados con éxito." });
+        } catch (error) {
+          console.error("Error en updateBatch:", error);
+          return res.status(500).json({ message: "Error al actualizar permisos." });
+        }
+      },
+
+
+      async findByRole(req, res) {
+        try {
+          const { roleId } = req.query;
+      
+          if (!roleId) {
+            return res.status(400).json({ message: "Se requiere el ID del rol." });
+          }
+      
+          // Buscar asignaciones de permisos para el rol específico
+          const assignments = await db.asignacion_permisos.findAll({
+            where: { idRol: roleId },
+            include: [
+              {
+                model: db.permisos,
+                attributes: ["idPermiso", "nombrePermiso"], // Solo los campos necesarios
+              },
+            ],
+          });
+      
+          // Si no hay asignaciones, devolver lista vacía
+          if (!assignments.length) {
+            return res.status(200).json([]);
+          }
+      
+          // Mapear los resultados
+          const permisos = assignments.map((assignment) => ({
+            idPermiso: assignment.idPermiso,
+            nombrePermiso: assignment.permiso.nombrePermiso,
+            estado: assignment.estado, // Estado actual (1 o 0)
+          }));
+      
+          return res.status(200).json(permisos);
+        } catch (error) {
+          console.error("Error al obtener permisos por rol:", error);
+          return res.status(500).json({ message: "Error al obtener permisos." });
+        }
+      }
 };

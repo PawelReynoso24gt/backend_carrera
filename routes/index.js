@@ -25,6 +25,11 @@ const fotosSedesController = require('../controllers/fotosSedesController');
 const personasController = require('../controllers/personasController');
 const categoriasController = require('../controllers/categoriaController');
 const comisionesController = require('../controllers/comisionesController');
+const rolesController = require('../controllers/rolesController');
+const talonariosController = require('../controllers/talonariosController');
+const voluntariosController = require('../controllers/voluntariosController');
+const permisosController = require('../controllers/permisosController');
+const asignacionPermisosController = require('../controllers/asignacionPermisosController');
 
 module.exports = (app) => {
 
@@ -232,6 +237,54 @@ module.exports = (app) => {
     router.put('/categorias/:idCategoria', categoriasController.update);
     router.get('/categorias/:nombreCategoria', categoriasController.findCategoria);
     
+    // * RUTAS DE COMISIONES
+    router.get('/comisiones', comisionesController.find);
+    router.get('/comisiones/activos', comisionesController.findActive); 
+    router.get('/comisiones/inactivos', comisionesController.findInactive);
+    router.get('/comisiones/:id', comisionesController.findById);
+    router.post('/comisiones/create', comisionesController.create);
+    router.put('/comisiones/update/:id', comisionesController.update); 
+    router.delete('/comisiones/delete/:id', comisionesController.delete); 
+
+    // * RUTAS DE ROLES
+    router.get('/roles', rolesController.find);
+    router.get('/roles/activos', rolesController.findActivateRol); 
+    router.get('/roles/inactivos', rolesController.findaInactivateRol);
+    router.post('/roles/create', rolesController.createRol);
+    router.put('/roles/update/:id', rolesController.updateRol); 
+    router.delete('/roles/delete/:id', rolesController.deleteRol); 
+
+    // * RUTAS DE TALONARIOS
+    router.get('/talonarios', talonariosController.find);
+    router.get('/talonarios/activos', talonariosController.findActivateTalo); 
+    router.get('/talonarios/inactivos', talonariosController.findaInactivateTalo);
+    router.post('/talonarios/create', talonariosController.createTalo);
+    router.put('/talonarios/update/:id', talonariosController.updateTalo); 
+    router.delete('/talonarios/delete/:id', talonariosController.deleteTalo); 
+
+    // * RUTAS DE VOLUNTARIOS
+    router.get('/voluntarios', voluntariosController.find);
+    router.get('/voluntarios/activos', voluntariosController.findActivateVol); 
+    router.get('/voluntarios/inactivos', voluntariosController.findaInactivateVol);
+    router.post('/voluntarios/create', voluntariosController.createVol);
+    router.put('/voluntarios/update/:id', voluntariosController.updateVol); 
+    router.delete('/voluntarios/delete/:id', voluntariosController.deleteVol); 
+
+    // * RUTAS DE PERMISOS
+    router.get('/permisos', permisosController.findAll); 
+    router.post('/permisos/create', permisosController.create); 
+    router.put('/permisos/update/:idPermiso', permisosController.update); 
+    router.delete('/permisos/delete/:idPermiso', permisosController.delete); 
+
+    // * RUTAS DE ASIGNACIÓN DE PERMISOS
+    router.get('/asignacionPermisos', asignacionPermisosController.findAll); 
+    router.get('/asignacionPermisos', asignacionPermisosController.findByRole); 
+    router.post('/asignacionPermisos/create', asignacionPermisosController.create);
+    router.post('/asignacionPermisos/update', asignacionPermisosController.updateBatch);
+    router.put('/asignacionPermisos/update/:idAsignacion', asignacionPermisosController.update); 
+    router.delete('/asignacionPermisos/delete/:idAsignacion', asignacionPermisosController.delete); 
+
+
     app.use('/', router);
 
 };
