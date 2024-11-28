@@ -8,7 +8,11 @@ module.exports = {
     // Obtener todos los tipos de público
     async find(req, res) {
         try {
-            const tipoPublicos = await TIPOS_PUBLICOS.findAll();
+            const tipoPublicos = await TIPOS_PUBLICOS.findAll({
+                where: {
+                    estado: 1
+                }
+            });
             return res.status(200).json(tipoPublicos);
         } catch (error) {
             console.error('Error al recuperar los tipos de publicos:', error);

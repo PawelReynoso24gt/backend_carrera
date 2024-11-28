@@ -1,4 +1,5 @@
 'use strict';
+const { where } = require("sequelize");
 const db = require("../models");
 const PRODUCTOS = db.productos;
 const CATEGORIAS = db.categorias;
@@ -13,6 +14,9 @@ module.exports = {
                 include: {
                     model: CATEGORIAS,
                     attributes: ["idCategoria", "nombreCategoria"],
+                },
+                where: {
+                    estado: 1
                 }
             });
             return res.status(200).json(productos);
