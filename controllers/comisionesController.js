@@ -1,4 +1,5 @@
 'use strict';
+const { where } = require("sequelize");
 const db = require("../models");
 const COMISIONES = db.comisiones;
 
@@ -20,7 +21,10 @@ module.exports = {
                         as: 'detalleHorario',
                         attributes: ['idDetalleHorario', 'cantidadPersonas', 'estado']
                     }
-                ]
+                ],
+                where: {
+                    estado: 1
+                }
             });
             return res.status(200).json(comisiones);
         } catch (error) {

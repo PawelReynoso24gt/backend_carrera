@@ -7,6 +7,10 @@ module.exports = (sequelize, DataTypes) => {
         talonarios.belongsTo(models.rifas, {
             foreignKey: 'idRifa'
         });
+
+        talonarios.hasMany(models.solicitudTalonarios, {
+          foreignKey: 'idTalonario',
+        });
     }
   }
 

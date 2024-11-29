@@ -13,6 +13,9 @@ module.exports = {
                 include: {
                     model: SEDES,
                     attributes: ["idSede", "nombreSede"]
+                },
+                where: {
+                    estado: 1
                 }
             });
             return res.status(200).json(rifas);
