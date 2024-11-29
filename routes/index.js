@@ -337,13 +337,6 @@ module.exports = (app) => {
     router.put('/publicacionesRifas/update/:id', publicacionRifasController.update); 
     router.delete('/publicacionesRifas/delete/:id', publicacionRifasController.delete);
 
-    // * RUTAS DE ROLES
-    router.get('/roles', rolesController.find);
-    router.get('/roles/activos', rolesController.findActivateRol); 
-    router.get('/roles/inactivos', rolesController.findaInactivateRol);
-    router.post('/roles/create', rolesController.createRol);
-    router.put('/roles/update/:id', rolesController.updateRol); 
-    router.delete('/roles/delete/:id', rolesController.deleteRol); 
 
     // * RUTAS DE TALONARIOS
     router.get('/talonarios', talonariosController.find);
