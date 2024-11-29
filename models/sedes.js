@@ -14,6 +14,11 @@ module.exports = (sequelize, DataTypes) => {
         foreignKey: 'idSede',
         as: 'fotos'
       });
+      // * Una sede tiene muchas publicaciones
+      sedes.hasMany(models.publicaciones, {
+        foreignKey: 'idSede',
+        as: 'publicaciones'
+      });
     }
   }
 

@@ -10,7 +10,12 @@ module.exports = (sequelize, DataTypes) => {
             });
                 rifas.hasMany(models.talonarios, {
                 foreignKey: 'idRifa'
-              });
+            });
+            // * Relación con publicaciones de rifas (nueva)
+            rifas.hasMany(models.publicacion_rifas, {
+                foreignKey: 'idRifa',
+                as: 'publicacionesRifas'
+            });
         }
     }
 

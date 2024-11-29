@@ -31,6 +31,10 @@ const rolesController = require('../controllers/rolesController');
 const talonariosController = require('../controllers/talonariosController');
 const actividadesController = require('../controllers/actividadesController');
 const voluntariosController = require('../controllers/voluntariosController');
+const publicacionesController = require('../controllers/publicacionesController');
+const publicacionGeneralController = require('../controllers/publicacionGeneralesController');
+const publicacionEventoController = require('../controllers/publicacionEventosController');
+const publicacionRifasController = require('../controllers/publicacionRifasController');
 
 module.exports = (app) => {
 
@@ -39,7 +43,7 @@ module.exports = (app) => {
     router.post('/usuarios', usuariosController.create); // Ruta para crear un usuario, no requiere autenticación
 
     // ! Todas las rutas a continuación requieren autenticación
-    //router.use(authenticateToken); // Middleware para proteger las rutas con autenticación
+    // router.use(authenticateToken); // Middleware para proteger las rutas con autenticación
 
     // * USUARIOS
     router.get('/usuarios/activos', usuariosController.find);
@@ -48,6 +52,7 @@ module.exports = (app) => {
     router.post('/usuarios', usuariosController.create);
     router.put('/usuarios/:id', usuariosController.update);
     router.put('/usuarios/:id/contrasenia', usuariosController.updatePassword);
+    router.put('/usuarios/:id/reset', usuariosController.resetPassword);
     router.put('/usuarios/logout/:id', usuariosController.logout);
     router.delete('/usuarios/:id', usuariosController.delete);
 
@@ -69,9 +74,9 @@ module.exports = (app) => {
 
     // * RUTAS DE SEDES
     router.get('/sedes', sedesController.findAll);
-    router.get('/sedes/:idSede', sedesController.findById);
     router.get('/sedes/activas', sedesController.findActive);
     router.get('/sedes/inactivas', sedesController.findInactive);
+    router.get('/sedes/:idSede', sedesController.findById);
     router.post('/sedes', sedesController.create);
     router.put('/sedes/:idSede', sedesController.update);
     router.get('/sedes/:nombreSede', sedesController.findSede);
@@ -79,9 +84,9 @@ module.exports = (app) => {
 
     // * RUTAS DE EVENTOS
     router.get('/eventos', eventosController.findAll);
-    router.get('/eventos/:idEvento', eventosController.findById);
     router.get('/eventos/activas', eventosController.findActive);
     router.get('/eventos/inactivas', eventosController.findInactive);
+    router.get('/eventos/:idEvento', eventosController.findById);
     router.post('/eventos', eventosController.create);
     router.put('/eventos/:idEvento', eventosController.update);
     router.get('/eventos/:nombreEvento', eventosController.findEvento);
@@ -293,6 +298,43 @@ module.exports = (app) => {
     router.post('/actividades/create', actividadesController.create);
     router.put('/actividades/update/:id', actividadesController.update); 
     router.delete('/actividades/delete/:id', actividadesController.delete); 
+
+    // * RUTAS DE PUBLICACIONES
+    router.get('/publicaciones', publicacionesController.find);
+    router.get('/publicaciones/activos', publicacionesController.findActive); 
+    router.get('/publicaciones/inactivos', publicacionesController.findInactive);
+    router.get('/publicaciones/:id', publicacionesController.findById);
+    router.post('/publicaciones/create', publicacionesController.create);
+    router.put('/publicaciones/update/:id', publicacionesController.update); 
+    router.delete('/publicaciones/delete/:id', publicacionesController.delete);
+
+    // * RUTAS DE PUBLICACIONES DE EVENTOS
+    router.get('/publicacionesGeneral', publicacionGeneralController.find);
+    router.get('/publicacionesGeneral/activos', publicacionGeneralController.findActive); 
+    router.get('/publicacionesGeneral/inactivos', publicacionGeneralController.findInactive);
+    router.get('/publicacionesGeneral/:id', publicacionGeneralController.findById);
+    router.post('/publicacionesGeneral/create', publicacionGeneralController.create);
+    router.put('/publicacionesGeneral/update/:id', publicacionGeneralController.update); 
+    router.delete('/publicacionesGeneral/delete/:id', publicacionGeneralController.delete);
+
+    // * RUTAS DE PUBLICACIONES DE EVENTOS
+    router.get('/publicacionesEvento', publicacionEventoController.find);
+    router.get('/publicacionesEvento/activos', publicacionEventoController.findActive); 
+    router.get('/publicacionesEvento/inactivos', publicacionEventoController.findInactive);
+    router.get('/publicacionesEvento/:id', publicacionEventoController.findById);
+    router.post('/publicacionesEvento/create', publicacionEventoController.create);
+    router.put('/publicacionesEvento/update/:id', publicacionEventoController.update); 
+    router.delete('/publicacionesEvento/delete/:id', publicacionEventoController.delete);
+
+    // * RUTAS DE PUBLICACIONES DE RIFAS
+    router.get('/publicacionesRifas', publicacionRifasController.find);
+    router.get('/publicacionesRifas/activos', publicacionRifasController.findActive); 
+    router.get('/publicacionesRifas/inactivos', publicacionRifasController.findInactive);
+    router.get('/publicacionesRifas/:id', publicacionRifasController.findById);
+    router.post('/publicacionesRifas/create', publicacionRifasController.create);
+    router.put('/publicacionesRifas/update/:id', publicacionRifasController.update); 
+    router.delete('/publicacionesRifas/delete/:id', publicacionRifasController.delete);
+
     app.use('/', router);
 
 };
