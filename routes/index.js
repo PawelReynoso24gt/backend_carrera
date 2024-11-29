@@ -35,6 +35,9 @@ const publicacionesController = require('../controllers/publicacionesController'
 const publicacionGeneralController = require('../controllers/publicacionGeneralesController');
 const publicacionEventoController = require('../controllers/publicacionEventosController');
 const publicacionRifasController = require('../controllers/publicacionRifasController');
+const permisosController = require('../controllers/permisosController');
+const asignacionPermisosController = require('../controllers/asignacionPermisosController');
+const modulosController = require('../controllers/modulosController');
 
 module.exports = (app) => {
 
@@ -44,6 +47,7 @@ module.exports = (app) => {
 
     // ! Todas las rutas a continuación requieren autenticación
     //router.use(authenticateToken); // Middleware para proteger las rutas con autenticación
+
 
     // * USUARIOS
     router.get('/usuarios/activos', usuariosController.find);
@@ -78,7 +82,6 @@ module.exports = (app) => {
     router.get('/sedes/:idSede', sedesController.findById);
     router.post('/sedes', sedesController.create);
     router.put('/sedes/:idSede', sedesController.update);
-    router.get('/sedes/:nombreSede', sedesController.findSede);
     router.delete('/sedes/:idSede', sedesController.delete);
 
     // * RUTAS DE EVENTOS
@@ -134,10 +137,10 @@ module.exports = (app) => {
     router.get('/categoriaHorarios', categoriaHorariosController.findAll);
     router.get('/categoriaHorarios/activas', categoriaHorariosController.findActive);
     router.get('/categoriaHorarios/inactivas', categoriaHorariosController.findInactive);
+    router.get('/categoriaHorarios/:categoria', categoriaHorariosController.findCategoria);
     router.get('/categoriaHorarios/:id', categoriaHorariosController.findById);
     router.post('/categoriaHorarios', categoriaHorariosController.create);
     router.put('/categoriaHorarios/:id', categoriaHorariosController.update);
-    router.get('/categoriaHorarios/:categoria', categoriaHorariosController.findCategoria);
     router.delete('/categoriaHorarios/:idCategoriaHorario', categoriaHorariosController.delete);
 
      // * RUTAS DE CATEGORIAS
@@ -153,9 +156,9 @@ module.exports = (app) => {
 
     // * RUTAS DE TIPO TRASLADOS
     router.get('/tipoTraslados', tipoTrasladosController.findAll);
-    router.get('/tipoTraslados/:idTipoTraslado', tipoTrasladosController.findById);
     router.get('/tipoTraslados/activas', tipoTrasladosController.findActive);
     router.get('/tipoTraslados/inactivas', tipoTrasladosController.findInactive);
+    router.get('/tipoTraslados/:idTipoTraslado', tipoTrasladosController.findById);
     router.get('/tipoTraslados/:tipo', tipoTrasladosController.findTipo);
     router.post('/tipoTraslados', tipoTrasladosController.create);
     router.put('/tipoTraslados/:id', tipoTrasladosController.update);
@@ -164,12 +167,13 @@ module.exports = (app) => {
 
     // * RUTAS DE TRASLADOS
     router.get('/traslados', trasladosController.findAll);
-    router.get('/traslados/:idTraslado', trasladosController.findById);
     router.get('/traslados/activas', trasladosController.findActive);
     router.get('/traslados/inactivas', trasladosController.findInactive);
+    router.get('/traslados/:idTraslado', trasladosController.findById);
+    router.get('/traslados/:descripcion', trasladosController.findTraslado);
     router.post('/traslados', trasladosController.create);
     router.put('/traslados/:id', trasladosController.update);
-    router.get('/traslados/:descripcion', trasladosController.findTraslado);
+
 
     // * PRODUCTOS
     router.get('/productos', productosController.find); 
@@ -266,7 +270,7 @@ module.exports = (app) => {
     router.post('/materiales', materialesController.create);
     router.put('/materiales/:id', materialesController.update);
     router.delete('/materiales/:id', materialesController.delete);
-
+    
     // * RUTAS DE ROLES
     router.get('/roles', rolesController.find);
     router.get('/roles/activos', rolesController.findActivateRol); 
@@ -335,6 +339,54 @@ module.exports = (app) => {
     router.post('/publicacionesRifas/create', publicacionRifasController.create);
     router.put('/publicacionesRifas/update/:id', publicacionRifasController.update); 
     router.delete('/publicacionesRifas/delete/:id', publicacionRifasController.delete);
+
+    // * RUTAS DE ROLES
+    router.get('/roles', rolesController.find);
+    router.get('/roles/activos', rolesController.findActivateRol); 
+    router.get('/roles/inactivos', rolesController.findaInactivateRol);
+    router.post('/roles/create', rolesController.createRol);
+    router.put('/roles/update/:id', rolesController.updateRol); 
+    router.delete('/roles/delete/:id', rolesController.deleteRol); 
+
+    // * RUTAS DE TALONARIOS
+    router.get('/talonarios', talonariosController.find);
+    router.get('/talonarios/activos', talonariosController.findActivateTalo); 
+    router.get('/talonarios/inactivos', talonariosController.findaInactivateTalo);
+    router.post('/talonarios/create', talonariosController.createTalo);
+    router.put('/talonarios/update/:id', talonariosController.updateTalo); 
+    router.delete('/talonarios/delete/:id', talonariosController.deleteTalo); 
+
+    // * RUTAS DE VOLUNTARIOS
+    router.get('/voluntarios', voluntariosController.find);
+    router.get('/voluntarios/activos', voluntariosController.findActivateVol); 
+    router.get('/voluntarios/inactivos', voluntariosController.findaInactivateVol);
+    router.post('/voluntarios/create', voluntariosController.createVol);
+    router.put('/voluntarios/update/:id', voluntariosController.updateVol); 
+    router.delete('/voluntarios/delete/:id', voluntariosController.deleteVol); 
+
+    // * RUTAS DE PERMISOS
+    router.get('/permisos', permisosController.findAll); 
+    router.get('/permisos/modulos/:idModulo', permisosController.findByModulo); 
+    router.get('/permisos/:idPermiso', permisosController.findById); 
+    router.post('/permisos/create', permisosController.create); 
+    router.put('/permisos/update/:idPermiso', permisosController.update); 
+    router.delete('/permisos/delete/:idPermiso', permisosController.delete); 
+
+    // * RUTAS DE ASIGNACIÓN DE PERMISOS
+    router.get('/asignacionPermisos', asignacionPermisosController.findAll); 
+    router.get('/asignacionPermisos', asignacionPermisosController.findByRole); 
+    router.post('/asignacionPermisos/create', asignacionPermisosController.create);
+    router.post('/asignacionPermisos/update', asignacionPermisosController.updateBatch);
+    router.put('/asignacionPermisos/update/:idAsignacion', asignacionPermisosController.update); 
+    router.delete('/asignacionPermisos/delete/:idAsignacion', asignacionPermisosController.delete); 
+
+      // * RUTAS DE MODULOS
+    router.get('/modulos', modulosController.findAll);
+    router.get('/modulos/:idModulo', modulosController.findById);
+    router.get('/modulos/nombre/:nombreModulo', modulosController.findByName);
+    router.post('/modulos', modulosController.create);
+    router.put('/modulos/:idModulo', modulosController.update);
+    router.delete('/modulos/:idModulo', modulosController.delete);
 
     app.use('/', router);
 
