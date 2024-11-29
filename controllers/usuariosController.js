@@ -189,10 +189,10 @@ module.exports = {
         const datos = req.body;
 
         // Validar los datos del usuario
-        const error = validateUserData(datos, true);
+        /*const error = validateUserData(datos, true);
         if (error) {
             return res.status(400).json({ error });
-        }
+        }*/
         const datosIngreso = {
             usuario: datos.usuario,
             contrasenia: hashPassword(datos.contrasenia),
