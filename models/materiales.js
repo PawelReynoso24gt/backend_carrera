@@ -1,43 +1,41 @@
-// ! Modelo de sedes
+// ! Modelo de materiales
 'use strict';
 const { Model } = require('sequelize');
 
 module.exports = (sequelize, DataTypes) => {
-  class sedes extends Model {
+  class materiales extends Model {
     static associate(models) {
-      // * Una sede tiene muchas rifas
-      sedes.hasMany(models.rifas, {
-        foreignKey: 'idSede'
-      });
-      // * Una sede tiene muchas fotos
-      sedes.hasMany(models.fotos_sedes, {
-        foreignKey: 'idSede',
-        as: 'fotos'
-      });
-      // * Una sede tiene muchas publicaciones
-      sedes.hasMany(models.publicaciones, {
-        foreignKey: 'idSede',
-        as: 'publicaciones'
+      // Relación con la tabla comisiones
+      materiales.belongsTo(models.comisiones, {
+        foreignKey: 'idComision'
       });
     }
   }
 
-  sedes.init({
-    idSede: {
+  materiales.init({
+    idMaterial: {
       type: DataTypes.INTEGER,
       autoIncrement: true,
       primaryKey: true
     },
-    informacion: {
-      type: DataTypes.TEXT,
+    material: {
+      type: DataTypes.STRING(255),
       allowNull: false
+    },
+    cantidad: {
+      type: DataTypes.INTEGER,
+      allowNull: false
+    },
+    descripcion: {
+      type: DataTypes.STRING(255),
+      allowNull: true
     },
     estado: {
       type: DataTypes.INTEGER,
       allowNull: false
     },
-    nombreSede: {
-      type: DataTypes.STRING(255),
+    idComision: {
+      type: DataTypes.INTEGER,
       allowNull: false
     },
     createdAt: {
@@ -52,10 +50,10 @@ module.exports = (sequelize, DataTypes) => {
     }
   }, {
     sequelize,
-    modelName: 'sedes',
-    tableName: 'sedes',
+    modelName: 'materiales',
+    tableName: 'materiales',
     timestamps: true
   });
 
-  return sedes;
+  return materiales;
 };

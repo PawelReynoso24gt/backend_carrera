@@ -4,7 +4,9 @@ const { Model } = require('sequelize');
 module.exports = (sequelize, DataTypes) => {
   class usuarios extends Model {
     static associate(models) {
-        // * Aqui van las relaciones
+      usuarios.belongsTo(models.roles, {
+        foreignKey: 'idRol'
+      });
     }
   }
 
