@@ -39,6 +39,7 @@ const permisosController = require('../controllers/permisosController');
 const asignacionPermisosController = require('../controllers/asignacionPermisosController');
 const modulosController = require('../controllers/modulosController');
 const inscripcionEventosController = require('../controllers/inscripcionEventosController');
+const detalleStandsController = require('../controllers/detalleStandsController');
 
 module.exports = (app) => {
 
@@ -397,6 +398,15 @@ module.exports = (app) => {
     router.post('/inscripcion_eventos/create', inscripcionEventosController.create); 
     router.put('/inscripcion_eventos/update/:id', inscripcionEventosController.update);
     router.delete('/inscripcion_eventos/delete/:id', inscripcionEventosController.delete); 
+
+    // Rutas para los detalles de stands
+    router.get('/detalle_stands', detalleStandsController.find); 
+    router.get('/detalle_stands/activos', detalleStandsController.findActive);
+    router.get('/detalle_stands/inactivos', detalleStandsController.findInactive); 
+    router.get('detalle_stands/:id', detalleStandsController.findById); 
+    router.post('/detalle_stands/create', detalleStandsController.create);
+    router.put('/detalle_stands/update/:id', detalleStandsController.update);
+    router.delete('/detalle_stands/:id', detalleStandsController.delete); 
 
     app.use('/', router);
 
