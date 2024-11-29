@@ -7,6 +7,12 @@ module.exports = (sequelize, DataTypes) => {
         voluntarios.belongsTo(models.personas, {
             foreignKey: 'idPersona'
         });
+
+      // Relación con inscripcionEventos
+      voluntarios.hasMany(models.inscripcion_eventos, {
+        foreignKey: 'idVoluntario',
+        as: 'inscripciones'
+      });
     }
   }
 

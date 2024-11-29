@@ -38,6 +38,7 @@ const publicacionRifasController = require('../controllers/publicacionRifasContr
 const permisosController = require('../controllers/permisosController');
 const asignacionPermisosController = require('../controllers/asignacionPermisosController');
 const modulosController = require('../controllers/modulosController');
+const inscripcionEventosController = require('../controllers/inscripcionEventosController');
 
 module.exports = (app) => {
 
@@ -387,6 +388,15 @@ module.exports = (app) => {
     router.post('/modulos', modulosController.create);
     router.put('/modulos/:idModulo', modulosController.update);
     router.delete('/modulos/:idModulo', modulosController.delete);
+
+    // * RUTAS DE INSCRIPCION A EVENTOS
+    router.get('/inscripcion_eventos', inscripcionEventosController.find);
+    router.get('/inscripcion_eventos/activos', inscripcionEventosController.findActive);
+    router.get('/inscripcion_eventos/inactivos', inscripcionEventosController.findInactive);
+    router.get('/inscripcion_eventos/:id', inscripcionEventosController.findById);
+    router.post('/inscripcion_eventos/create', inscripcionEventosController.create); 
+    router.put('/inscripcion_eventos/update/:id', inscripcionEventosController.update);
+    router.delete('/inscripcion_eventos/delete/:id', inscripcionEventosController.delete); 
 
     app.use('/', router);
 
