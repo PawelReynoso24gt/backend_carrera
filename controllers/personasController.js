@@ -1,4 +1,5 @@
 'use strict';
+const { where } = require("sequelize");
 const db = require("../models");
 const PERSONAS = db.personas;
 const MUNICIPIOS = db.municipios;
@@ -13,6 +14,9 @@ module.exports = {
                 include: {
                     model: MUNICIPIOS,
                     attributes: ["idMunicipio", "municipio"],
+                },
+                where: {
+                    estado: 1
                 }
             });
             return res.status(200).json(personas);
