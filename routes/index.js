@@ -42,6 +42,7 @@ const solicitudTalonariosController = require('../controllers/solicitudTalonario
 const inscripcionEventosController = require('../controllers/inscripcionEventosController');
 const detalleStandsController = require('../controllers/detalleStandsController');
 const asignacionStandsController = require('../controllers/asignacionStandsController');
+const detalle_trasladosController = require('../controllers/detalle_trasladosController');
 
 module.exports = (app) => {
 
@@ -427,6 +428,14 @@ module.exports = (app) => {
     router.post('/asignacion_stands/create', asignacionStandsController.create);
     router.put('/asignacion_stands/update/:id', asignacionStandsController.update);
     router.delete('/asignacion_stands/delete/:id', asignacionStandsController.delete); 
+
+
+    // * RUTAS DE DETALLE TRASLADOS
+    router.get('/detalle_traslados', detalle_trasladosController.find);
+    router.get('/detalle_traslados/:id', detalle_trasladosController.findById);
+    router.post('/detalle_traslados/create', detalle_trasladosController.createDetalleTraslado);
+    router.put('/detalle_traslados/update/:id', detalle_trasladosController.updateDetalleTraslado);
+    router.delete('/detalle_traslados/delete/:id', detalle_trasladosController.deleteDetalleTraslado);
 
     app.use('/', router);
 
