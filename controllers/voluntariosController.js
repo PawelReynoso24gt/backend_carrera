@@ -1,11 +1,18 @@
 'use strict';
+const { v4: uuidv4 } = require('uuid'); // Importar para generar identificadores únicos
 const db = require("../models");
 const voluntarios = require("../models/voluntarios");
 const VOLUNTARIOS = db.voluntarios;
 
+// Método para generar un código QR numérico
+function generateQRCode() {
+    // Generar un número único de 9 dígitos
+    return Math.floor(100000000 + Math.random() * 900000000).toString();
+}
+
 // Métodos CRUD
 module.exports = {
-    
+    // Método para obtener todos los voluntarios
     async find(req, res) {
         try {
             const voluntarios = await VOLUNTARIOS.findAll({
@@ -57,27 +64,28 @@ module.exports = {
 
     createVol(req, res) {
         const datos = req.body;
-    
-        // Validación del campo talonarios
+
+        // Validación de campos requeridos
         if (!datos.fechaRegistro || !datos.fechaSalida || !datos.idPersona) {
             return res.status(400).json({ message: 'Faltan campos requeridos.' });
         }
-    
-        const datos_ingreso = { 
+
+        const datos_ingreso = {
+            codigoQR: generateQRCode(), // Generar el código QR
             fechaRegistro: datos.fechaRegistro,
             fechaSalida: datos.fechaSalida,
             estado: datos.estado !== undefined ? datos.estado : 1,
-            idPersona: datos.idPersona
+            idPersona: datos.idPersona,
         };
-    
+
         return VOLUNTARIOS.create(datos_ingreso)
-            .then(voluntarios => {
-                return res.status(201).json(voluntarios);
+            .then((voluntario) => {
+                return res.status(201).json(voluntario);
             })
-            .catch(error => {
-                console.error('Error al insertar el voluntario:', error);
-                return res.status(500).json({ error: 'Error al insertar el voluntario' });
-            });
+            .catch((error) => {
+            console.error('Error al insertar el voluntario:', error);
+            return res.status(500).json({ error: 'Error al insertar el voluntario.' });
+        });
     },
     
     updateVol(req, res) {
@@ -89,7 +97,10 @@ module.exports = {
         }
     
         const camposActualizados = {};
-    
+        
+        if(datos.codigoQR !== undefined) {
+            camposActualizados.codigoQR = datos.codigoQR;
+        }
         if (datos.fechaRegistro !== undefined) {
             camposActualizados.fechaRegistro = datos.fechaRegistro;
         }

@@ -27,6 +27,10 @@ module.exports = (sequelize, DataTypes) => {
       autoIncrement: true,
       primaryKey: true
     },
+    codigoQR: {
+      type: DataTypes.STRING,
+      allowNull: false
+    },
     fechaRegistro: {
       type: DataTypes.DATE,
       allowNull: false
