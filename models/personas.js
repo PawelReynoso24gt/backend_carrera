@@ -14,11 +14,8 @@ module.exports = (sequelize, DataTypes) => {
             personas.belongsTo(models.usuarios,{
                 foreignKey: 'idPersona'
             });
-            });
-            // relacion con empleados
-            this.hasMany(models.empleados, {
-                foreignKey: 'idPersona',
-                as: 'empleados'
+            personas.hasMany(models.empleados, {
+                foreignKey: 'idPersona'
             });            
         }
     }
