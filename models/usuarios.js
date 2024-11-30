@@ -7,6 +7,9 @@ module.exports = (sequelize, DataTypes) => {
       usuarios.belongsTo(models.roles, {
         foreignKey: 'idRol'
       });
+      usuarios.belongsTo(models.personas, {
+        foreignKey: 'idPersona'
+      })
     }
   }
 
@@ -31,6 +34,11 @@ module.exports = (sequelize, DataTypes) => {
     tokenExpiresAt: {
         type: DataTypes.DATE,
         allowNull: true
+    },
+    changedPassword: {
+        type: DataTypes.INTEGER,
+        allowNull: false,
+        defaultValue: 0
     },
     estado: {
         type: DataTypes.INTEGER,

@@ -10,7 +10,10 @@ module.exports = (sequelize, DataTypes) => {
             });
             personas.hasMany(models.voluntarios, {
                 foreignKey: 'idPersona'
-              });
+            });
+            personas.belongsTo(models.usuarios,{
+                foreignKey: 'idPersona'
+            });
         }
     }
 

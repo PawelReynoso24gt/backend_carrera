@@ -57,6 +57,7 @@ module.exports = (app) => {
     router.get('/usuarios/activos', usuariosController.find);
     router.get('/usuarios', usuariosController.findAllUsers);
     router.get('/usuariosById/:id', usuariosController.findById);
+    router.get('/usuarios/verify', usuariosController.verifyChangedPassword);
     router.post('/usuarios', usuariosController.create);
     router.put('/usuarios/:id', usuariosController.update);
     router.put('/usuarios/:id/contrasenia', usuariosController.updatePassword);

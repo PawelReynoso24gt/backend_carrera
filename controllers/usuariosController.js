@@ -6,6 +6,7 @@ const jwt = require('jsonwebtoken');
 const db = require('../models');
 const USERS = db.usuarios;
 const ROLES = db.roles;
+const PERSONAS = db.personas;
 
 // Función para hashear la contraseña usando SHA-256
 function hashPassword(password) {
@@ -170,7 +171,8 @@ module.exports = {
                     {
                       model: ROLES,
                       attributes: ['roles'], 
-                    }],
+                    },
+                {model: PERSONAS, attributes: ['idPersona', 'nombre', 'fechaNacimiento', 'telefono', 'domicilio', 'correo', 'idMunicipio', 'createdAt']}],
                 where: { estado: 1 }
             });
     
@@ -187,22 +189,25 @@ module.exports = {
     },
 
     // * Get todos los usuarios
-        async findAllUsers(req, res) {
-            return USERS.findAll({
+    async findAllUsers(req, res) {
+        try{
+            const users = await USERS.findAll({
                 include: [{
                     model: ROLES,
                     attributes: ['roles'] 
                 }]
-            })
-            .then((users) => {
-                res.status(200).send(users);
-            })
-            .catch((error) => {
-                res.status(500).send({
-                    message: error.message || 'Error al listar los usuarios.'
-                });
             });
-        },
+
+            const dataUsers = users.map(user => {
+                const { contrasenia, token, tokenExpiresAt, ...userWithoutPasswordAndTokens } = user.dataValues;
+                return userWithoutPasswordAndTokens;
+            });
+            return res.status(200).send(dataUsers);
+        } catch {
+            console.error('Error al traer los datos:', error);
+            return res.status(500).send({ message: 'Ocurrio un error al traer los datos'})
+        }
+    },
 
     // * Obtener usuario por ID
     async findById(req, res) {
@@ -227,13 +232,14 @@ module.exports = {
         const datos = req.body;
 
         // Validar los datos del usuario
-        /*const error = validateUserData(datos, true);
+        const error = validateUserData(datos, true);
         if (error) {
             return res.status(400).json({ error });
-        }*/
+        }
         const datosIngreso = {
             usuario: datos.usuario,
             contrasenia: hashPassword(datos.contrasenia),
+            changedPassword: 0,
             estado: 1,
             idRol: datos.idRol,
             idSede: datos.idSede,
@@ -262,6 +268,7 @@ module.exports = {
         const camposActualizados = {};
 
         if (datos.usuario !== undefined) camposActualizados.usuario = datos.usuario;
+        if (datos.changedPassword !== undefined) camposActualizados.usuario = datos.usuario;
         if (datos.estado !== undefined) camposActualizados.estado = datos.estado;
         if (datos.idRol !== undefined) camposActualizados.idRol = datos.idRol;
         if (datos.idSede !== undefined) camposActualizados.idSede = datos.idSede;
@@ -323,10 +330,10 @@ module.exports = {
         const id = req.params.id; // ID del usuario obtenido de los parámetros de la solicitud
 
         // Validar la nueva contraseña
-        /*const error = validatePasswordChange(newPassword); // Reutilizar la función para validar contraseñas
+        const error = validatePasswordChange(newPassword); // Reutilizar la función para validar contraseñas
         if (error) {
             return res.status(400).json({ error });
-        }*/
+        }
 
         try {
             // Buscar el usuario por ID
@@ -367,5 +374,25 @@ module.exports = {
         }
     },
 
-    hashPassword
+    hashPassword,
+
+    async verifyChangedPassword(req, res){
+        try {
+            const users = await USERS.findAll({});
+    
+            const dataUsers = users.map(user => {
+                const { contrasenia, token, tokenExpiresAt, ...userWithoutPasswordAndTokens } = user.dataValues;
+                return userWithoutPasswordAndTokens;
+            });
+
+            if(changedPassword === 0){
+                return { ...userWithoutPasswordAndTokens, message: 'Necesitas cambiar tu contraseña.', changedPassword };
+            }
+    
+            return res.status(200).send(dataUsers);
+        } catch (error) {
+            console.error('Error al recuperar los datos:', error);
+            return res.status(500).send({ message: 'Ocurrió un error al recuperar los datos.' });
+        }
+    }
 };
