@@ -9,6 +9,12 @@ module.exports = (sequelize, DataTypes) => {
       materiales.belongsTo(models.comisiones, {
         foreignKey: 'idComision'
       });
+
+      // relacion de detalle inscripcion materiales
+      this.hasMany(models.detalle_inscripcion_materiales, {
+        foreignKey: 'idMaterial',
+        as: 'detallesMateriales' // Alias único
+      });  
     }
   }
 

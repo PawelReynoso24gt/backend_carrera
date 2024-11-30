@@ -42,6 +42,11 @@ const solicitudTalonariosController = require('../controllers/solicitudTalonario
 const inscripcionEventosController = require('../controllers/inscripcionEventosController');
 const detalleStandsController = require('../controllers/detalleStandsController');
 const asignacionStandsController = require('../controllers/asignacionStandsController');
+const detalleInscripcionActividadesController = require('../controllers/detalleInscripcionActividadesController');
+const detalleInscripcionMaterialesController = require('../controllers/detalleInscripcionMaterialesController');
+const empleadosController = require('../controllers/empleadosController');
+const asistenciaEventosController = require('../controllers/asistenciaEventosController');
+const recaudacionRifasController = require('../controllers/recaudacionRifasController');
 
 module.exports = (app) => {
 
@@ -429,6 +434,53 @@ module.exports = (app) => {
     router.post('/asignacion_stands/create', asignacionStandsController.create);
     router.put('/asignacion_stands/update/:id', asignacionStandsController.update);
     router.delete('/asignacion_stands/delete/:id', asignacionStandsController.delete); 
+
+    // * RuUTAS DE DETALLE DE INSCRIPCION DE ACTIVIDADES
+    router.get('/detalle_inscripcion_actividades', detalleInscripcionActividadesController.find);
+    router.get('/detalle_inscripcion_actividades/activos', detalleInscripcionActividadesController.findActive);
+    router.get('/detalle_inscripcion_actividades/inactivos', detalleInscripcionActividadesController.findInactive);
+    router.get('/detalle_inscripcion_actividades/:id', detalleInscripcionActividadesController.findById);
+    router.post('/detalle_inscripcion_actividades/create', detalleInscripcionActividadesController.create);
+    router.put('/detalle_inscripcion_actividades/update/:id', detalleInscripcionActividadesController.update);
+    router.delete('/detalle_inscripcion_actividades/delete/:id', detalleInscripcionActividadesController.delete);
+
+    // * RUTAS DE DETALLE DE INSCRIPCION DE MATERIALES
+    router.get('/detalle_inscripcion_materiales', detalleInscripcionMaterialesController.find);
+    router.get('/detalle_inscripcion_materiales/activos', detalleInscripcionMaterialesController.findActive);
+    router.get('/detalle_inscripcion_materiales/inactivos', detalleInscripcionMaterialesController.findInactive);
+    router.get('/detalle_inscripcion_materiales/:id', detalleInscripcionMaterialesController.findById);
+    router.post('/detalle_inscripcion_materiales/create', detalleInscripcionMaterialesController.create);
+    router.put('/detalle_inscripcion_materiales/update/:id', detalleInscripcionMaterialesController.update);
+    router.delete('/detalle_inscripcion_materiales/delete/:id', detalleInscripcionMaterialesController.delete);
+
+    // * RUTAS DE EMPLEADO
+    router.get('/empleados', empleadosController.find);
+    router.get('/empleados/activos', empleadosController.findActive);
+    router.get('/empleados/inactivos', empleadosController.findInactive);
+    router.get('/empleados/:id', empleadosController.findById);
+    router.post('/empleados/create', empleadosController.create);
+    router.put('/empleados/update/:id', empleadosController.update);
+    router.delete('/empleados/delete/:id', empleadosController.delete);
+
+    // * RUTAS DE ASISTENCIA A EVENTOS
+    router.get('/asistencia_eventos', asistenciaEventosController.find); 
+    router.get('/asistencia_eventos/activos', asistenciaEventosController.findActive); 
+    router.get('/asistencia_eventos/inactivos', asistenciaEventosController.findInactive); 
+    router.get('/asistencia_eventos/:id', asistenciaEventosController.findById); 
+    router.post('/asistencia_eventos/create', asistenciaEventosController.create); 
+    router.put('/asistencia_eventos/update/:id', asistenciaEventosController.update);
+    router.delete('/asistencia_eventos/delete/:id', asistenciaEventosController.delete);
+
+    //* RUTAS DE RECAUDACION DE RIFAS
+
+    router.get('/recaudaciones', recaudacionRifasController.findAll);
+    router.get('/recaudaciones/activas', recaudacionRifasController.findActive);
+    router.get('/recaudaciones/inactivas', recaudacionRifasController.findInactive);
+    router.get('/recaudaciones/fecha/:fecha', recaudacionRifasController.getByDate);
+    router.post('/recaudaciones', recaudacionRifasController.create);
+    router.put('/recaudaciones/:idRecaudacionRifa', recaudacionRifasController.update);
+    router.delete('/recaudaciones/:idRecaudacionRifa', recaudacionRifasController.delete);
+
 
     app.use('/', router);
 
