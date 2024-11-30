@@ -40,6 +40,7 @@ const asignacionPermisosController = require('../controllers/asignacionPermisosC
 const modulosController = require('../controllers/modulosController');
 const inscripcionEventosController = require('../controllers/inscripcionEventosController');
 const detalleStandsController = require('../controllers/detalleStandsController');
+const asignacionStandsController = require('../controllers/asignacionStandsController');
 
 module.exports = (app) => {
 
@@ -399,7 +400,7 @@ module.exports = (app) => {
     router.put('/inscripcion_eventos/update/:id', inscripcionEventosController.update);
     router.delete('/inscripcion_eventos/delete/:id', inscripcionEventosController.delete); 
 
-    // Rutas para los detalles de stands
+    // * RUTAS DE DETALLES DE STANDS
     router.get('/detalle_stands', detalleStandsController.find); 
     router.get('/detalle_stands/activos', detalleStandsController.findActive);
     router.get('/detalle_stands/inactivos', detalleStandsController.findInactive); 
@@ -407,6 +408,15 @@ module.exports = (app) => {
     router.post('/detalle_stands/create', detalleStandsController.create);
     router.put('/detalle_stands/update/:id', detalleStandsController.update);
     router.delete('/detalle_stands/:id', detalleStandsController.delete); 
+
+    // Rutas para asignaciones de stands
+    router.get('/asignacion_stands', asignacionStandsController.find); // Obtener todas las asignaciones activas (por defecto)
+    router.get('/asignacion_stands/activos', asignacionStandsController.findActive); // Obtener asignaciones activas
+    router.get('/asignacion_stands/inactivos', asignacionStandsController.findInactive); // Obtener asignaciones inactivas
+    router.get('/asignacion_stands/:id', asignacionStandsController.findById); // Obtener una asignación por ID
+    router.post('/asignacion_stands/create', asignacionStandsController.create); // Crear una nueva asignación
+    router.put('/asignacion_stands/update/:id', asignacionStandsController.update); // Actualizar una asignación existente
+    router.delete('/asignacion_stands/delete/:id', asignacionStandsController.delete); // Eliminar una asignación
 
     app.use('/', router);
 
