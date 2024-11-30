@@ -45,6 +45,7 @@ const asignacionStandsController = require('../controllers/asignacionStandsContr
 const detalleInscripcionActividadesController = require('../controllers/detalleInscripcionActividadesController');
 const detalleInscripcionMaterialesController = require('../controllers/detalleInscripcionMaterialesController');
 const empleadosController = require('../controllers/empleadosController');
+const asistenciaEventosController = require('../controllers/asistenciaEventosController');
 
 module.exports = (app) => {
 
@@ -458,6 +459,14 @@ module.exports = (app) => {
     router.put('/empleados/update/:id', empleadosController.update);
     router.delete('/empleados/delete/:id', empleadosController.delete);
 
+    // * RUTAS DE ASISTENCIA A EVENTOS
+    router.get('/asistencia_eventos', asistenciaEventosController.find); // Obtener todas las asistencias activas (por defecto)
+    router.get('/asistencia_eventos/activos', asistenciaEventosController.findActive); // Obtener asistencias activas
+    router.get('/asistencia_eventos/inactivos', asistenciaEventosController.findInactive); // Obtener asistencias inactivas
+    router.get('/asistencia_eventos/:id', asistenciaEventosController.findById); // Obtener una asistencia por ID
+    router.post('/asistencia_eventos/create', asistenciaEventosController.create); // Crear una nueva asistencia
+    router.put('/asistencia_eventos/update/:id', asistenciaEventosController.update); // Actualizar una asistencia existente
+    router.delete('/asistencia_eventos/delete/:id', asistenciaEventosController.delete); // Eliminar una asistencia
 
     app.use('/', router);
 
