@@ -2,29 +2,31 @@
 const { Model } = require('sequelize');
 
 module.exports = (sequelize, DataTypes) => {
-  class tipo_pagos extends Model {
+  class aspirantes extends Model {
     static associate(models) {
 
-      tipo_pagos.hasMany(models.detalle_pago_recaudacion_rifas, {
-        foreignKey: 'idTipoPago',
+      aspirantes.belongsTo(models.personas, {
+        foreignKey: 'idPersona',
       });
-
-
-      
     }
   }
 
-  tipo_pagos.init({
-    idTipoPago: {
+  aspirantes.init({
+    idAspirante: {
       type: DataTypes.INTEGER,
       autoIncrement: true,
       primaryKey: true
     },
-    tipo: {
-      type: DataTypes.STRING(255),
+    estado: {
+      type: DataTypes.INTEGER,
+      allowNull: false,
+      defaultValue: 1
+    },
+    fechaRegistro: {
+      type: DataTypes.DATEONLY,
       allowNull: false
     },
-    estado: {
+    idPersona: {
       type: DataTypes.INTEGER,
       allowNull: false
     },
@@ -36,14 +38,14 @@ module.exports = (sequelize, DataTypes) => {
     updatedAt: {
       type: DataTypes.DATE,
       allowNull: false,
-      defaultValue: DataTypes.NOW 
+      defaultValue: DataTypes.NOW
     }
   }, {
     sequelize,
-    modelName: 'tipo_pagos',
-    tableName: 'tipo_pagos',
+    modelName: 'aspirantes',
+    tableName: 'aspirantes',
     timestamps: true
   });
 
-  return tipo_pagos;
+  return aspirantes;
 };

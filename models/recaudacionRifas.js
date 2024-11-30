@@ -2,16 +2,21 @@
 const { Model } = require('sequelize');
 
 module.exports = (sequelize, DataTypes) => {
-  class recaudacionRifas extends Model {
+  class recaudacion_rifas extends Model {
     static associate(models) {
       // Relación con solicitudTalonarios
-      recaudacionRifas.belongsTo(models.solicitudTalonarios, {
+      recaudacion_rifas.belongsTo(models.solicitudTalonarios, {
         foreignKey: 'idSolicitudTalonario',
       });
+
+      recaudacion_rifas.hasMany(models.detalle_pago_recaudacion_rifas, {
+        foreignKey: 'idRecaudacionRifa',
+      });
+      
     }
   }
 
-  recaudacionRifas.init({
+  recaudacion_rifas.init({
     idRecaudacionRifa: {
       type: DataTypes.INTEGER,
       autoIncrement: true,
@@ -46,10 +51,10 @@ module.exports = (sequelize, DataTypes) => {
     }
   }, {
     sequelize,
-    modelName: 'recaudacionRifas',
+    modelName: 'recaudacion_rifas',
     tableName: 'recaudacion_rifas',
     timestamps: true
   });
 
-  return recaudacionRifas;
+  return recaudacion_rifas;
 };

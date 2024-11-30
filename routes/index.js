@@ -47,6 +47,9 @@ const detalleInscripcionMaterialesController = require('../controllers/detalleIn
 const empleadosController = require('../controllers/empleadosController');
 const asistenciaEventosController = require('../controllers/asistenciaEventosController');
 const recaudacionRifasController = require('../controllers/recaudacionRifasController');
+const detallePagoRifasController = require('../controllers/detallePagoRifasController');
+const aspirantesController = require('../controllers/aspirantesController');
+
 
 module.exports = (app) => {
 
@@ -480,6 +483,23 @@ module.exports = (app) => {
     router.put('/recaudaciones/:idRecaudacionRifa', recaudacionRifasController.update);
     router.delete('/recaudaciones/:idRecaudacionRifa', recaudacionRifasController.delete);
 
+    //* RUTAS DETALLE PAGO RIFAS
+    router.get('/detallespago', detallePagoRifasController.findAll);
+    router.get('/detallespago/activos', detallePagoRifasController.findActive);
+    router.get('/detallespago/inactivos', detallePagoRifasController.findInactive);
+    router.post('/detallespago', detallePagoRifasController.create);
+    router.put('/detallespago/:idDetallePagoRecaudacionRifa', detallePagoRifasController.update);
+    router.delete('/detallespago/:idDetallePagoRecaudacionRifa', detallePagoRifasController.delete);
+
+    //* RUTAS ASPIRANTES 
+
+    router.get('/aspirantes', aspirantesController.findAll);
+    router.get('/aspirantes/activos', aspirantesController.findActive);
+    router.get('/aspirantes/inactivos', aspirantesController.findInactive);
+    router.post('/aspirantes', aspirantesController.create);
+    router.put('/aspirantes/:idAspirante', aspirantesController.update);
+    router.get('/aspirantes/:idAspirante', aspirantesController.findById);
+    router.delete('/aspirantes/:idAspirante', aspirantesController.delete);
 
     app.use('/', router);
 
