@@ -46,6 +46,7 @@ const detalleInscripcionActividadesController = require('../controllers/detalleI
 const detalleInscripcionMaterialesController = require('../controllers/detalleInscripcionMaterialesController');
 const empleadosController = require('../controllers/empleadosController');
 const asistenciaEventosController = require('../controllers/asistenciaEventosController');
+const recaudacionRifasController = require('../controllers/recaudacionRifasController');
 
 module.exports = (app) => {
 
@@ -460,13 +461,24 @@ module.exports = (app) => {
     router.delete('/empleados/delete/:id', empleadosController.delete);
 
     // * RUTAS DE ASISTENCIA A EVENTOS
-    router.get('/asistencia_eventos', asistenciaEventosController.find); // Obtener todas las asistencias activas (por defecto)
-    router.get('/asistencia_eventos/activos', asistenciaEventosController.findActive); // Obtener asistencias activas
-    router.get('/asistencia_eventos/inactivos', asistenciaEventosController.findInactive); // Obtener asistencias inactivas
-    router.get('/asistencia_eventos/:id', asistenciaEventosController.findById); // Obtener una asistencia por ID
-    router.post('/asistencia_eventos/create', asistenciaEventosController.create); // Crear una nueva asistencia
-    router.put('/asistencia_eventos/update/:id', asistenciaEventosController.update); // Actualizar una asistencia existente
-    router.delete('/asistencia_eventos/delete/:id', asistenciaEventosController.delete); // Eliminar una asistencia
+    router.get('/asistencia_eventos', asistenciaEventosController.find); 
+    router.get('/asistencia_eventos/activos', asistenciaEventosController.findActive); 
+    router.get('/asistencia_eventos/inactivos', asistenciaEventosController.findInactive); 
+    router.get('/asistencia_eventos/:id', asistenciaEventosController.findById); 
+    router.post('/asistencia_eventos/create', asistenciaEventosController.create); 
+    router.put('/asistencia_eventos/update/:id', asistenciaEventosController.update);
+    router.delete('/asistencia_eventos/delete/:id', asistenciaEventosController.delete);
+
+    //* RUTAS DE RECAUDACION DE RIFAS
+
+    router.get('/recaudaciones', recaudacionRifasController.findAll);
+    router.get('/recaudaciones/activas', recaudacionRifasController.findActive);
+    router.get('/recaudaciones/inactivas', recaudacionRifasController.findInactive);
+    router.get('/recaudaciones/fecha/:fecha', recaudacionRifasController.getByDate);
+    router.post('/recaudaciones', recaudacionRifasController.create);
+    router.put('/recaudaciones/:idRecaudacionRifa', recaudacionRifasController.update);
+    router.delete('/recaudaciones/:idRecaudacionRifa', recaudacionRifasController.delete);
+
 
     app.use('/', router);
 
