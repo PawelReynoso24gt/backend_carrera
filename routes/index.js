@@ -44,6 +44,7 @@ const detalleStandsController = require('../controllers/detalleStandsController'
 const asignacionStandsController = require('../controllers/asignacionStandsController');
 const detalleInscripcionActividadesController = require('../controllers/detalleInscripcionActividadesController');
 const detalleInscripcionMaterialesController = require('../controllers/detalleInscripcionMaterialesController');
+const empleadosController = require('../controllers/empleadosController');
 
 module.exports = (app) => {
 
@@ -447,6 +448,16 @@ module.exports = (app) => {
     router.post('/detalle_inscripcion_materiales/create', detalleInscripcionMaterialesController.create);
     router.put('/detalle_inscripcion_materiales/update/:id', detalleInscripcionMaterialesController.update);
     router.delete('/detalle_inscripcion_materiales/delete/:id', detalleInscripcionMaterialesController.delete);
+
+    // * RUTAS DE EMPLEADO
+    router.get('/empleados', empleadosController.find);
+    router.get('/empleados/activos', empleadosController.findActive);
+    router.get('/empleados/inactivos', empleadosController.findInactive);
+    router.get('/empleados/:id', empleadosController.findById);
+    router.post('/empleados/create', empleadosController.create);
+    router.put('/empleados/update/:id', empleadosController.update);
+    router.delete('/empleados/delete/:id', empleadosController.delete);
+
 
     app.use('/', router);
 
