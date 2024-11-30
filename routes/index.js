@@ -38,6 +38,15 @@ const voluntariosController = require('../controllers/voluntariosController');
 const permisosController = require('../controllers/permisosController');
 const asignacionPermisosController = require('../controllers/asignacionPermisosController');
 const modulosController = require('../controllers/modulosController');
+const solicitudTalonariosController = require('../controllers/solicitudTalonariosController');
+const inscripcionEventosController = require('../controllers/inscripcionEventosController');
+const detalleStandsController = require('../controllers/detalleStandsController');
+const asignacionStandsController = require('../controllers/asignacionStandsController');
+const detalleInscripcionActividadesController = require('../controllers/detalleInscripcionActividadesController');
+const detalleInscripcionMaterialesController = require('../controllers/detalleInscripcionMaterialesController');
+const empleadosController = require('../controllers/empleadosController');
+const asistenciaEventosController = require('../controllers/asistenciaEventosController');
+const recaudacionRifasController = require('../controllers/recaudacionRifasController');
 
 module.exports = (app) => {
 
@@ -47,6 +56,7 @@ module.exports = (app) => {
 
     // ! Todas las rutas a continuación requieren autenticación
     //router.use(authenticateToken); // Middleware para proteger las rutas con autenticación
+
 
     // * USUARIOS
     router.get('/usuarios/activos', usuariosController.find);
@@ -248,9 +258,10 @@ module.exports = (app) => {
     router.get('/categorias/:idCategoria', categoriasController.findById);
     router.get('/categorias/activas', categoriasController.findActive);
     router.get('/categorias/inactivas', categoriasController.findInactive);
+    router.get('/categorias/:nombreCategoria', categoriasController.findCategoria);
     router.post('/categorias', categoriasController.create);
     router.put('/categorias/:idCategoria', categoriasController.update);
-    router.get('/categorias/:nombreCategoria', categoriasController.findCategoria);
+
     
     // * RUTAS DE COMISIONES
     router.get('/comisiones', comisionesController.find);
@@ -268,6 +279,7 @@ module.exports = (app) => {
     router.post('/materiales', materialesController.create);
     router.put('/materiales/:id', materialesController.update);
     router.delete('/materiales/:id', materialesController.delete);
+    
     // * RUTAS DE ROLES
     router.get('/roles', rolesController.find);
     router.get('/roles/activos', rolesController.findActivateRol); 
@@ -338,6 +350,14 @@ module.exports = (app) => {
     router.delete('/publicacionesRifas/delete/:id', publicacionRifasController.delete);
 
 
+    // * RUTAS DE ROLES
+    router.get('/roles', rolesController.find);
+    router.get('/roles/activos', rolesController.findActivateRol); 
+    router.get('/roles/inactivos', rolesController.findaInactivateRol);
+    router.post('/roles/create', rolesController.createRol);
+    router.put('/roles/update/:id', rolesController.updateRol); 
+    router.delete('/roles/delete/:id', rolesController.deleteRol); 
+
     // * RUTAS DE TALONARIOS
     router.get('/talonarios', talonariosController.find);
     router.get('/talonarios/activos', talonariosController.findActivateTalo); 
@@ -377,6 +397,89 @@ module.exports = (app) => {
     router.post('/modulos', modulosController.create);
     router.put('/modulos/:idModulo', modulosController.update);
     router.delete('/modulos/:idModulo', modulosController.delete);
+
+      // * RUTAS DE MODULOS
+      router.get('/solicitudes', solicitudTalonariosController.getAll);
+      router.get('/solicitudes/:id', solicitudTalonariosController.getById);
+      router.get('/solicitudes/fecha/:fecha', solicitudTalonariosController.getByDate);
+      router.get('/solicitudes/voluntario/:idVoluntario', solicitudTalonariosController.getByVoluntario);
+      router.post('/solicitudes', solicitudTalonariosController.create);
+      router.put('/solicitudes/:id', solicitudTalonariosController.update);
+      router.delete('/solicitudes/:id', solicitudTalonariosController.delete);
+
+    // * RUTAS DE INSCRIPCION A EVENTOS
+    router.get('/inscripcion_eventos', inscripcionEventosController.find);
+    router.get('/inscripcion_eventos/activos', inscripcionEventosController.findActive);
+    router.get('/inscripcion_eventos/inactivos', inscripcionEventosController.findInactive);
+    router.get('/inscripcion_eventos/:id', inscripcionEventosController.findById);
+    router.post('/inscripcion_eventos/create', inscripcionEventosController.create); 
+    router.put('/inscripcion_eventos/update/:id', inscripcionEventosController.update);
+    router.delete('/inscripcion_eventos/delete/:id', inscripcionEventosController.delete); 
+
+    // * RUTAS DE DETALLES DE STANDS
+    router.get('/detalle_stands', detalleStandsController.find); 
+    router.get('/detalle_stands/activos', detalleStandsController.findActive);
+    router.get('/detalle_stands/inactivos', detalleStandsController.findInactive); 
+    router.get('detalle_stands/:id', detalleStandsController.findById); 
+    router.post('/detalle_stands/create', detalleStandsController.create);
+    router.put('/detalle_stands/update/:id', detalleStandsController.update);
+    router.delete('/detalle_stands/:id', detalleStandsController.delete); 
+
+    // * RUTAS DE ASIGANCION DE STANDS
+    router.get('/asignacion_stands', asignacionStandsController.find);
+    router.get('/asignacion_stands/activos', asignacionStandsController.findActive);
+    router.get('/asignacion_stands/inactivos', asignacionStandsController.findInactive);
+    router.get('/asignacion_stands/:id', asignacionStandsController.findById);
+    router.post('/asignacion_stands/create', asignacionStandsController.create);
+    router.put('/asignacion_stands/update/:id', asignacionStandsController.update);
+    router.delete('/asignacion_stands/delete/:id', asignacionStandsController.delete); 
+
+    // * RuUTAS DE DETALLE DE INSCRIPCION DE ACTIVIDADES
+    router.get('/detalle_inscripcion_actividades', detalleInscripcionActividadesController.find);
+    router.get('/detalle_inscripcion_actividades/activos', detalleInscripcionActividadesController.findActive);
+    router.get('/detalle_inscripcion_actividades/inactivos', detalleInscripcionActividadesController.findInactive);
+    router.get('/detalle_inscripcion_actividades/:id', detalleInscripcionActividadesController.findById);
+    router.post('/detalle_inscripcion_actividades/create', detalleInscripcionActividadesController.create);
+    router.put('/detalle_inscripcion_actividades/update/:id', detalleInscripcionActividadesController.update);
+    router.delete('/detalle_inscripcion_actividades/delete/:id', detalleInscripcionActividadesController.delete);
+
+    // * RUTAS DE DETALLE DE INSCRIPCION DE MATERIALES
+    router.get('/detalle_inscripcion_materiales', detalleInscripcionMaterialesController.find);
+    router.get('/detalle_inscripcion_materiales/activos', detalleInscripcionMaterialesController.findActive);
+    router.get('/detalle_inscripcion_materiales/inactivos', detalleInscripcionMaterialesController.findInactive);
+    router.get('/detalle_inscripcion_materiales/:id', detalleInscripcionMaterialesController.findById);
+    router.post('/detalle_inscripcion_materiales/create', detalleInscripcionMaterialesController.create);
+    router.put('/detalle_inscripcion_materiales/update/:id', detalleInscripcionMaterialesController.update);
+    router.delete('/detalle_inscripcion_materiales/delete/:id', detalleInscripcionMaterialesController.delete);
+
+    // * RUTAS DE EMPLEADO
+    router.get('/empleados', empleadosController.find);
+    router.get('/empleados/activos', empleadosController.findActive);
+    router.get('/empleados/inactivos', empleadosController.findInactive);
+    router.get('/empleados/:id', empleadosController.findById);
+    router.post('/empleados/create', empleadosController.create);
+    router.put('/empleados/update/:id', empleadosController.update);
+    router.delete('/empleados/delete/:id', empleadosController.delete);
+
+    // * RUTAS DE ASISTENCIA A EVENTOS
+    router.get('/asistencia_eventos', asistenciaEventosController.find); 
+    router.get('/asistencia_eventos/activos', asistenciaEventosController.findActive); 
+    router.get('/asistencia_eventos/inactivos', asistenciaEventosController.findInactive); 
+    router.get('/asistencia_eventos/:id', asistenciaEventosController.findById); 
+    router.post('/asistencia_eventos/create', asistenciaEventosController.create); 
+    router.put('/asistencia_eventos/update/:id', asistenciaEventosController.update);
+    router.delete('/asistencia_eventos/delete/:id', asistenciaEventosController.delete);
+
+    //* RUTAS DE RECAUDACION DE RIFAS
+
+    router.get('/recaudaciones', recaudacionRifasController.findAll);
+    router.get('/recaudaciones/activas', recaudacionRifasController.findActive);
+    router.get('/recaudaciones/inactivas', recaudacionRifasController.findInactive);
+    router.get('/recaudaciones/fecha/:fecha', recaudacionRifasController.getByDate);
+    router.post('/recaudaciones', recaudacionRifasController.create);
+    router.put('/recaudaciones/:idRecaudacionRifa', recaudacionRifasController.update);
+    router.delete('/recaudaciones/:idRecaudacionRifa', recaudacionRifasController.delete);
+
 
     app.use('/', router);
 

@@ -1,6 +1,7 @@
 'use strict';
 const { zonedTimeToUtc, format } = require('date-fns-tz');
 const db = require("../models");
+const { where } = require('sequelize');
 const PUBLICACIONES = db.publicaciones;
 const SEDES = db.sedes;
 
@@ -15,7 +16,10 @@ module.exports = {
                 as: 'sede',
                 attributes: ['idSede', 'nombreSede']
             }
-            ]
+            ],
+            where: {
+                estado: 1
+            }
         });
         return res.status(200).json(publicaciones);
         } catch (error) {
