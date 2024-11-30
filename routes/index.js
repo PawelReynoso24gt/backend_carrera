@@ -42,11 +42,9 @@ const solicitudTalonariosController = require('../controllers/solicitudTalonario
 const inscripcionEventosController = require('../controllers/inscripcionEventosController');
 const detalleStandsController = require('../controllers/detalleStandsController');
 const asignacionStandsController = require('../controllers/asignacionStandsController');
-<<<<<<< HEAD
 const detalle_trasladosController = require('../controllers/detalle_trasladosController');
 const detalle_pedidosController = require('../controllers/detalle_pedidosController');
 const detalle_productosController = require('../controllers/detalle_productosController');
-=======
 const detalleInscripcionActividadesController = require('../controllers/detalleInscripcionActividadesController');
 const detalleInscripcionMaterialesController = require('../controllers/detalleInscripcionMaterialesController');
 const empleadosController = require('../controllers/empleadosController');
@@ -54,8 +52,8 @@ const asistenciaEventosController = require('../controllers/asistenciaEventosCon
 const recaudacionRifasController = require('../controllers/recaudacionRifasController');
 const detallePagoRifasController = require('../controllers/detallePagoRifasController');
 const aspirantesController = require('../controllers/aspirantesController');
+const recaudacion_eventosController = require('../controllers/recaudacion_eventosController');
 
->>>>>>> 75b1774558071614409d0b8898aed07c3d8b3232
 
 module.exports = (app) => {
 
@@ -443,7 +441,6 @@ module.exports = (app) => {
     router.put('/asignacion_stands/update/:id', asignacionStandsController.update);
     router.delete('/asignacion_stands/delete/:id', asignacionStandsController.delete); 
 
-<<<<<<< HEAD
 
     // * RUTAS DE DETALLE TRASLADOS
     router.get('/detalle_traslados', detalle_trasladosController.find);
@@ -465,7 +462,7 @@ module.exports = (app) => {
     router.post('/detalle_productos/create', detalle_productosController.createDetalleProducto);
     router.put('/detalle_productos/update/:id', detalle_productosController.updateDetalleProducto);
     router.delete('/detalle_productos/delete/:id', detalle_productosController.deleteDetalleProducto);
-=======
+    
     // * RuUTAS DE DETALLE DE INSCRIPCION DE ACTIVIDADES
     router.get('/detalle_inscripcion_actividades', detalleInscripcionActividadesController.find);
     router.get('/detalle_inscripcion_actividades/activos', detalleInscripcionActividadesController.findActive);
@@ -521,7 +518,6 @@ module.exports = (app) => {
     router.delete('/detallespago/:idDetallePagoRecaudacionRifa', detallePagoRifasController.delete);
 
     //* RUTAS ASPIRANTES 
-
     router.get('/aspirantes', aspirantesController.findAll);
     router.get('/aspirantes/activos', aspirantesController.findActive);
     router.get('/aspirantes/inactivos', aspirantesController.findInactive);
@@ -529,7 +525,15 @@ module.exports = (app) => {
     router.put('/aspirantes/:idAspirante', aspirantesController.update);
     router.get('/aspirantes/:idAspirante', aspirantesController.findById);
     router.delete('/aspirantes/:idAspirante', aspirantesController.delete);
->>>>>>> 75b1774558071614409d0b8898aed07c3d8b3232
+
+    // * RUTAS RECAUDACION EVENTOS
+    router.get('/recaudacion_evento', recaudacion_eventosController.find);
+    router.get('/recaudacion_evento/:id', recaudacion_eventosController.findById);
+    router.post('/recaudacion_evento/create', recaudacion_eventosController.createRecaudacionEvento);
+    router.put('/recaudacion_evento/update/:id', recaudacion_eventosController.updateRecaudacionEvento);
+    router.delete('/recaudacion_evento/delete/:id', recaudacion_eventosController.deleteRecaudacionEvento);
+
+
 
     app.use('/', router);
 
