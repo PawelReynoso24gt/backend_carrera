@@ -12,6 +12,9 @@ module.exports = {
                     model: COMISIONES,
                     as: 'comision',
                     attributes: ['idComision', 'comision', 'descripcion', 'estado']
+                },
+                where: {
+                    estado: 1
                 }
             });
             return res.status(200).json(actividades);

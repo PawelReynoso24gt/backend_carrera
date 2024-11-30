@@ -4,7 +4,16 @@ const { Model } = require('sequelize');
 module.exports = (sequelize, DataTypes) => {
   class stands extends Model {
     static associate(models) {
-
+      // Relación con detalleStands
+      this.hasMany(models.detalle_stands, {
+        foreignKey: 'idStand',
+        as: 'detallesStands'
+      });
+      // Relación con asignacion de stands
+      this.hasMany(models.asignacion_stands, {
+        foreignKey: 'idStand',
+        as: 'asignaciones'
+      });
     }
   }
   stands.init({

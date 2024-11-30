@@ -1,4 +1,5 @@
 'use strict';
+const { where } = require("sequelize");
 const db = require("../models");
 const PRODUCTOS = db.productos;
 const CATEGORIAS = db.categorias;
@@ -13,6 +14,9 @@ module.exports = {
                 include: {
                     model: CATEGORIAS,
                     attributes: ["idCategoria", "nombreCategoria"],
+                },
+                where: {
+                    estado: 1
                 }
             });
             return res.status(200).json(productos);
@@ -59,9 +63,9 @@ module.exports = {
         }
 
         // Validar talla
-        const regexTalla = /^(?:\d+|S|M|L|XL|XXL|XXXL)$/; // Permitir números o S, M, L, XL, XXL, XXXL
+        const regexTalla = /^(?:\d+|S|M|L|XL|XXL|XXXL|NA)$/; // Permitir números o S, M, L, XL, XXL, XXXL o que No Aplica (NA)
         if (!regexTalla.test(datos.talla)) {
-            return res.status(400).json({ message: 'La talla debe ser un número o una de las siguientes letras: S, M, L, XL, XXL, XXXL.' });
+            return res.status(400).json({ message: 'La talla debe ser un número o una de las siguientes letras: S, M, L, XL, XXL, XXXL, NA.' });
         }
 
         // Validar precio
@@ -74,9 +78,6 @@ module.exports = {
         if (!regexNombreProducto.test(datos.nombreProducto)) {
             return res.status(400).json({ message: 'El nombre del producto contiene caracteres no válidos.' });
         }
-
-        // Descripción
-        if (datos.descripcion !== undefined) camposActualizados.descripcion = datos.descripcion;
 
         // Validar cantidad mínima
         if (typeof datos.cantidadMinima !== 'number' || datos.cantidadMinima < 0) {
@@ -124,10 +125,9 @@ module.exports = {
     
         if (datos.talla !== undefined) {
             // Expresión regular para validar tallas
-            const regexTalla = /^(?:\d+|S|M|L|XL|XXL|XXXL)$/; // Permitir números o S, M, L, XL, XXL, XXXL
-
+            const regexTalla = /^(?:\d+|S|M|L|XL|XXL|XXXL|NA)$/; // Permitir números o S, M, L, XL, XXL, XXXL, NA 
             if (!regexTalla.test(datos.talla)) {
-                return res.status(400).json({ message: 'La talla debe ser un número o una de las siguientes letras: S, M, L, XL, XXL, XXXL.' });
+                return res.status(400).json({ message: 'La talla debe ser un número o una de las siguientes letras: S, M, L, XL, XXL, XXXL, NA.' });
             }
             camposActualizados.talla = datos.talla;
         }
