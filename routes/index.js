@@ -38,6 +38,7 @@ const publicacionRifasController = require('../controllers/publicacionRifasContr
 const permisosController = require('../controllers/permisosController');
 const asignacionPermisosController = require('../controllers/asignacionPermisosController');
 const modulosController = require('../controllers/modulosController');
+const solicitudTalonariosController = require('../controllers/solicitudTalonariosController');
 const inscripcionEventosController = require('../controllers/inscripcionEventosController');
 const detalleStandsController = require('../controllers/detalleStandsController');
 const asignacionStandsController = require('../controllers/asignacionStandsController');
@@ -390,6 +391,15 @@ module.exports = (app) => {
     router.post('/modulos', modulosController.create);
     router.put('/modulos/:idModulo', modulosController.update);
     router.delete('/modulos/:idModulo', modulosController.delete);
+
+      // * RUTAS DE MODULOS
+      router.get('/solicitudes', solicitudTalonariosController.getAll);
+      router.get('/solicitudes/:id', solicitudTalonariosController.getById);
+      router.get('/solicitudes/fecha/:fecha', solicitudTalonariosController.getByDate);
+      router.get('/solicitudes/voluntario/:idVoluntario', solicitudTalonariosController.getByVoluntario);
+      router.post('/solicitudes', solicitudTalonariosController.create);
+      router.put('/solicitudes/:id', solicitudTalonariosController.update);
+      router.delete('/solicitudes/:id', solicitudTalonariosController.delete);
 
     // * RUTAS DE INSCRIPCION A EVENTOS
     router.get('/inscripcion_eventos', inscripcionEventosController.find);
