@@ -39,6 +39,9 @@ const permisosController = require('../controllers/permisosController');
 const asignacionPermisosController = require('../controllers/asignacionPermisosController');
 const modulosController = require('../controllers/modulosController');
 const solicitudTalonariosController = require('../controllers/solicitudTalonariosController');
+const inscripcionEventosController = require('../controllers/inscripcionEventosController');
+const detalleStandsController = require('../controllers/detalleStandsController');
+const asignacionStandsController = require('../controllers/asignacionStandsController');
 
 module.exports = (app) => {
 
@@ -398,6 +401,33 @@ module.exports = (app) => {
       router.post('/solicitudes', solicitudTalonariosController.create);
       router.put('/solicitudes/:id', solicitudTalonariosController.update);
       router.delete('/solicitudes/:id', solicitudTalonariosController.delete);
+
+    // * RUTAS DE INSCRIPCION A EVENTOS
+    router.get('/inscripcion_eventos', inscripcionEventosController.find);
+    router.get('/inscripcion_eventos/activos', inscripcionEventosController.findActive);
+    router.get('/inscripcion_eventos/inactivos', inscripcionEventosController.findInactive);
+    router.get('/inscripcion_eventos/:id', inscripcionEventosController.findById);
+    router.post('/inscripcion_eventos/create', inscripcionEventosController.create); 
+    router.put('/inscripcion_eventos/update/:id', inscripcionEventosController.update);
+    router.delete('/inscripcion_eventos/delete/:id', inscripcionEventosController.delete); 
+
+    // * RUTAS DE DETALLES DE STANDS
+    router.get('/detalle_stands', detalleStandsController.find); 
+    router.get('/detalle_stands/activos', detalleStandsController.findActive);
+    router.get('/detalle_stands/inactivos', detalleStandsController.findInactive); 
+    router.get('detalle_stands/:id', detalleStandsController.findById); 
+    router.post('/detalle_stands/create', detalleStandsController.create);
+    router.put('/detalle_stands/update/:id', detalleStandsController.update);
+    router.delete('/detalle_stands/:id', detalleStandsController.delete); 
+
+    // * RUTAS DE ASIGANCION DE STANDS
+    router.get('/asignacion_stands', asignacionStandsController.find);
+    router.get('/asignacion_stands/activos', asignacionStandsController.findActive);
+    router.get('/asignacion_stands/inactivos', asignacionStandsController.findInactive);
+    router.get('/asignacion_stands/:id', asignacionStandsController.findById);
+    router.post('/asignacion_stands/create', asignacionStandsController.create);
+    router.put('/asignacion_stands/update/:id', asignacionStandsController.update);
+    router.delete('/asignacion_stands/delete/:id', asignacionStandsController.delete); 
 
     app.use('/', router);
 

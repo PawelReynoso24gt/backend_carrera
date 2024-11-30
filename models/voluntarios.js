@@ -12,6 +12,12 @@ module.exports = (sequelize, DataTypes) => {
           foreignKey: 'idVoluntario',
         });
         
+
+      // Relación con inscripcionEventos
+      voluntarios.hasMany(models.inscripcion_eventos, {
+        foreignKey: 'idVoluntario',
+        as: 'inscripciones'
+      });
     }
   }
 
