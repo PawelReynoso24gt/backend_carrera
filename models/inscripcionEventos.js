@@ -22,6 +22,23 @@ module.exports = (sequelize, DataTypes) => {
                 as: 'asignaciones'
             });
             
+            // Relacion con inscripcion de actividades
+            this.hasMany(models.detalle_inscripcion_actividades, {
+                foreignKey: 'idInscripcionEvento',
+                as: 'actividadesInscripcion'
+            });  
+            
+            // Relacion con inscripcion de materiales
+            this.hasMany(models.detalle_inscripcion_materiales, {
+                foreignKey: 'idInscripcionEvento',
+                as: 'materialesInscripcion' // Alias único
+            });
+            
+            // relacion con asistencia a eventos
+            this.hasMany(models.asistencia_eventos, {
+                foreignKey: 'idInscripcionEvento',
+                as: 'asistencias'
+            });            
         }
     }
 
