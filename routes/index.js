@@ -43,6 +43,7 @@ const inscripcionEventosController = require('../controllers/inscripcionEventosC
 const detalleStandsController = require('../controllers/detalleStandsController');
 const asignacionStandsController = require('../controllers/asignacionStandsController');
 const detalleInscripcionActividadesController = require('../controllers/detalleInscripcionActividadesController');
+const detalleInscripcionMaterialesController = require('../controllers/detalleInscripcionMaterialesController');
 
 module.exports = (app) => {
 
@@ -437,6 +438,16 @@ module.exports = (app) => {
     router.post('/detalle_inscripcion_actividades/create', detalleInscripcionActividadesController.create);
     router.put('/detalle_inscripcion_actividades/update/:id', detalleInscripcionActividadesController.update);
     router.delete('/detalle_inscripcion_actividades/delete/:id', detalleInscripcionActividadesController.delete);
+
+    // * RUTAS DE DETALLE DE INSCRIPCION DE MATERIALES
+    router.get('/detalle_inscripcion_materiales', detalleInscripcionMaterialesController.find);
+    router.get('/detalle_inscripcion_materiales/activos', detalleInscripcionMaterialesController.findActive);
+    router.get('/detalle_inscripcion_materiales/inactivos', detalleInscripcionMaterialesController.findInactive);
+    router.get('/detalle_inscripcion_materiales/:id', detalleInscripcionMaterialesController.findById);
+    router.post('/detalle_inscripcion_materiales/create', detalleInscripcionMaterialesController.create);
+    router.put('/detalle_inscripcion_materiales/update/:id', detalleInscripcionMaterialesController.update);
+    router.delete('/detalle_inscripcion_materiales/delete/:id', detalleInscripcionMaterialesController.delete);
+
     app.use('/', router);
 
 };
