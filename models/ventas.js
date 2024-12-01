@@ -10,6 +10,9 @@ module.exports = (sequelize, DataTypes) => {
             ventas.belongsTo(models.stands, {
                 foreignKey: 'idStand'
             });
+            ventas.hasMany(models.detalle_ventas, {
+                foreignKey: 'idVenta'
+            });
         }
     }
 
