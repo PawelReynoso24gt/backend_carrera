@@ -7,6 +7,9 @@ module.exports = (sequelize, DataTypes) => {
       usuarios.belongsTo(models.roles, {
         foreignKey: 'idRol'
       });
+      usuarios.hasMany(models.bitacoras, {
+        foreignKey: 'idUsuario'
+     });
     }
   }
 

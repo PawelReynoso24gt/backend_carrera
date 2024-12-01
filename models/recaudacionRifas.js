@@ -2,44 +2,40 @@
 const { Model } = require('sequelize');
 
 module.exports = (sequelize, DataTypes) => {
-  class solicitudTalonarios extends Model {
+  class recaudacion_rifas extends Model {
     static associate(models) {
-
-      solicitudTalonarios.belongsTo(models.talonarios, {
-        foreignKey: 'idTalonario',
-      });
-
-      solicitudTalonarios.belongsTo(models.voluntarios, {
-        foreignKey: 'idVoluntario',
-      });
-
-      solicitudTalonarios.hasMany(models.recaudacion_rifas, {
+      // Relación con solicitudTalonarios
+      recaudacion_rifas.belongsTo(models.solicitudTalonarios, {
         foreignKey: 'idSolicitudTalonario',
+      });
+
+      recaudacion_rifas.hasMany(models.detalle_pago_recaudacion_rifas, {
+        foreignKey: 'idRecaudacionRifa',
       });
       
     }
   }
 
-  solicitudTalonarios.init({
-    idSolicitudTalonario: {
+  recaudacion_rifas.init({
+    idRecaudacionRifa: {
       type: DataTypes.INTEGER,
       autoIncrement: true,
       primaryKey: true
+    },
+    boletosVendidos: {
+      type: DataTypes.INTEGER,
+      allowNull: false
+    },
+    subTotal: {
+      type: DataTypes.DECIMAL(10, 2),
+      allowNull: false
     },
     estado: {
       type: DataTypes.INTEGER,
       allowNull: false,
       defaultValue: 1
     },
-    fechaSolicitud: {
-      type: DataTypes.DATEONLY,
-      allowNull: false
-    },
-    idTalonario: {
-      type: DataTypes.INTEGER,
-      allowNull: false
-    },
-    idVoluntario: {
+    idSolicitudTalonario: {
       type: DataTypes.INTEGER,
       allowNull: false
     },
@@ -55,10 +51,10 @@ module.exports = (sequelize, DataTypes) => {
     }
   }, {
     sequelize,
-    modelName: 'solicitudTalonarios',
-    tableName: 'solicitud_talonarios',
+    modelName: 'recaudacion_rifas',
+    tableName: 'recaudacion_rifas',
     timestamps: true
   });
 
-  return solicitudTalonarios;
+  return recaudacion_rifas;
 };
