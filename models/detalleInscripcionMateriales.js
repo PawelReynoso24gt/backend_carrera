@@ -25,13 +25,18 @@ module.exports = (sequelize, DataTypes) => {
     }
 
     detalleInscripcionMateriales.init({
-        idDetalleInscripcionActividad: {
+        idDetalleInscripcionMaterial: {
             type: DataTypes.INTEGER,
             autoIncrement: true,
             primaryKey: true
         },
 
         estado: {
+            type: DataTypes.INTEGER,
+            allowNull: false
+        },
+
+        cantidadMaterial: {
             type: DataTypes.INTEGER,
             allowNull: false
         },

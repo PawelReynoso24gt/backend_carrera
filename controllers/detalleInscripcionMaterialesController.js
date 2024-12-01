@@ -141,15 +141,16 @@ module.exports = {
 
     // Crear un nuevo detalle
     async create(req, res) {
-        const { idInscripcionEvento, idComision, idMaterial } = req.body;
+        const { idInscripcionEvento, cantidadMaterial, idComision, idMaterial } = req.body;
         const estado = req.body.estado !== undefined ? req.body.estado : 1;
-        if (!idInscripcionEvento || !idComision || !idMaterial) {
+        if (!idInscripcionEvento || !cantidadMaterial || !idComision || !idMaterial) {
             return res.status(400).json({ message: 'Faltan campos requeridos.' });
         }
 
         try {
             const nuevoDetalle = await DETALLE_INSCRIPCION_MATERIALES.create({
                 estado,
+                cantidadMaterial,
                 idInscripcionEvento,
                 idComision,
                 idMaterial
@@ -167,18 +168,19 @@ module.exports = {
 
     // Actualizar un detalle existente
     async update(req, res) {
-        const { estado, idInscripcionEvento, idComision, idMaterial } = req.body;
+        const { estado, idInscripcionEvento, cantidadMaterial, idComision, idMaterial } = req.body;
         const id = req.params.id;
 
         const camposActualizados = {};
         if (estado !== undefined) camposActualizados.estado = estado;
         if (idInscripcionEvento !== undefined) camposActualizados.idInscripcionEvento = idInscripcionEvento;
+        if (cantidadMaterial !== undefined) camposActualizados.cantidadMaterial = cantidadMaterial;
         if (idComision !== undefined) camposActualizados.idComision = idComision;
         if (idMaterial !== undefined) camposActualizados.idMaterial = idMaterial;
 
         try {
             const [rowsUpdated] = await DETALLE_INSCRIPCION_MATERIALES.update(camposActualizados, {
-                where: { idDetalleInscripcionMateriales: id }
+                where: { idDetalleInscripcionMaterial: id }
             });
 
             if (rowsUpdated === 0) {
