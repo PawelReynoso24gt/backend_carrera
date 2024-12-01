@@ -219,9 +219,11 @@ module.exports = (app) => {
     router.get('/stand', standsController.find);
     router.get('/stand/activas', standsController.findActivateStand);
     router.get('/stand/inactivas', standsController.findaInactivateStand);
+    router.get('/stands/virtual/products', standsController.findVirtualStandProducts);
     router.post('/stand/create', standsController.createStand);
     router.put('/stand/update/:id', standsController.updateStand);
     router.delete('/stand/:id', standsController.deleteStand);
+    
 
     // * RUTAS DE MUNICIPIOS
     router.get('/municipios', municipiosController.find);
