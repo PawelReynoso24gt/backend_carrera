@@ -48,7 +48,7 @@ module.exports = (sequelize, DataTypes) => {
         type: DataTypes.INTEGER,
         allowNull: false,
         references: {
-          model: 'categorias_bitacora',
+          model: 'categorias_bitacoras',
           key: 'idCategoriaBitacora',
         },
         onUpdate: 'CASCADE',

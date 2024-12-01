@@ -53,6 +53,7 @@ const recaudacionRifasController = require('../controllers/recaudacionRifasContr
 const detallePagoRifasController = require('../controllers/detallePagoRifasController');
 const aspirantesController = require('../controllers/aspirantesController');
 const recaudacion_eventosController = require('../controllers/recaudacion_eventosController');
+const bitacorasController = require('../controllers/bitacorasController');
 
 
 module.exports = (app) => {
@@ -533,7 +534,12 @@ module.exports = (app) => {
     router.put('/recaudacion_evento/update/:id', recaudacion_eventosController.updateRecaudacionEvento);
     router.delete('/recaudacion_evento/delete/:id', recaudacion_eventosController.deleteRecaudacionEvento);
 
-
+    // * RUTAS BITACORAS
+    router.get('/bitacora', bitacorasController.find);
+    router.get('/bitacora/:id', bitacorasController.findById);
+    router.post('/bitacora/create', bitacorasController.createBitacora);
+    router.put('/bitacora/update/:id', bitacorasController.updateBitacora);
+    router.delete('/bitacora/delete/:id', bitacorasController.deleteBitacora);
 
     app.use('/', router);
 
