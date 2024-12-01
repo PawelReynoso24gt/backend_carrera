@@ -47,6 +47,7 @@ const detalleInscripcionMaterialesController = require('../controllers/detalleIn
 const empleadosController = require('../controllers/empleadosController');
 const asistenciaEventosController = require('../controllers/asistenciaEventosController');
 const recaudacionRifasController = require('../controllers/recaudacionRifasController');
+const ventasController = require('../controllers/ventasController');
 
 module.exports = (app) => {
 
@@ -481,6 +482,10 @@ module.exports = (app) => {
     router.put('/recaudaciones/:idRecaudacionRifa', recaudacionRifasController.update);
     router.delete('/recaudaciones/:idRecaudacionRifa', recaudacionRifasController.delete);
 
+    // * RUTAS DE VENTAS
+    router.get('/ventas', ventasController.findAll);
+    router.get('/ventas/:id', ventasController.findById);
+    router.post('/ventas', ventasController.create);
 
     app.use('/', router);
 
