@@ -301,7 +301,10 @@ module.exports = (app) => {
     router.get('/voluntarios/inactivos', voluntariosController.findaInactivateVol);
     router.post('/voluntarios/create', voluntariosController.createVol);
     router.put('/voluntarios/update/:id', voluntariosController.updateVol); 
-    router.delete('/voluntarios/delete/:id', voluntariosController.deleteVol); 
+    router.delete('/voluntarios/delete/:id', voluntariosController.deleteVol);
+
+    // * QR
+    router.get('/generateQR', voluntariosController.generateQR);
 
     // * RUTAS DE ACTIVIDADES
     router.get('/actividades', actividadesController.find);

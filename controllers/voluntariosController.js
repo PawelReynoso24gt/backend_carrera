@@ -1,5 +1,6 @@
 'use strict';
-const { v4: uuidv4 } = require('uuid'); // Importar para generar identificadores únicos
+const QRCode = require('qrcode'); // Sirve para generar el código QR
+const { v4: uuidv4 } = require('uuid'); // Sirve para generar identificadores únicos
 const db = require("../models");
 const voluntarios = require("../models/voluntarios");
 const VOLUNTARIOS = db.voluntarios;
@@ -12,6 +13,38 @@ function generateQRCode() {
 
 // Métodos CRUD
 module.exports = {
+
+    // Método para generar un QR code y devolverlo como una imagen
+    async generateQR(req, res) {
+        const { data } = req.query;
+
+        if (!data) {
+            return res.status(400).json({ message: 'Faltan datos para generar el QR.' });
+        }
+
+        try {
+            // Generar el código QR como Data URL (base64)
+            const qrCodeDataURL = await QRCode.toDataURL(data, {
+                errorCorrectionLevel: 'H', // Nivel de corrección de errores
+                type: 'image/png', // Tipo de imagen a generar
+                width: 300, // Ancho del QR
+                margin: 2, // Margen alrededor del QR
+            });
+
+            // Establecer la cabecera para devolver una imagen PNG
+            res.setHeader('Content-Type', 'image/png');
+            
+            // Extraer solo los datos base64 sin la parte de encabezado "data:image/png;base64,"
+            const base64Data = qrCodeDataURL.replace(/^data:image\/png;base64,/, "");
+            
+            // Convertir los datos base64 a un Buffer y devolverlo como respuesta
+            res.status(200).send(Buffer.from(base64Data, 'base64'));
+        } catch (error) {
+            console.error('Error al generar el código QR:', error);
+            res.status(500).json({ message: 'Error al generar el código QR.' });
+        }
+    },
+    
     // Método para obtener todos los voluntarios
     async find(req, res) {
         try {
