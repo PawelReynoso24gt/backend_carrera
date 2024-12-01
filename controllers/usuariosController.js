@@ -6,10 +6,49 @@ const jwt = require('jsonwebtoken');
 const db = require('../models');
 const USERS = db.usuarios;
 const ROLES = db.roles;
+const PERSONAS = db.personas;
 
 // Función para hashear la contraseña usando SHA-256
 function hashPassword(password) {
     return crypto.createHash('sha256').update(password).digest('hex');
+}
+
+// Validación de entrada
+function validateUserData(datos, esCreacion = false) {
+    const usuarioRegex = /^[a-z0-9-_]+$/; // Solo minúsculas, números, guion y guion bajo
+
+    if (datos.usuario !== undefined && !usuarioRegex.test(datos.usuario)) {
+        return 'El nombre de usuario solo debe contener minúsculas, números, "-" o "_"';
+    }
+
+    if (esCreacion || datos.contrasenia !== undefined) {
+        if (!datos.contrasenia || datos.contrasenia.length < 8) {
+            return 'La contraseña debe tener al menos 8 caracteres';
+        }
+    }
+
+    if (datos.idRol !== undefined && datos.idRol < 1) {
+        return 'El rol es inválido';
+    }
+    if (datos.idSede !== undefined && datos.idSede < 1) {
+        return 'La sede es inválida';
+    }
+    if (datos.idPersona !== undefined && datos.idPersona < 1) {
+        return 'La persona es inválida';
+    }
+
+    return null;
+}
+
+// Validación de actualización de contraseña
+function validatePasswordChange(currentPassword, newPassword) {
+    if (!currentPassword) {
+        return 'La contraseña actual es requerida';
+    }
+    if (!newPassword || newPassword.length < 8) {
+        return 'La nueva contraseña debe tener al menos 8 caracteres';
+    }
+    return null;
 }
 
 // Función para generar un token JWT
@@ -132,7 +171,8 @@ module.exports = {
                     {
                       model: ROLES,
                       attributes: ['roles'], 
-                    }],
+                    },
+                {model: PERSONAS, attributes: ['idPersona', 'nombre', 'fechaNacimiento', 'telefono', 'domicilio', 'correo', 'idMunicipio', 'createdAt']}],
                 where: { estado: 1 }
             });
     
@@ -149,22 +189,25 @@ module.exports = {
     },
 
     // * Get todos los usuarios
-        async findAllUsers(req, res) {
-            return USERS.findAll({
+    async findAllUsers(req, res) {
+        try{
+            const users = await USERS.findAll({
                 include: [{
                     model: ROLES,
                     attributes: ['roles'] 
                 }]
-            })
-            .then((users) => {
-                res.status(200).send(users);
-            })
-            .catch((error) => {
-                res.status(500).send({
-                    message: error.message || 'Error al listar los usuarios.'
-                });
             });
-        },
+
+            const dataUsers = users.map(user => {
+                const { contrasenia, token, tokenExpiresAt, ...userWithoutPasswordAndTokens } = user.dataValues;
+                return userWithoutPasswordAndTokens;
+            });
+            return res.status(200).send(dataUsers);
+        } catch {
+            console.error('Error al traer los datos:', error);
+            return res.status(500).send({ message: 'Ocurrio un error al traer los datos'})
+        }
+    },
 
     // * Obtener usuario por ID
     async findById(req, res) {
@@ -189,13 +232,14 @@ module.exports = {
         const datos = req.body;
 
         // Validar los datos del usuario
-        /*const error = validateUserData(datos, true);
+        const error = validateUserData(datos, true);
         if (error) {
             return res.status(400).json({ error });
-        }*/
+        }
         const datosIngreso = {
             usuario: datos.usuario,
             contrasenia: hashPassword(datos.contrasenia),
+            changedPassword: 0,
             estado: 1,
             idRol: datos.idRol,
             idSede: datos.idSede,
@@ -224,6 +268,7 @@ module.exports = {
         const camposActualizados = {};
 
         if (datos.usuario !== undefined) camposActualizados.usuario = datos.usuario;
+        if (datos.changedPassword !== undefined) camposActualizados.usuario = datos.usuario;
         if (datos.estado !== undefined) camposActualizados.estado = datos.estado;
         if (datos.idRol !== undefined) camposActualizados.idRol = datos.idRol;
         if (datos.idSede !== undefined) camposActualizados.idSede = datos.idSede;
@@ -279,6 +324,35 @@ module.exports = {
         }
     },
 
+    // * Reiniciar contraseña para superadmin
+    async resetPassword(req, res) {
+        const { newPassword } = req.body; // Nueva contraseña proporcionada en el cuerpo de la solicitud
+        const id = req.params.id; // ID del usuario obtenido de los parámetros de la solicitud
+
+        // Validar la nueva contraseña
+        const error = validatePasswordChange(newPassword); // Reutilizar la función para validar contraseñas
+        if (error) {
+            return res.status(400).json({ error });
+        }
+
+        try {
+            // Buscar el usuario por ID
+            const user = await USERS.findByPk(id);
+            if (!user) {
+                return res.status(404).send({ message: 'Usuario no encontrado' });
+            }
+
+            // Actualizar la contraseña con SHA-256
+            user.contrasenia = hashPassword(newPassword);
+            await user.save();
+
+            return res.status(200).send('La contraseña ha sido reiniciada exitosamente');
+        } catch (error) {
+            console.log(error);
+            return res.status(500).json({ error: 'Error al reiniciar la contraseña' });
+        }
+    },
+
     // * Eliminar usuario
     async delete(req, res) {
         const id = req.params.id;
@@ -300,5 +374,25 @@ module.exports = {
         }
     },
 
-    hashPassword
+    hashPassword,
+
+    async verifyChangedPassword(req, res){
+        try {
+            const users = await USERS.findAll({});
+    
+            const dataUsers = users.map(user => {
+                const { contrasenia, token, tokenExpiresAt, ...userWithoutPasswordAndTokens } = user.dataValues;
+                return userWithoutPasswordAndTokens;
+            });
+
+            if(changedPassword === 0){
+                return { ...userWithoutPasswordAndTokens, message: 'Necesitas cambiar tu contraseña.', changedPassword };
+            }
+    
+            return res.status(200).send(dataUsers);
+        } catch (error) {
+            console.error('Error al recuperar los datos:', error);
+            return res.status(500).send({ message: 'Ocurrió un error al recuperar los datos.' });
+        }
+    }
 };
