@@ -8,6 +8,9 @@ module.exports = (sequelize, DataTypes) => {
         foreignKey: 'idTipoTraslado',
         as: 'tipoTraslado'
       });
+      traslados.hasMany(models.detalle_traslados, {
+        foreignKey: 'idTraslado'
+      });
     }
   }
 
@@ -49,7 +52,7 @@ module.exports = (sequelize, DataTypes) => {
     }
   }, {
     sequelize,
-    modelName: 'Traslado',
+    modelName: 'traslados',
     tableName: 'traslados',
     timestamps: true
   });

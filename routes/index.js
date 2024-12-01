@@ -28,13 +28,13 @@ const categoriasController = require('../controllers/categoriaController');
 const materialesController = require('../controllers/materialesController');
 const comisionesController = require('../controllers/comisionesController');
 const rolesController = require('../controllers/rolesController');
-const talonariosController = require('../controllers/talonariosController');
 const actividadesController = require('../controllers/actividadesController');
-const voluntariosController = require('../controllers/voluntariosController');
 const publicacionesController = require('../controllers/publicacionesController');
 const publicacionGeneralController = require('../controllers/publicacionGeneralesController');
 const publicacionEventoController = require('../controllers/publicacionEventosController');
 const publicacionRifasController = require('../controllers/publicacionRifasController');
+const talonariosController = require('../controllers/talonariosController');
+const voluntariosController = require('../controllers/voluntariosController');
 const permisosController = require('../controllers/permisosController');
 const asignacionPermisosController = require('../controllers/asignacionPermisosController');
 const modulosController = require('../controllers/modulosController');
@@ -42,12 +42,20 @@ const solicitudTalonariosController = require('../controllers/solicitudTalonario
 const inscripcionEventosController = require('../controllers/inscripcionEventosController');
 const detalleStandsController = require('../controllers/detalleStandsController');
 const asignacionStandsController = require('../controllers/asignacionStandsController');
+const detalle_trasladosController = require('../controllers/detalle_trasladosController');
+const detalle_pedidosController = require('../controllers/detalle_pedidosController');
+const detalle_productosController = require('../controllers/detalle_productosController');
 const detalleInscripcionActividadesController = require('../controllers/detalleInscripcionActividadesController');
 const detalleInscripcionMaterialesController = require('../controllers/detalleInscripcionMaterialesController');
 const empleadosController = require('../controllers/empleadosController');
 const asistenciaEventosController = require('../controllers/asistenciaEventosController');
 const recaudacionRifasController = require('../controllers/recaudacionRifasController');
 const ventasController = require('../controllers/ventasController');
+const detallePagoRifasController = require('../controllers/detallePagoRifasController');
+const aspirantesController = require('../controllers/aspirantesController');
+const recaudacion_eventosController = require('../controllers/recaudacion_eventosController');
+const bitacorasController = require('../controllers/bitacorasController');
+
 
 module.exports = (app) => {
 
@@ -305,7 +313,10 @@ module.exports = (app) => {
     router.get('/voluntarios/inactivos', voluntariosController.findaInactivateVol);
     router.post('/voluntarios/create', voluntariosController.createVol);
     router.put('/voluntarios/update/:id', voluntariosController.updateVol); 
-    router.delete('/voluntarios/delete/:id', voluntariosController.deleteVol); 
+    router.delete('/voluntarios/delete/:id', voluntariosController.deleteVol);
+
+    // * QR
+    router.get('/generateQR', voluntariosController.generateQR);
 
     // * RUTAS DE ACTIVIDADES
     router.get('/actividades', actividadesController.find);
@@ -351,6 +362,7 @@ module.exports = (app) => {
     router.post('/publicacionesRifas/create', publicacionRifasController.create);
     router.put('/publicacionesRifas/update/:id', publicacionRifasController.update); 
     router.delete('/publicacionesRifas/delete/:id', publicacionRifasController.delete);
+
 
     // * RUTAS DE ROLES
     router.get('/roles', rolesController.find);
@@ -436,6 +448,28 @@ module.exports = (app) => {
     router.put('/asignacion_stands/update/:id', asignacionStandsController.update);
     router.delete('/asignacion_stands/delete/:id', asignacionStandsController.delete); 
 
+
+    // * RUTAS DE DETALLE TRASLADOS
+    router.get('/detalle_traslados', detalle_trasladosController.find);
+    router.get('/detalle_traslados/:id', detalle_trasladosController.findById);
+    router.post('/detalle_traslados/create', detalle_trasladosController.createDetalleTraslado);
+    router.put('/detalle_traslados/update/:id', detalle_trasladosController.updateDetalleTraslado);
+    router.delete('/detalle_traslados/delete/:id', detalle_trasladosController.deleteDetalleTraslado);
+
+    // * RUTAS DETALLE PEDIDOS
+    router.get('/detalle_pedido', detalle_pedidosController.find);
+    router.get('/detalle_pedido/:id', detalle_pedidosController.findById);
+    router.post('/detalle_pedido/create', detalle_pedidosController.createDetallePedido);
+    router.put('/detalle_pedido/update/:id', detalle_pedidosController.updateDetallePedido);
+    router.delete('/detalle_pedido/delete/:id', detalle_pedidosController.deleteDetallePedido);
+
+    // * RUTAS DETALLE PRODUCTOS
+    router.get('/detalle_productos', detalle_productosController.find);
+    router.get('/detalle_productos/:id', detalle_productosController.findById);
+    router.post('/detalle_productos/create', detalle_productosController.createDetalleProducto);
+    router.put('/detalle_productos/update/:id', detalle_productosController.updateDetalleProducto);
+    router.delete('/detalle_productos/delete/:id', detalle_productosController.deleteDetalleProducto);
+    
     // * RuUTAS DE DETALLE DE INSCRIPCION DE ACTIVIDADES
     router.get('/detalle_inscripcion_actividades', detalleInscripcionActividadesController.find);
     router.get('/detalle_inscripcion_actividades/activos', detalleInscripcionActividadesController.findActive);
@@ -486,6 +520,37 @@ module.exports = (app) => {
     router.get('/ventas', ventasController.findAll);
     router.get('/ventas/:id', ventasController.findById);
     router.post('/ventas', ventasController.create);
+    
+    //* RUTAS DETALLE PAGO RIFAS
+    router.get('/detallespago', detallePagoRifasController.findAll);
+    router.get('/detallespago/activos', detallePagoRifasController.findActive);
+    router.get('/detallespago/inactivos', detallePagoRifasController.findInactive);
+    router.post('/detallespago', detallePagoRifasController.create);
+    router.put('/detallespago/:idDetallePagoRecaudacionRifa', detallePagoRifasController.update);
+    router.delete('/detallespago/:idDetallePagoRecaudacionRifa', detallePagoRifasController.delete);
+
+    //* RUTAS ASPIRANTES 
+    router.get('/aspirantes', aspirantesController.findAll);
+    router.get('/aspirantes/activos', aspirantesController.findActive);
+    router.get('/aspirantes/inactivos', aspirantesController.findInactive);
+    router.post('/aspirantes', aspirantesController.create);
+    router.put('/aspirantes/:idAspirante', aspirantesController.update);
+    router.get('/aspirantes/:idAspirante', aspirantesController.findById);
+    router.delete('/aspirantes/:idAspirante', aspirantesController.delete);
+
+    // * RUTAS RECAUDACION EVENTOS
+    router.get('/recaudacion_evento', recaudacion_eventosController.find);
+    router.get('/recaudacion_evento/:id', recaudacion_eventosController.findById);
+    router.post('/recaudacion_evento/create', recaudacion_eventosController.createRecaudacionEvento);
+    router.put('/recaudacion_evento/update/:id', recaudacion_eventosController.updateRecaudacionEvento);
+    router.delete('/recaudacion_evento/delete/:id', recaudacion_eventosController.deleteRecaudacionEvento);
+
+    // * RUTAS BITACORAS
+    router.get('/bitacora', bitacorasController.find);
+    router.get('/bitacora/:id', bitacorasController.findById);
+    router.post('/bitacora/create', bitacorasController.createBitacora);
+    router.put('/bitacora/update/:id', bitacorasController.updateBitacora);
+    router.delete('/bitacora/delete/:id', bitacorasController.deleteBitacora);
 
     app.use('/', router);
 

@@ -10,6 +10,9 @@ module.exports = (sequelize, DataTypes) => {
       usuarios.belongsTo(models.personas, {
         foreignKey: 'idPersona'
       })
+      usuarios.hasMany(models.bitacoras, {
+        foreignKey: 'idUsuario'
+     });
     }
   }
 

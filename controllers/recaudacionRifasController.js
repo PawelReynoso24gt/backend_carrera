@@ -2,7 +2,7 @@
 
 const db = require('../models');
 const Sequelize = require('sequelize');
-const RECAUDACION_RIFAS = db.recaudacionRifas;
+const RECAUDACION_RIFAS = db.recaudacion_rifas;
 const SOLICITUD_TALONARIOS = db.solicitudTalonarios;
 
 module.exports = {
