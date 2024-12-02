@@ -69,7 +69,7 @@ module.exports = {
                     },
                     {
                         model: TIPOS_PAGO,
-                        attributes: ['nombreTipoPago']
+                        attributes: ['tipo']
                     }
                 ]
             });
@@ -93,7 +93,7 @@ module.exports = {
                     },
                     {
                         model: TIPOS_PAGO,
-                        attributes: ['nombreTipoPago']
+                        attributes: ['tipo']
                     }
                 ]
             });
