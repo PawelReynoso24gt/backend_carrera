@@ -66,11 +66,11 @@ module.exports = {
                 include: [
                     {
                         model: VENTAS,
-                        attributes: ['totalVenta', 'fechaVenta']
+                        attributes: ['idVenta','totalVenta', 'fechaVenta']
                     },
                     {
                         model: PRODUCTOS,
-                        attributes: ['nombreProducto', 'precio']
+                        attributes: ['idProducto','nombreProducto', 'precio']
                     }
                 ]
             });

@@ -55,6 +55,7 @@ const detallePagoRifasController = require('../controllers/detallePagoRifasContr
 const aspirantesController = require('../controllers/aspirantesController');
 const recaudacion_eventosController = require('../controllers/recaudacion_eventosController');
 const bitacorasController = require('../controllers/bitacorasController');
+const detalle_ventasController = require('../controllers/detalle_ventasController');
 
 
 module.exports = (app) => {
@@ -520,6 +521,7 @@ module.exports = (app) => {
     router.get('/ventas', ventasController.findAll);
     router.get('/ventas/:id', ventasController.findById);
     router.post('/ventas', ventasController.create);
+    router.put('/ventasUpdate/:id', ventasController.update);
     
     //* RUTAS DETALLE PAGO RIFAS
     router.get('/detallespago', detallePagoRifasController.findAll);
@@ -551,6 +553,12 @@ module.exports = (app) => {
     router.post('/bitacora/create', bitacorasController.createBitacora);
     router.put('/bitacora/update/:id', bitacorasController.updateBitacora);
     router.delete('/bitacora/delete/:id', bitacorasController.deleteBitacora);
+
+    // * RUTAS PARA DETALLE VENTAS
+    app.get('/detalle_ventas', detalle_ventasController.findAll);
+    app.get('/detalle_ventas/:id', detalle_ventasController.findById);
+    app.post('/detalle_ventas', detalle_ventasController.create);
+    app.put('/detalle_ventas/:id', detalle_ventasController.update);
 
     app.use('/', router);
 
