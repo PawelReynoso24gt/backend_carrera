@@ -1,6 +1,7 @@
 'use strict';
 const { zonedTimeToUtc, format } = require('date-fns-tz');
 const db = require("../models");
+const ASISTENCIA_EVENTOS = db.asistencia_eventos;
 const INSCRIPCION_EVENTOS = db.inscripcion_eventos;
 const EVENTOS = db.eventos;
 const VOLUNTARIOS = db.voluntarios;
@@ -31,11 +32,21 @@ module.exports = {
         }
     },
 
-    // Obtener inscripciones activas
+    // Obtener inscripciones activas que no tengan asistencia
     async findActive(req, res) {
         try {
+            const { eventoId } = req.query;
+
+            // Validar si el id del evento fue proporcionado
+            if (!eventoId) {
+                return res.status(400).json({ message: 'Se requiere el ID del evento.' });
+            }
+
             const inscripciones = await INSCRIPCION_EVENTOS.findAll({
-                where: { estado: 1 },
+                where: {
+                    estado: 1,
+                    idEvento: eventoId,
+                },
                 include: [
                     {
                         model: EVENTOS,
@@ -46,13 +57,23 @@ module.exports = {
                         model: VOLUNTARIOS,
                         as: 'voluntario',
                         attributes: ['idVoluntario', 'estado', 'codigoQR']
+                    },
+                    {
+                        model: ASISTENCIA_EVENTOS,
+                        as: 'asistencias',
+                        required: false, // LEFT JOIN para traer asistencias solo si existen
+                        attributes: []
                     }
-                ]
+                ],
+                // Filtrar solo aquellas inscripciones que no tienen ninguna asistencia asociada
+                having: db.Sequelize.literal('COUNT(asistencias.idAsistenciaEvento) = 0'),
+                group: ['inscripcion_eventos.idInscripcionEvento']
             });
+
             return res.status(200).json(inscripciones);
         } catch (error) {
-            console.error('Error al listar las inscripciones activas:', error);
-            return res.status(500).json({ message: 'Error al listar las inscripciones activas.' });
+            console.error('Error al listar las inscripciones activas sin asistencia:', error);
+            return res.status(500).json({ message: 'Error al listar las inscripciones activas sin asistencia.' });
         }
     },
 
