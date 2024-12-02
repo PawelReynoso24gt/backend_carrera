@@ -5,7 +5,7 @@ module.exports = (sequelize, DataTypes) => {
   class TipoTraslado extends Model {
     static associate(models) {
       // Relación con la tabla traslados
-      TipoTraslado.hasMany(models.Traslado, {
+      TipoTraslado.hasMany(models.traslados, {
         foreignKey: 'idTipoTraslado',
         as: 'traslados'
       });

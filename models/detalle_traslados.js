@@ -2,56 +2,53 @@
 const { Model } = require('sequelize');
 
 module.exports = (sequelize, DataTypes) => {
-  class pedidos extends Model {
+  class detalle_traslados extends Model {
     static associate(models) {
-      pedidos.belongsTo(models.sedes, {
-        foreignKey: 'idSede',
-        as: 'sede'
+     
+      detalle_traslados.belongsTo(models.traslados, {
+        foreignKey: 'idTraslado'
       });
 
-      pedidos.belongsTo(models.usuarios, {
-        foreignKey: 'idUsuario',
-        as: 'usuario'
-      });
-      pedidos.hasMany(models.detalle_pedidos, {
-        foreignKey: 'idPedido'
+      detalle_traslados.belongsTo(models.productos, {
+        foreignKey: 'idProducto'
       });
     }
   }
 
-  pedidos.init({
-    idPedido: {
+  detalle_traslados.init({
+    idDetalleTraslado: {
       type: DataTypes.INTEGER,
       autoIncrement: true,
       primaryKey: true
     },
-    fecha: {
-      type: DataTypes.DATE,
+    cantidad: {
+      type: DataTypes.INTEGER,
       allowNull: false
     },
     estado: {
       type: DataTypes.INTEGER,
-      allowNull: false
+      allowNull: false,
+      defaultValue: 1
     },
-    descripcion: {
-      type: DataTypes.TEXT,
-      allowNull: false
-    },
-    idSede: {
+    idTraslado: {
       type: DataTypes.INTEGER,
       allowNull: false,
       references: {
-        model: 'sedes',
-        key: 'idSede'
-      }
+        model: 'traslados', 
+        key: 'idTraslado'
+      },
+      onUpdate: 'CASCADE',
+      onDelete: 'CASCADE'
     },
-    idUsuario: {
+    idProducto: {
       type: DataTypes.INTEGER,
       allowNull: false,
       references: {
-        model: 'usuarios',
-        key: 'idUsuario'
-      }
+        model: 'productos', 
+        key: 'idProducto'
+      },
+      onUpdate: 'CASCADE',
+      onDelete: 'CASCADE'
     },
     createdAt: {
       type: DataTypes.DATE,
@@ -65,10 +62,10 @@ module.exports = (sequelize, DataTypes) => {
     }
   }, {
     sequelize,
-    modelName: 'pedidos',
-    tableName: 'pedidos',
+    modelName: 'detalle_traslados',
+    tableName: 'detalle_traslados', 
     timestamps: true
   });
 
-  return pedidos;
+  return detalle_traslados;
 };
