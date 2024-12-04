@@ -229,9 +229,11 @@ module.exports = (app) => {
     router.get('/stand', standsController.find);
     router.get('/stand/activas', standsController.findActivateStand);
     router.get('/stand/inactivas', standsController.findaInactivateStand);
+    router.get('/stands/virtual/products', standsController.findVirtualStandProducts);
     router.post('/stand/create', standsController.createStand);
     router.put('/stand/update/:id', standsController.updateStand);
     router.delete('/stand/:id', standsController.deleteStand);
+    
 
     // * RUTAS DE MUNICIPIOS
     router.get('/municipios', municipiosController.find);
@@ -443,6 +445,7 @@ module.exports = (app) => {
 
     // * RUTAS DE ASIGANCION DE STANDS
     router.get('/asignacion_stands', asignacionStandsController.find);
+    router.get('/asignacion_stands/voluntarios_por_stand', asignacionStandsController.findVoluntariosByStand);
     router.get('/asignacion_stands/activos', asignacionStandsController.findActive);
     router.get('/asignacion_stands/inactivos', asignacionStandsController.findInactive);
     router.get('/asignacion_stands/:id', asignacionStandsController.findById);

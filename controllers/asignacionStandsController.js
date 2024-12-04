@@ -233,5 +233,84 @@ module.exports = {
             console.error('Error al eliminar la asignación:', error);
             return res.status(500).json({ message: 'Error al eliminar la asignación.' });
         }
-    }
+    },
+
+        // Obtener voluntarios asignados agrupados por stand
+        async findVoluntariosByStand(req, res) {
+            try {
+                const asignaciones = await ASIGNACION_STANDS.findAll({
+                    include: [
+                        {
+                            model: STANDS,
+                            as: 'stand',
+                            attributes: ['idStand', 'nombreStand', 'direccion']
+                        },
+                        {
+                            model: INSCRIPCION_EVENTOS,
+                            as: 'inscripcionEvento',
+                            attributes: ['idInscripcionEvento', 'fechaHoraInscripcion', 'estado'],
+                            include: [
+                                {
+                                    model: db.voluntarios,
+                                    as: 'voluntario',
+                                    attributes: ['idVoluntario', 'estado'], // Atributos del voluntario
+                                    include: [
+                                        {
+                                            model: db.personas,
+                                            as: 'persona',
+                                            attributes: ['idPersona', 'nombre', 'telefono'] // Atributos de la persona
+                                        }
+                                    ]
+                                }
+                            ]
+                        },
+                        {
+                            model: DETALLE_HORARIOS,
+                            as: 'detalleHorario',
+                            attributes: ['idDetalleHorario', 'cantidadPersonas', 'estado'],
+                            include: [
+                                {
+                                    model: db.horarios,
+                                    as: 'horario',
+                                    attributes: ['horarioInicio', 'horarioFinal', 'estado']
+                                }
+                            ]
+                        }
+                    ],
+                    where: { estado: 1 }, // Filtrar asignaciones activas
+                    attributes: ['idAsignacionStands', 'estado'] // Atributos de asignacion_stands
+                });
+        
+                // Agrupar asignaciones por stand
+                const resultado = asignaciones.reduce((acc, asignacion) => {
+                    const standId = asignacion.stand.idStand;
+                    const standNombre = asignacion.stand.nombreStand;
+        
+                    if (!acc[standId]) {
+                        acc[standId] = {
+                            standId,
+                            standNombre,
+                            voluntarios: []
+                        };
+                    }
+        
+                    acc[standId].voluntarios.push({
+                        idVoluntario: asignacion.inscripcionEvento.voluntario.idVoluntario,
+                        nombreVoluntario: asignacion.inscripcionEvento.voluntario.persona.nombre,
+                        telefonoVoluntario: asignacion.inscripcionEvento.voluntario.persona.telefono,
+                        horarioInicio: asignacion.detalleHorario.horario.horarioInicio,
+                        horarioFinal: asignacion.detalleHorario.horario.horarioFinal
+                    });
+        
+                    return acc;
+                }, {});
+        
+                return res.status(200).json(Object.values(resultado));
+            } catch (error) {
+                console.error('Error al obtener los voluntarios por stand:', error);
+                return res.status(500).json({
+                    message: 'Error al obtener los voluntarios por stand.'
+                });
+            }
+        }
 };
