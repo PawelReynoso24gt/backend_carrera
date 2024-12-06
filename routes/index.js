@@ -63,7 +63,6 @@ module.exports = (app) => {
 
     // * LOGIN AND LOGOUT
     router.post('/usuarios/login', usuariosController.login); // Ruta para iniciar sesión, no requiere autenticación
-    router.post('/usuarios', usuariosController.create); // Ruta para crear un usuario, no requiere autenticación
 
     // ! Todas las rutas a continuación requieren autenticación
     router.use(authenticateToken); // Middleware para proteger las rutas con autenticación

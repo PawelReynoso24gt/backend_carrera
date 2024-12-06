@@ -268,7 +268,6 @@ module.exports = {
         const camposActualizados = {};
 
         if (datos.usuario !== undefined) camposActualizados.usuario = datos.usuario;
-        if (datos.changedPassword !== undefined) camposActualizados.usuario = datos.usuario;
         if (datos.estado !== undefined) camposActualizados.estado = datos.estado;
         if (datos.idRol !== undefined) camposActualizados.idRol = datos.idRol;
         if (datos.idSede !== undefined) camposActualizados.idSede = datos.idSede;
@@ -315,6 +314,7 @@ module.exports = {
 
             // Actualizar la contraseña con SHA-256
             user.contrasenia = hashPassword(newPassword);
+            user.changedPassword = 1; // Marcar la contraseña como cambiada
             await user.save();
 
             return res.status(200).send('La contraseña ha sido actualizada');
@@ -379,7 +379,7 @@ module.exports = {
     async verifyChangedPassword(req, res) {
         try {
             const idUsuario = req.userId; // Obtenido del token
-            console.log("ID del usuario autenticado:", idUsuario);
+            // console.log("ID del usuario autenticado:", idUsuario);
     
             const user = await USERS.findByPk(idUsuario, {
                 attributes: ['changedPassword'], // Solo obtenemos los campos necesarios
