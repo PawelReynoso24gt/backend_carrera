@@ -74,6 +74,7 @@ module.exports = (app) => {
     router.get('/usuariosById/:id', usuariosController.findById);
     router.get('/usuarios/verify/:idUsuario?', usuariosController.verifyChangedPassword);
     router.post('/usuarios', usuariosController.create);
+    router.post("/renew", usuariosController.renewToken);
     router.put('/usuarios/:id', usuariosController.update);
     router.put('/usuarios/:id/contrasenia', usuariosController.updatePassword);
     router.put('/usuarios/:id/reset', usuariosController.resetPassword);

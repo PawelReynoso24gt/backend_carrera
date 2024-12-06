@@ -404,5 +404,29 @@ module.exports = {
             console.error("Error al verificar el estado de la contraseña:", error);
             return res.status(500).send({ message: 'Error interno del servidor.' });
         }
-    }
+    },
+    
+    async renewToken(req, res) {
+        const token = req.headers.authorization?.split(" ")[1];
+    
+        if (!token) {
+            return res.status(401).json({ message: "Token no proporcionado." });
+        }
+    
+        try {
+            // Verificar el token y extraer el payload
+            const payload = jwt.verify(token, process.env.SECRET_KEY);
+    
+            // Generar un nuevo token con una nueva expiración
+            const newToken = jwt.sign(
+                { idUsuario: payload.idUsuario },
+                process.env.SECRET_KEY,
+                { expiresIn: "15m" } // Renueva por 15 minutos más
+            );
+    
+            return res.status(200).json({ token: newToken });
+        } catch (error) {
+            return res.status(401).json({ message: "Token inválido o expirado." });
+        }
+    }    
 };
