@@ -8,20 +8,45 @@ const STANDS = db.stands;
 
 // Validación de entrada
 function validateVentaData(datos) {
-    if (datos.totalVenta !== undefined && datos.totalVenta <= 0) {
-        return 'El total de la venta debe ser mayor a 0.';
+    if (datos.totalVenta !== undefined) {
+        if (isNaN(datos.totalVenta) || datos.totalVenta <= 0) {
+            return { error: 'El total de la venta debe ser un número mayor a 0.' };
+        }
     }
 
-    if (datos.fechaVenta === undefined) {
-        return 'La fecha de la venta es obligatoria.';
+    if (datos.fechaVenta !== undefined) {
+        if (isNaN(Date.parse(datos.fechaVenta))) {
+            return { error: 'La fecha de la venta debe ser una fecha válida.' };
+        }
     }
 
-    if (datos.idTipoPublico !== undefined && datos.idTipoPublico < 1) {
-        return 'El tipo de público es inválido.';
+    if (datos.idTipoPublico !== undefined) {
+        if (isNaN(datos.idTipoPublico) || datos.idTipoPublico < 1) {
+            return { error: 'El tipo de público debe ser un número válido mayor a 0.' };
+        }
     }
 
-    if (datos.idStand !== undefined && datos.idStand < 1) {
-        return 'El stand es inválido.';
+    if (datos.idStand !== undefined) {
+        if (isNaN(datos.idStand) || datos.idStand < 1) {
+            return { error: 'El ID del stand debe ser un número válido mayor a 0.' };
+        }
+    }
+
+    // Verificar que al menos un campo esté presente para actualizaciones
+    if (
+        datos.totalVenta === undefined &&
+        datos.fechaVenta === undefined &&
+        datos.idTipoPublico === undefined &&
+        datos.idStand === undefined &&
+        datos.estado === undefined
+    ) {
+        return { error: 'Debe proporcionar al menos un campo para actualizar.' };
+    }
+
+    if (datos.estado !== undefined) {
+        if (datos.estado !== 0 && datos.estado !== 1) {
+            return { error: 'El estado debe ser 0 o 1.' };
+        }
     }
 
     return null;

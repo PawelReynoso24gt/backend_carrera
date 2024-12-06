@@ -2,44 +2,49 @@
 const { Model } = require('sequelize');
 
 module.exports = (sequelize, DataTypes) => {
-    class ventas extends Model {
-        static associate(models){
-            ventas.belongsTo(models.tipo_publicos, {
-                foreignKey: 'idTipoPublico'
-            });
-            ventas.belongsTo(models.stands, {
-                foreignKey: 'idStand'
-            });
-            ventas.hasMany(models.detalle_ventas, {
+    class detalle_ventas extends Model {
+        static associate(models) {
+            detalle_ventas.belongsTo(models.ventas, {
                 foreignKey: 'idVenta'
+            });
+            detalle_ventas.belongsTo(models.productos, {
+                foreignKey: 'idProducto'
+            });
+            detalle_ventas.hasMany(models.detalle_pago_ventas, {
+                foreignKey: 'idDetalleVenta'
             });
         }
     }
 
-    ventas.init({
-        idVenta: {
+    detalle_ventas.init({
+        idDetalleVenta: {
             type: DataTypes.INTEGER,
             autoIncrement: true,
             primaryKey: true
         },
-        totalVenta: {
-            type: DataTypes.DECIMAL(10,2),
+        cantidad: {
+            type: DataTypes.INTEGER,
             allowNull: false
         },
-        fechaVenta: {
-            type: DataTypes.DATE,
+        subTotal: {
+            type: DataTypes.DECIMAL(10, 2),
             allowNull: false
+        },
+        donacion: {
+            type: DataTypes.DECIMAL(10, 2),
+            allowNull: false,
+            defaultValue: 0.00
         },
         estado: {
             type: DataTypes.INTEGER,
             allowNull: false,
             defaultValue: 1
         },
-        idTipoPublico: {
+        idVenta: {
             type: DataTypes.INTEGER,
             allowNull: false
         },
-        idStand: {
+        idProducto: {
             type: DataTypes.INTEGER,
             allowNull: false
         },
@@ -51,15 +56,14 @@ module.exports = (sequelize, DataTypes) => {
         updatedAt: {
             type: DataTypes.DATE,
             allowNull: false,
-            defaultValue: DataTypes.NOW 
+            defaultValue: DataTypes.NOW
         }
-    },{
+    }, {
         sequelize,
-        modelName: 'ventas',
-        tableName: 'ventas',
+        modelName: 'detalle_ventas',
+        tableName: 'detalle_ventas',
         timestamps: true
     });
 
-    return ventas;
-
+    return detalle_ventas;
 };

@@ -55,6 +55,8 @@ const detallePagoRifasController = require('../controllers/detallePagoRifasContr
 const aspirantesController = require('../controllers/aspirantesController');
 const recaudacion_eventosController = require('../controllers/recaudacion_eventosController');
 const bitacorasController = require('../controllers/bitacorasController');
+const detalle_ventasController = require('../controllers/detalle_ventasController');
+const detalle_pago_ventasController = require('../controllers/detalle_pago_ventasController');
 
 
 module.exports = (app) => {
@@ -443,6 +445,7 @@ module.exports = (app) => {
 
     // * RUTAS DE ASIGANCION DE STANDS
     router.get('/asignacion_stands', asignacionStandsController.find);
+    router.get('/asignacion_stands/voluntarios_por_stand', asignacionStandsController.findVoluntariosByStand);
     router.get('/asignacion_stands/activos', asignacionStandsController.findActive);
     router.get('/asignacion_stands/inactivos', asignacionStandsController.findInactive);
     router.get('/asignacion_stands/:id', asignacionStandsController.findById);
@@ -522,6 +525,7 @@ module.exports = (app) => {
     router.get('/ventas', ventasController.findAll);
     router.get('/ventas/:id', ventasController.findById);
     router.post('/ventas', ventasController.create);
+    router.put('/ventasUpdate/:id', ventasController.update);
     
     //* RUTAS DETALLE PAGO RIFAS
     router.get('/detallespago', detallePagoRifasController.findAll);
@@ -553,6 +557,18 @@ module.exports = (app) => {
     router.post('/bitacora/create', bitacorasController.createBitacora);
     router.put('/bitacora/update/:id', bitacorasController.updateBitacora);
     router.delete('/bitacora/delete/:id', bitacorasController.deleteBitacora);
+
+    // * RUTAS PARA DETALLE VENTAS
+    app.get('/detalle_ventas', detalle_ventasController.findAll);
+    app.get('/detalle_ventas/:id', detalle_ventasController.findById);
+    app.post('/detalle_ventas', detalle_ventasController.create);
+    app.put('/detalle_ventas/:id', detalle_ventasController.update);
+
+    // * RUTAS DETALLE PAGO VENTAS
+    app.get('/detalle_pago_ventas', detalle_pago_ventasController.findAll);
+    app.get('/detalle_pago_ventas/:id', detalle_pago_ventasController.findById);
+    app.post('/detalle_pago_ventas', detalle_pago_ventasController.create);
+    app.put('/detalle_pago_ventas/update/:id', detalle_pago_ventasController.update);
 
     app.use('/', router);
 
