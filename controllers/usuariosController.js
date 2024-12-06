@@ -376,23 +376,33 @@ module.exports = {
 
     hashPassword,
 
-    async verifyChangedPassword(req, res){
+    async verifyChangedPassword(req, res) {
         try {
-            const users = await USERS.findAll({});
+            const idUsuario = req.userId; // Obtenido del token
+            console.log("ID del usuario autenticado:", idUsuario);
     
-            const dataUsers = users.map(user => {
-                const { contrasenia, token, tokenExpiresAt, ...userWithoutPasswordAndTokens } = user.dataValues;
-                return userWithoutPasswordAndTokens;
+            const user = await USERS.findByPk(idUsuario, {
+                attributes: ['changedPassword'], // Solo obtenemos los campos necesarios
             });
-
-            if(changedPassword === 0){
-                return { ...userWithoutPasswordAndTokens, message: 'Necesitas cambiar tu contraseña.', changedPassword };
+    
+            if (!user) {
+                return res.status(404).send({ message: 'Usuario no encontrado.' });
             }
     
-            return res.status(200).send(dataUsers);
+            if (user.changedPassword === 0) {
+                return res.status(200).send({
+                    changedPassword: 0,
+                    message: 'Necesitas cambiar tu contraseña.',
+                });
+            }
+    
+            return res.status(200).send({
+                changedPassword: 1,
+                message: 'Tu contraseña ya ha sido cambiada.',
+            });
         } catch (error) {
-            console.error('Error al recuperar los datos:', error);
-            return res.status(500).send({ message: 'Ocurrió un error al recuperar los datos.' });
+            console.error("Error al verificar el estado de la contraseña:", error);
+            return res.status(500).send({ message: 'Error interno del servidor.' });
         }
     }
 };

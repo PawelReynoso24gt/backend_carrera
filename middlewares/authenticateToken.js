@@ -1,39 +1,46 @@
-// middlewares/authenticateToken.js
 'use strict';
 const jwt = require('jsonwebtoken');
-const { usuarios: Usuarios } = require('../models'); // Asegúrate de que 'usuarios' sea el nombre correcto
+const { usuarios: Usuarios } = require('../models');
 const Sequelize = require('sequelize');
 
 function authenticateToken(req, res, next) {
     const authHeader = req.headers['authorization'];
-    const token = authHeader && authHeader.split(' ')[1];
+    const token = authHeader && authHeader.split(' ')[1]; // Extraer el token del encabezado Authorization
 
-    if (token == null) return res.sendStatus(401); // Si no hay token, retorna 401 (Unauthorized)
+    if (!token) {
+        return res.status(401).send({ message: 'Token no proporcionado.' }); // Retorna 401 si no hay token
+    }
 
-    // Verificar si el token es válido en la base de datos
+    // Verificar si el token existe y no ha expirado en la base de datos
     Usuarios.findOne({
         where: {
             token: token,
             tokenExpiresAt: {
-                [Sequelize.Op.gt]: new Date() // Verifica que el token no haya expirado
+                [Sequelize.Op.gt]: new Date() // Verificar que el token no ha expirado
             }
         }
     })
-    .then(usuario => {
-        if (!usuario) return res.sendStatus(403); // Si el token no es válido, retorna 403 (Forbidden)
+        .then(usuario => {
+            if (!usuario) {
+                return res.status(403).send({ message: 'Token inválido o expirado.' }); // Retorna 403 si el token no es válido
+            }
 
-        jwt.verify(token, process.env.SECRET_KEY, (err, user) => {
-            if (err) return res.sendStatus(403); // Si el token no es válido, retorna 403 (Forbidden)
+            // Verificar el token con la clave secreta
+            jwt.verify(token, process.env.SECRET_KEY, (err, decoded) => {
+                if (err) {
+                    console.error('Error al verificar el token:', err);
+                    return res.status(403).send({ message: 'Token inválido o expirado.' });
+                }
 
-            req.user = user; // Guardar la información del usuario en la request para usarla en las rutas
-            next(); // Continuar con la siguiente función middleware o la ruta
+                // Adjuntar el `idUsuario` al request para usarlo en los controladores
+                req.userId = decoded.idUsuario; // Extraer `idUsuario` del token decodificado
+                next(); // Continuar al siguiente middleware o controlador
+            });
+        })
+        .catch(err => {
+            console.error('Error al verificar el token en la base de datos:', err);
+            return res.status(500).send({ message: 'Error interno del servidor.' }); // Retorna 500 en caso de error interno
         });
-    })
-    .catch(err => {
-        console.error('Error al verificar el token:', err);
-        return res.sendStatus(500); // Error interno del servidor
-    });
 }
 
-// Cambiar la exportación para ser una función en lugar de un objeto
 module.exports = authenticateToken;
