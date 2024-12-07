@@ -268,7 +268,6 @@ module.exports = {
         const camposActualizados = {};
 
         if (datos.usuario !== undefined) camposActualizados.usuario = datos.usuario;
-        if (datos.changedPassword !== undefined) camposActualizados.usuario = datos.usuario;
         if (datos.estado !== undefined) camposActualizados.estado = datos.estado;
         if (datos.idRol !== undefined) camposActualizados.idRol = datos.idRol;
         if (datos.idSede !== undefined) camposActualizados.idSede = datos.idSede;
@@ -315,6 +314,7 @@ module.exports = {
 
             // Actualizar la contraseña con SHA-256
             user.contrasenia = hashPassword(newPassword);
+            user.changedPassword = 1; // Marcar la contraseña como cambiada
             await user.save();
 
             return res.status(200).send('La contraseña ha sido actualizada');
@@ -376,23 +376,57 @@ module.exports = {
 
     hashPassword,
 
-    async verifyChangedPassword(req, res){
+    async verifyChangedPassword(req, res) {
         try {
-            const users = await USERS.findAll({});
+            const idUsuario = req.userId; // Obtenido del token
+            // console.log("ID del usuario autenticado:", idUsuario);
     
-            const dataUsers = users.map(user => {
-                const { contrasenia, token, tokenExpiresAt, ...userWithoutPasswordAndTokens } = user.dataValues;
-                return userWithoutPasswordAndTokens;
+            const user = await USERS.findByPk(idUsuario, {
+                attributes: ['changedPassword'], // Solo obtenemos los campos necesarios
             });
-
-            if(changedPassword === 0){
-                return { ...userWithoutPasswordAndTokens, message: 'Necesitas cambiar tu contraseña.', changedPassword };
+    
+            if (!user) {
+                return res.status(404).send({ message: 'Usuario no encontrado.' });
             }
     
-            return res.status(200).send(dataUsers);
+            if (user.changedPassword === 0) {
+                return res.status(200).send({
+                    changedPassword: 0,
+                    message: 'Necesitas cambiar tu contraseña.',
+                });
+            }
+    
+            return res.status(200).send({
+                changedPassword: 1,
+                message: 'Tu contraseña ya ha sido cambiada.',
+            });
         } catch (error) {
-            console.error('Error al recuperar los datos:', error);
-            return res.status(500).send({ message: 'Ocurrió un error al recuperar los datos.' });
+            console.error("Error al verificar el estado de la contraseña:", error);
+            return res.status(500).send({ message: 'Error interno del servidor.' });
         }
-    }
+    },
+    
+    async renewToken(req, res) {
+        const token = req.headers.authorization?.split(" ")[1];
+    
+        if (!token) {
+            return res.status(401).json({ message: "Token no proporcionado." });
+        }
+    
+        try {
+            // Verificar el token y extraer el payload
+            const payload = jwt.verify(token, process.env.SECRET_KEY);
+    
+            // Generar un nuevo token con una nueva expiración
+            const newToken = jwt.sign(
+                { idUsuario: payload.idUsuario },
+                process.env.SECRET_KEY,
+                { expiresIn: "15m" } // Renueva por 15 minutos más
+            );
+    
+            return res.status(200).json({ token: newToken });
+        } catch (error) {
+            return res.status(401).json({ message: "Token inválido o expirado." });
+        }
+    }    
 };
