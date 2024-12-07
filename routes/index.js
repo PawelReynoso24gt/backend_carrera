@@ -63,18 +63,18 @@ module.exports = (app) => {
 
     // * LOGIN AND LOGOUT
     router.post('/usuarios/login', usuariosController.login); // Ruta para iniciar sesión, no requiere autenticación
-    router.post('/usuarios', usuariosController.create); // Ruta para crear un usuario, no requiere autenticación
 
     // ! Todas las rutas a continuación requieren autenticación
-    // router.use(authenticateToken); // Middleware para proteger las rutas con autenticación
+    router.use(authenticateToken); // Middleware para proteger las rutas con autenticación
 
 
     // * USUARIOS
     router.get('/usuarios/activos', usuariosController.find);
     router.get('/usuarios', usuariosController.findAllUsers);
     router.get('/usuariosById/:id', usuariosController.findById);
-    router.get('/usuarios/verify', usuariosController.verifyChangedPassword);
+    router.get('/usuarios/verify/:idUsuario?', usuariosController.verifyChangedPassword);
     router.post('/usuarios', usuariosController.create);
+    router.post("/renew", usuariosController.renewToken);
     router.put('/usuarios/:id', usuariosController.update);
     router.put('/usuarios/:id/contrasenia', usuariosController.updatePassword);
     router.put('/usuarios/:id/reset', usuariosController.resetPassword);

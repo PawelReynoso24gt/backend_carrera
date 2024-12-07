@@ -1,13 +1,24 @@
 'use strict';
 const db = require("../models");
 const SOLICITUD_TALONARIOS = db.solicitudTalonarios;
+const VOLUNTARIOS = db.voluntarios;
+const PERSONAS = db.personas;
 
 // Métodos CRUD
 module.exports = {
 
     async getAll(req, res) {
         try {
-            const solicitudes = await SOLICITUD_TALONARIOS.findAll();
+            const solicitudes = await SOLICITUD_TALONARIOS.findAll({
+                include: [{
+                    model: VOLUNTARIOS,
+                    attributes: ['idVoluntario', 'idPersona'],
+                    include: [{ 
+                        model: PERSONAS, 
+                        attributes: ['idPersona', 'nombre'] 
+                    }]
+                }]
+            });            
             return res.status(200).json(solicitudes);
         } catch (error) {
             console.error('Error al recuperar las solicitudes:', error);
