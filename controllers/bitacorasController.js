@@ -20,11 +20,83 @@ module.exports = {
     }
   },
 
-   // Obtener los problemas detectados
+  // Obtener los problemas detectados con información del usuario
   async findProblemaDetectado(req, res) {
     try {
       const bitacoras = await Bitacora.findAll({
         where: { estado: 'problema detectado' },
+        include: [
+          {
+            model: db.usuarios, // El modelo relacionado
+            as: 'usuario', // Alias definido en la asociación del modelo de bitácoras
+            attributes: ['idUsuario', 'usuario'], // Campos específicos que quieres traer
+            include: [
+              {
+                model: db.personas, // Incluir el modelo relacionado con usuarios (opcional)
+                as: 'persona', // Alias definido en el modelo
+                attributes: ['idPersona', 'nombre'], // Campos que quieras de personas
+              },
+            ],
+          },
+        ],
+      });
+      return res.status(200).json(bitacoras);
+    } catch (error) {
+      console.error('Error al recuperar las bitácoras:', error);
+      return res.status(500).json({
+        message: 'Ocurrió un error al recuperar los datos.',
+      });
+    }
+  },
+
+  // Obtener los problemas en revisión
+  async findProblemaRevision(req, res) {
+    try {
+      const bitacoras = await Bitacora.findAll({
+        where: { estado: 'problema en revisión' },
+        include: [
+          {
+            model: db.usuarios, // El modelo relacionado
+            as: 'usuario', // Alias definido en la asociación del modelo de bitácoras
+            attributes: ['idUsuario', 'usuario'], // Campos específicos que quieres traer
+            include: [
+              {
+                model: db.personas, // Incluir el modelo relacionado con usuarios (opcional)
+                as: 'persona', // Alias definido en el modelo
+                attributes: ['idPersona', 'nombre'], // Campos que quieras de personas
+              },
+            ],
+          },
+        ],
+      });
+      return res.status(200).json(bitacoras);
+    } catch (error) {
+      console.error('Error al recuperar las bitácoras:', error);
+      return res.status(500).json({
+        message: 'Ocurrió un error al recuperar los datos.',
+      });
+    }
+  },
+
+  // Obtener los problemas solucionados
+  async findProblemaSolucionado(req, res) {
+    try {
+      const bitacoras = await Bitacora.findAll({
+        where: { estado: 'problema solucionado' },
+        include: [
+          {
+            model: db.usuarios, // El modelo relacionado
+            as: 'usuario', // Alias definido en la asociación del modelo de bitácoras
+            attributes: ['idUsuario', 'usuario'], // Campos específicos que quieres traer
+            include: [
+              {
+                model: db.personas, // Incluir el modelo relacionado con usuarios (opcional)
+                as: 'persona', // Alias definido en el modelo
+                attributes: ['idPersona', 'nombre'], // Campos que quieras de personas
+              },
+            ],
+          },
+        ],
       });
       return res.status(200).json(bitacoras);
     } catch (error) {
