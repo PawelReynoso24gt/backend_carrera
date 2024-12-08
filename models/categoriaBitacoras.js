@@ -6,7 +6,7 @@ module.exports = (sequelize, DataTypes) => {
         static associate(models) {
             categoria_bitacoras.hasMany(models.bitacoras, {
                 foreignKey: 'idCategoriaBitacora'
-             });
+            });
         }
     }
 

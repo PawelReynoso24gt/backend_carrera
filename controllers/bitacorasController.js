@@ -20,6 +20,21 @@ module.exports = {
     }
   },
 
+   // Obtener los problemas detectados
+  async findProblemaDetectado(req, res) {
+    try {
+      const bitacoras = await Bitacora.findAll({
+        where: { estado: 'problema detectado' },
+      });
+      return res.status(200).json(bitacoras);
+    } catch (error) {
+      console.error('Error al recuperar las bitácoras:', error);
+      return res.status(500).json({
+        message: 'Ocurrió un error al recuperar los datos.',
+      });
+    }
+  },
+
   // Obtener una bitácora por ID
   async findById(req, res) {
     const id = req.params.id;

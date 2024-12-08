@@ -65,7 +65,7 @@ module.exports = (app) => {
     router.post('/usuarios/login', usuariosController.login); // Ruta para iniciar sesión, no requiere autenticación
 
     // ! Todas las rutas a continuación requieren autenticación
-    router.use(authenticateToken); // Middleware para proteger las rutas con autenticación
+    // router.use(authenticateToken); // Middleware para proteger las rutas con autenticación
 
 
     // * USUARIOS
@@ -553,6 +553,7 @@ module.exports = (app) => {
 
     // * RUTAS BITACORAS
     router.get('/bitacora', bitacorasController.find);
+    router.get('/bitacora/problemas', bitacorasController.findProblemaDetectado);
     router.get('/bitacora/:id', bitacorasController.findById);
     router.post('/bitacora/create', bitacorasController.createBitacora);
     router.put('/bitacora/update/:id', bitacorasController.updateBitacora);
