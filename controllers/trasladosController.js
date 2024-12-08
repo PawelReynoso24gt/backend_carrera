@@ -2,7 +2,7 @@
 
 const db = require('../models');
 const Sequelize = require('sequelize');
-const TRASLADOS = db.Traslado;
+const TRASLADOS = db.traslados;
 const TIPO_TRASLADOS = db.TipoTraslado;
 
 module.exports = {

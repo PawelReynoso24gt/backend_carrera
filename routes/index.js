@@ -446,6 +446,8 @@ module.exports = (app) => {
     // * RUTAS DE ASIGANCION DE STANDS
     router.get('/asignacion_stands', asignacionStandsController.find);
     router.get('/asignacion_stands/voluntarios_por_stand', asignacionStandsController.findVoluntariosByStand);
+    router.get('/asignacion_stands/voluntarios_por_stand/activos', asignacionStandsController.findVoluntariosByActiveStands);
+    router.get('/asignacion_stands/voluntarios_por_stand/inactivos', asignacionStandsController.findVoluntariosByInactiveStands);
     router.get('/asignacion_stands/activos', asignacionStandsController.findActive);
     router.get('/asignacion_stands/inactivos', asignacionStandsController.findInactive);
     router.get('/asignacion_stands/:id', asignacionStandsController.findById);
