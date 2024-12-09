@@ -11,13 +11,33 @@ module.exports = {
     async find(req, res) {
         try {
             const productos = await PRODUCTOS.findAll({
-                include: {
-                    model: CATEGORIAS,
-                    attributes: ["idCategoria", "nombreCategoria"],
-                },
+                include: [
+                    {
+                        model: CATEGORIAS,
+                        attributes: ["idCategoria", "nombreCategoria"],
+                    },
+                    {
+                        model: db.detalle_stands,
+                        as: "detallesStands",
+                        attributes: ["idDetalleStands", "cantidad", "estado", "idStand"],
+                        include: {
+                            model: db.stands,
+                            as: "stand",
+                            attributes: ["idStand", "nombreStand"],
+                        },
+                    },
+                    {
+                        model: db.detalle_productos,
+                        attributes: ["idDetalleProductos", "cantidad", "estado", "idSede"],
+                        include: {
+                            model: db.sedes,
+                            attributes: ["idSede", "nombreSede"],
+                        },
+                    },
+                ],
                 where: {
-                    estado: 1
-                }
+                    estado: 1,
+                },
             });
             return res.status(200).json(productos);
         } catch (error) {
@@ -34,10 +54,30 @@ module.exports = {
 
         try {
             const producto = await PRODUCTOS.findByPk(id, {
-                include: {
-                    model: CATEGORIAS,
-                    attributes: ["idCategoria", "nombreCategoria"],
-                }
+                include: [
+                    {
+                        model: CATEGORIAS,
+                        attributes: ["idCategoria", "nombreCategoria"],
+                    },
+                    {
+                        model: db.detalle_stands,
+                        as: "detallesStands",
+                        attributes: ["idDetalleStands", "cantidad", "estado", "idStand"],
+                        include: {
+                            model: db.stands,
+                            as: "stand",
+                            attributes: ["idStand", "nombreStand"],
+                        },
+                    },
+                    {
+                        model: db.detalle_productos,
+                        attributes: ["idDetalleProductos", "cantidad", "estado", "idSede"],
+                        include: {
+                            model: db.sedes,
+                            attributes: ["idSede", "nombreSede"],
+                        },
+                    },
+                ],
             });
 
             if (!producto) {
@@ -214,13 +254,33 @@ module.exports = {
     async findActive(req, res) {
         try {
             const productos = await PRODUCTOS.findAll({
-                include: {
-                    model: CATEGORIAS,
-                    attributes: ["idCategoria", "nombreCategoria"],
-                },
+                include: [
+                    {
+                        model: CATEGORIAS,
+                        attributes: ["idCategoria", "nombreCategoria"],
+                    },
+                    {
+                        model: db.detalle_stands,
+                        as: "detallesStands",
+                        attributes: ["idDetalleStands", "cantidad", "estado", "idStand"],
+                        include: {
+                            model: db.stands,
+                            as: "stand",
+                            attributes: ["idStand", "nombreStand"],
+                        },
+                    },
+                    {
+                        model: db.detalle_productos,
+                        attributes: ["idDetalleProductos", "cantidad", "estado", "idSede"],
+                        include: {
+                            model: db.sedes,
+                            attributes: ["idSede", "nombreSede"],
+                        },
+                    },
+                ],
                 where: {
-                    estado: 1
-                }
+                    estado: 1,
+                },
             });
             return res.status(200).json(productos);
         } catch (error) {
@@ -235,13 +295,33 @@ module.exports = {
     async findInactive(req, res) {
         try {
             const productos = await PRODUCTOS.findAll({
-                include: {
-                    model: CATEGORIAS,
-                    attributes: ["idCategoria", "nombreCategoria"],
-                },
+                include: [
+                    {
+                        model: CATEGORIAS,
+                        attributes: ["idCategoria", "nombreCategoria"],
+                    },
+                    {
+                        model: db.detalle_stands,
+                        as: "detallesStands",
+                        attributes: ["idDetalleStands", "cantidad", "estado", "idStand"],
+                        include: {
+                            model: db.stands,
+                            as: "stand",
+                            attributes: ["idStand", "nombreStand"],
+                        },
+                    },
+                    {
+                        model: db.detalle_productos,
+                        attributes: ["idDetalleProductos", "cantidad", "estado", "idSede"],
+                        include: {
+                            model: db.sedes,
+                            attributes: ["idSede", "nombreSede"],
+                        },
+                    },
+                ],
                 where: {
-                    estado: 0
-                }
+                    estado: 0,
+                },
             });
             return res.status(200).json(productos);
         } catch (error) {
