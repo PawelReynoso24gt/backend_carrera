@@ -70,6 +70,7 @@ module.exports = (app) => {
 
     // * USUARIOS
     router.get('/usuarios/activos', usuariosController.find);
+    router.get('/usuarios/me', usuariosController.getLoggedUser);
     router.get('/usuarios', usuariosController.findAllUsers);
     router.get('/usuariosById/:id', usuariosController.findById);
     router.get('/usuarios/verify/:idUsuario?', usuariosController.verifyChangedPassword);
