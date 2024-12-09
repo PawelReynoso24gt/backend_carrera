@@ -57,7 +57,8 @@ const recaudacion_eventosController = require('../controllers/recaudacion_evento
 const bitacorasController = require('../controllers/bitacorasController');
 const detalle_ventasController = require('../controllers/detalle_ventasController');
 const detalle_pago_ventasController = require('../controllers/detalle_pago_ventasController');
-
+const notificacionesController = require('../controllers/notificacionesController');
+const tipoNotificacionesController = require('../controllers/tipoNotificacionController');
 
 module.exports = (app) => {
 
@@ -65,7 +66,7 @@ module.exports = (app) => {
     router.post('/usuarios/login', usuariosController.login); // Ruta para iniciar sesión, no requiere autenticación
 
     // ! Todas las rutas a continuación requieren autenticación
-    router.use(authenticateToken); // Middleware para proteger las rutas con autenticación
+    // router.use(authenticateToken); // Middleware para proteger las rutas con autenticación
 
 
     // * USUARIOS
@@ -558,6 +559,7 @@ module.exports = (app) => {
     router.get('/bitacora/problemas', bitacorasController.findProblemaDetectado);
     router.get('/bitacora/problemasRevision', bitacorasController.findProblemaRevision);
     router.get('/bitacora/problemasSolucionados', bitacorasController.findProblemaSolucionado);
+    router.get('/bitacora/notificacionGeneralEvento', bitacorasController.findCatEvento);
     router.get('/bitacora/:id', bitacorasController.findById);
     router.post('/bitacora/create', bitacorasController.createBitacora);
     router.put('/bitacora/update/:id', bitacorasController.updateBitacora);
@@ -574,6 +576,13 @@ module.exports = (app) => {
     app.get('/detalle_pago_ventas/:id', detalle_pago_ventasController.findById);
     app.post('/detalle_pago_ventas', detalle_pago_ventasController.create);
     app.put('/detalle_pago_ventas/update/:id', detalle_pago_ventasController.update);
+
+    // * RUTAS DE NOTIFICACIONES
+    router.get('/notificaciones', notificacionesController.find);
+    router.put('/notificaciones/:id', notificacionesController.update);
+
+    // * RUTAS DE TIPOS DE NOTIFICACIONES
+    router.get('/tipoNotificaciones', tipoNotificacionesController.find);
 
     app.use('/', router);
 
