@@ -55,7 +55,9 @@ function validatePasswordChange(currentPassword, newPassword) {
 function generateToken(user) {
     const payload = {
         idUsuario: user.idUsuario,
-        usuario: user.usuario
+        usuario: user.usuario,
+        idRol: user.idRol,
+        idSede: user.idSede
     };
 
     // Generar un token firmado con una duración de 1 hora
