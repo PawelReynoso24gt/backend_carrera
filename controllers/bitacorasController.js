@@ -20,6 +20,21 @@ module.exports = {
     }
   },
 
+  // Obtener todas las bitácoras de notificación general
+  async findCatEvento(req, res) {
+    try {
+      const bitacoras = await Bitacora.findAll({
+        where: { estado: 'mostrar', idCategoriaBitacora: 7 },
+      });
+      return res.status(200).json(bitacoras);
+    } catch (error) {
+      console.error('Error al recuperar las bitácoras:', error);
+      return res.status(500).json({
+        message: 'Ocurrió un error al recuperar los datos.',
+      });
+    }
+  },
+
   // Obtener los problemas detectados con información del usuario
   async findProblemaDetectado(req, res) {
     try {
