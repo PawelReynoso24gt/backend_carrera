@@ -53,6 +53,7 @@ function validatePasswordChange(currentPassword, newPassword) {
 
 // Función para generar un token JWT
 function generateToken(user) {
+    //console.log('Datos del usuario antes de generar el token:', user);
     const payload = {
         idUsuario: user.idUsuario,
         usuario: user.usuario,
@@ -62,20 +63,30 @@ function generateToken(user) {
 
     // Generar un token firmado con una duración de 1 hora
     const token = jwt.sign(payload, process.env.SECRET_KEY, { expiresIn: '1h' });
+    //console.log('Token generado:', token); // Imprime el token generado
 
     return token;
 }
 
 // Crear un nuevo token y almacenar en la base de datos
-async function createToken(userId) {
-    const token = generateToken({ idUsuario: userId });
+async function createToken(user) {
+    // Extrae solo los valores planos del usuario
+    const userData = user.get({ plain: true });
+
+    const token = generateToken({
+        idUsuario: userData.idUsuario,
+        usuario: userData.usuario,
+        idRol: userData.idRol,
+        idSede: userData.idSede
+    });
+
     const expiresAt = new Date(Date.now() + 3600000); // Expira en 1 hora
 
     await USERS.update({
         token,
         tokenExpiresAt: expiresAt
     }, {
-        where: { idUsuario: userId }
+        where: { idUsuario: userData.idUsuario }
     });
 
     return token;
@@ -103,7 +114,8 @@ module.exports = {
                     usuario: usuario,
                     contrasenia: hashPassword(contrasenia),
                     estado: 1 // Verificamos que el usuario esté activo
-                }
+                },
+                attributes: ['idUsuario', 'usuario', 'idRol', 'idSede']
             });
 
             if (!user) {
@@ -113,7 +125,7 @@ module.exports = {
             }
 
             // Generar el token JWT y almacenarlo en la base de datos
-            const token = await createToken(user.idUsuario);
+            const token = await createToken(user);
 
             return res.status(200).send({
                 message: 'Inicio de sesión exitoso.',
