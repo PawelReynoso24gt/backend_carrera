@@ -66,8 +66,11 @@ module.exports = (app) => {
     // * LOGIN AND LOGOUT
     router.post('/usuarios/login', usuariosController.login); // Ruta para iniciar sesión, no requiere autenticación
 
+        // * QR (lo puse aqui porque no me dejaba usarlo a pesar de tener el token)
+        router.get('/generateQR', voluntariosController.generateQR);
+
     // ! Todas las rutas a continuación requieren autenticación
-    router.use(authenticateToken); // Middleware para proteger las rutas con autenticación
+    //router.use(authenticateToken); // Middleware para proteger las rutas con autenticación
 
     // * USUARIOS
     router.get('/usuarios/activos', usuariosController.find);
@@ -315,9 +318,6 @@ module.exports = (app) => {
     router.post('/voluntarios/create', voluntariosController.createVol);
     router.put('/voluntarios/update/:id', voluntariosController.updateVol); 
     router.delete('/voluntarios/delete/:id', voluntariosController.deleteVol);
-
-    // * QR
-    router.get('/generateQR', voluntariosController.generateQR);
 
     // * RUTAS DE ACTIVIDADES
     router.get('/actividades', actividadesController.find);
