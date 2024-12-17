@@ -21,6 +21,11 @@ module.exports = (sequelize, DataTypes) => {
             personas.hasMany(models.aspirantes, {
                 foreignKey: 'idPersona',
             });
+
+            // Relación con notificaciones
+            personas.hasMany(models.notificaciones, {
+                foreignKey: 'idPersona',
+            });
         }
     }
 

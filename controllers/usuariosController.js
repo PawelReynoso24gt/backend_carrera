@@ -428,5 +428,36 @@ module.exports = {
         } catch (error) {
             return res.status(401).json({ message: "Token inválido o expirado." });
         }
-    }    
+    },
+
+    async getLoggedUser(req, res) {
+        try {
+          // El token incluye el `idUsuario` extraído previamente
+          const idUsuario = req.userId; // Asegúrate de que `req.userId` sea extraído del middleware de autenticación
+      
+          const user = await USERS.findOne({
+            where: { idUsuario },
+            include: [
+              {
+                model: PERSONAS,
+                as: "persona",
+                attributes: ["nombre"], // Solo necesitamos el nombre de la persona
+              },
+            ],
+          });
+      
+          if (!user) {
+            return res.status(404).json({ message: "Usuario no encontrado." });
+          }
+      
+          return res.status(200).json({
+            idUsuario: user.idUsuario,
+            usuario: user.usuario,
+            nombre: user.persona?.nombre || "Sin nombre",
+          });
+        } catch (error) {
+          console.error("Error al obtener el usuario logueado:", error);
+          return res.status(500).json({ message: "Error al obtener el usuario logueado." });
+        }
+      }
 };

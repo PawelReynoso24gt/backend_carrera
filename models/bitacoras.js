@@ -12,6 +12,11 @@ module.exports = (sequelize, DataTypes) => {
       bitacoras.belongsTo(models.categoria_bitacoras, {
         foreignKey: 'idCategoriaBitacora',
       });
+
+      // relacion con notificaciones
+      bitacoras.hasMany(models.notificaciones, {
+        foreignKey: 'idBitacora',
+      });
     }
   }
 

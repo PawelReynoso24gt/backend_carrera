@@ -4,18 +4,29 @@ const Sequelize = require('sequelize');
 const db = require('../models');
 const Horarios = db.horarios;
 
-// * Funcion para validar los datos para create
+// * Función para formatear a HH:MM:00
+function formatTimeToHHMM(time) {
+    const timeRegex = /^\d{2}:\d{2}$/; // Solo HH:MM
+    if (!timeRegex.test(time)) {
+        return null; // No válido
+    }
+    return `${time}:00`; // Añadir los segundos como 00
+}
+
+// * Función para validar los datos para create y update
 function validateData(data) {
-    const datetimeRegex = /^\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}$/;
+    const timeRegex = /^\d{2}:\d{2}:\d{2}$/; // Para validación final HH:MM:SS
 
     if (data.horarioInicio !== undefined) {
-        if (!datetimeRegex.test(data.horarioInicio)) {
-            return 'El formato de horarioInicio es inválido. Debe ser YYYY-MM-DD HH:MM:SS';
+        data.horarioInicio = formatTimeToHHMM(data.horarioInicio); // Formatear a HH:MM:00
+        if (!data.horarioInicio || !timeRegex.test(data.horarioInicio)) {
+            return 'El formato de horarioInicio es inválido. Debe ser HH:MM';
         }
     }
     if (data.horarioFinal !== undefined) {
-        if (!datetimeRegex.test(data.horarioFinal)) {
-            return 'El formato de horarioFinal es inválido. Debe ser YYYY-MM-DD HH:MM:SS';
+        data.horarioFinal = formatTimeToHHMM(data.horarioFinal); // Formatear a HH:MM:00
+        if (!data.horarioFinal || !timeRegex.test(data.horarioFinal)) {
+            return 'El formato de horarioFinal es inválido. Debe ser HH:MM';
         }
     }
     if (data.horarioInicio !== undefined && data.horarioFinal !== undefined) {
@@ -33,7 +44,7 @@ function validateData(data) {
 }
 
 module.exports = {
-    // * Get horarios activos
+    // * Obtener horarios activos
     async find(req, res) {
         try {
             const horarios = await Horarios.findAll({
@@ -49,7 +60,7 @@ module.exports = {
         }
     },
 
-    // * Get todos los horarios
+    // * Obtener todos los horarios
     async findAll(req, res) {
         try {
             const horarios = await Horarios.findAll();
@@ -61,7 +72,7 @@ module.exports = {
         }
     },
 
-    // * Get horario por ID
+    // * Obtener horario por ID
     async findById(req, res) {
         const id = req.params.id;
 
@@ -93,7 +104,7 @@ module.exports = {
         const data = {
             horarioInicio: datos.horarioInicio,
             horarioFinal: datos.horarioFinal,
-            estado: 1
+            estado: datos.estado !== undefined ? datos.estado : 1 // Valor predeterminado de estado: 1
         };
 
         try {
@@ -103,7 +114,7 @@ module.exports = {
             console.log(error);
             return res.status(500).json({ error: 'Error al insertar horario' });
         }
-    },    
+    },
 
     // * Actualizar horario
     async update(req, res) {
@@ -118,9 +129,15 @@ module.exports = {
 
         const camposActualizados = {};
 
-        if (datos.horarioInicio !== undefined) camposActualizados.horarioInicio = datos.horarioInicio;
-        if (datos.horarioFinal !== undefined) camposActualizados.horarioFinal = datos.horarioFinal;
-        if (datos.estado !== undefined) camposActualizados.estado = datos.estado;
+        if (datos.horarioInicio !== undefined) {
+            camposActualizados.horarioInicio = formatTimeToHHMM(datos.horarioInicio);
+        }
+        if (datos.horarioFinal !== undefined) {
+            camposActualizados.horarioFinal = formatTimeToHHMM(datos.horarioFinal);
+        }
+        if (datos.estado !== undefined) {
+            camposActualizados.estado = datos.estado;
+        }
 
         try {
             const [rowsUpdated] = await Horarios.update(camposActualizados, {
@@ -136,7 +153,7 @@ module.exports = {
             console.log(error);
             return res.status(500).json({ error: 'Error al actualizar horario' });
         }
-    },    
+    },
 
     // * Eliminar horario
     async delete(req, res) {
