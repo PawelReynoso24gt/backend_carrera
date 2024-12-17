@@ -12,12 +12,10 @@ module.exports = {
                 include: [
                     {
                         model: db.comisiones,
-                        as: 'comision',
                         attributes: ['idComision', 'comision', 'descripcion']
                     },
                     {
                         model: db.voluntarios,
-                        as: 'voluntario',
                         attributes: ['idVoluntario']
                     }
                 ]
@@ -37,12 +35,10 @@ module.exports = {
                 include: [
                     {
                         model: db.comisiones,
-                        as: 'comision',
                         attributes: ['idComision', 'comision']
                     },
                     {
                         model: db.voluntarios,
-                        as: 'voluntario',
                         attributes: ['idVoluntario']
                     }
                 ]
@@ -62,12 +58,10 @@ module.exports = {
                 include: [
                     {
                         model: db.comisiones,
-                        as: 'comision',
                         attributes: ['idComision', 'comision']
                     },
                     {
                         model: db.voluntarios,
-                        as: 'voluntario',
                         attributes: ['idVoluntario']
                     }
                 ]
@@ -85,8 +79,8 @@ module.exports = {
         try {
             const inscripcion = await INSCRIPCION_COMISION.findByPk(id, {
                 include: [
-                    { model: db.comisiones, as: 'comision', attributes: ['idComision', 'comision'] },
-                    { model: db.voluntarios, as: 'voluntario', attributes: ['idVoluntario'] }
+                    { model: db.comisiones, attributes: ['idComision', 'comision'] },
+                    { model: db.voluntarios, attributes: ['idVoluntario'] }
                 ]
             });
             if (!inscripcion) {
