@@ -99,14 +99,14 @@ module.exports = {
         const datos = req.body;
 
         // Validación de campos requeridos
-        if (!datos.fechaRegistro || !datos.fechaSalida || !datos.idPersona) {
+        if (!datos.fechaRegistro ||  !datos.idPersona) {
             return res.status(400).json({ message: 'Faltan campos requeridos.' });
         }
 
         const datos_ingreso = {
             codigoQR: generateQRCode(), // Generar el código QR
             fechaRegistro: datos.fechaRegistro,
-            fechaSalida: datos.fechaSalida,
+            fechaSalida: null,
             estado: datos.estado !== undefined ? datos.estado : 1,
             idPersona: datos.idPersona,
         };

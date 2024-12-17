@@ -3,6 +3,8 @@ const { where } = require("sequelize");
 const db = require("../models");
 const PERSONAS = db.personas;
 const MUNICIPIOS = db.municipios;
+const ASPIRANTES = db.aspirantes;
+
 
 // Métodos CRUD
 module.exports = {
@@ -98,19 +100,19 @@ module.exports = {
     // Crear una nueva persona
     async create(req, res) {
         const datos = req.body;
-
+    
         // Verificar campos requeridos
         if (!datos.nombre || !datos.fechaNacimiento || !datos.telefono || !datos.domicilio || !datos.CUI || !datos.correo || !datos.estado || !datos.idMunicipio) {
             return res.status(400).json({ message: 'Faltan campos requeridos.' });
         }
-
+    
         // Expresiones regulares para validaciones
         const regexNombre = /^[A-Za-záéíóúÁÉÍÓÚÑñ\s]+$/; // Solo letras y espacios
         const regexTelefono = /^\d{8}$/; // 8 dígitos
         const regexDomicilio = /^[A-Za-záéíóúÁÉÍÓÚÑñ0-9\s\.\-]+$/; // Letras, dígitos, espacios, puntos y guiones
         const regexCUI = /^\d{13}$/; // 13 dígitos
         const regexCorreo = /^[^\s@]+@[^\s@]+\.[^\s@]+$/; // Formato de correo electrónico
-
+    
         // Validaciones
         if (!regexNombre.test(datos.nombre)) {
             return res.status(400).json({ message: 'El nombre solo puede contener letras y espacios.' });
@@ -127,7 +129,7 @@ module.exports = {
         if (!regexCorreo.test(datos.correo)) {
             return res.status(400).json({ message: 'El correo electrónico no es válido.' });
         }
-
+    
         const nuevaPersona = { 
             nombre: datos.nombre,
             fechaNacimiento: datos.fechaNacimiento,
@@ -135,18 +137,34 @@ module.exports = {
             domicilio: datos.domicilio,
             CUI: datos.CUI,
             correo: datos.correo,
+            foto: datos.foto || 'SIN FOTO', // Asignar "SIN FOTO" si no se envía el dato
             estado: datos.estado !== undefined ? datos.estado : 1,
             idMunicipio: datos.idMunicipio
         };
-
+    
         try {
+            // Crear registro en la tabla personas
             const persona = await PERSONAS.create(nuevaPersona);
-            return res.status(201).json(persona);
+    
+            // Crear registro en la tabla aspirantes
+            const nuevoAspirante = {
+                idPersona: persona.idPersona, // Usamos el ID generado de la persona
+                fechaRegistro: new Date(), // Fecha actual como fecha de registro
+                estado: 1, // Estado por defecto
+            };
+            const aspirante = await ASPIRANTES.create(nuevoAspirante);
+    
+            return res.status(201).json({
+                message: 'Persona y aspirante creados correctamente.',
+                persona,
+                aspirante,
+            });
         } catch (error) {
-            console.error('Error al insertar la persona:', error);
-            return res.status(500).json({ error: 'Error al insertar la persona' });
+            console.error('Error al insertar la persona o el aspirante:', error);
+            return res.status(500).json({ error: 'Error al insertar la persona o el aspirante' });
         }
     },
+    
 
     // Actualizar una persona existente
     async update(req, res) {

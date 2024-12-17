@@ -65,7 +65,7 @@ module.exports = (app) => {
     router.post('/usuarios/login', usuariosController.login); // Ruta para iniciar sesión, no requiere autenticación
 
     // ! Todas las rutas a continuación requieren autenticación
-    router.use(authenticateToken); // Middleware para proteger las rutas con autenticación
+    //router.use(authenticateToken); // Middleware para proteger las rutas con autenticación
 
 
     // * USUARIOS
@@ -541,9 +541,11 @@ module.exports = (app) => {
     router.get('/aspirantes', aspirantesController.findAll);
     router.get('/aspirantes/activos', aspirantesController.findActive);
     router.get('/aspirantes/inactivos', aspirantesController.findInactive);
+    router.get('/aspirantes/estado/:idAspirante', aspirantesController.verifyStatus);
     router.post('/aspirantes', aspirantesController.create);
     router.put('/aspirantes/:idAspirante', aspirantesController.update);
-    router.get('/aspirantes/:idAspirante', aspirantesController.findById);
+    router.get('/aspirantes', aspirantesController.findAll);
+    router.put('/aspirantes/aceptar/:idAspirante', aspirantesController.acceptAspirante);
     router.delete('/aspirantes/:idAspirante', aspirantesController.delete);
 
     // * RUTAS RECAUDACION EVENTOS

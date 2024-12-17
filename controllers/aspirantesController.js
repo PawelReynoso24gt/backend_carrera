@@ -2,8 +2,71 @@
 
 const db = require('../models');
 const ASPIRANTES = db.aspirantes;
+const VOLUNTARIOS = db.voluntarios;
 
 module.exports = {
+    async acceptAspirante(req, res) {
+        const { idAspirante } = req.params;
+
+        try {
+            // Buscar el aspirante por ID
+            const aspirante = await ASPIRANTES.findByPk(idAspirante);
+
+            if (!aspirante) {
+                return res.status(404).json({ message: 'Aspirante no encontrado.' });
+            }
+
+            if (aspirante.estado === 0) {
+                return res.status(400).json({ message: 'El aspirante ya ha sido aceptado.' });
+            }
+
+            // Actualizar el estado del aspirante a inactivo (0)
+            aspirante.estado = 0;
+            await aspirante.save();
+
+            // Crear un nuevo voluntario en base al aspirante
+            const nuevoVoluntario = await VOLUNTARIOS.create({
+                idPersona: aspirante.idPersona,
+                codigoQR: `VOL-${aspirante.idPersona}-${Date.now()}`, // Generar un código QR único
+                fechaRegistro: new Date(),
+                estado: 1, // Estado activo
+            });
+
+            // Retornar la respuesta con el aspirante actualizado y el voluntario creado
+            return res.status(200).json({
+                message: 'Aspirante aceptado y voluntario creado exitosamente.',
+                aspirante,
+                voluntario: nuevoVoluntario,
+            });
+        } catch (error) {
+            console.error('Error al aceptar el aspirante:', error);
+            return res.status(500).json({
+                message: error.message || 'Error al aceptar el aspirante y crear el voluntario.',
+            });
+        }
+    },
+
+        // * Verificar el estado de un aspirante por ID
+    async verifyStatus(req, res) {
+        const { idAspirante } = req.params;
+
+        try {
+            // Buscar el aspirante por su ID
+            const aspirante = await ASPIRANTES.findByPk(idAspirante);
+
+            if (!aspirante) {
+                return res.status(404).json({ message: 'Aspirante no encontrado.' });
+            }
+
+            // Retornar el estado del aspirante
+            return res.status(200).json({ estado: aspirante.estado });
+        } catch (error) {
+            console.error('Error al verificar el estado del aspirante:', error);
+            return res.status(500).json({
+                message: error.message || 'Error al verificar el estado del aspirante.',
+            });
+        }
+    },
 
     // * Listar todos los aspirantes
     async findAll(req, res) {
