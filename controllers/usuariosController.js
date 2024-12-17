@@ -115,7 +115,7 @@ module.exports = {
                     contrasenia: hashPassword(contrasenia),
                     estado: 1 // Verificamos que el usuario esté activo
                 },
-                attributes: ['idUsuario', 'usuario', 'idRol', 'idSede']
+                //attributes: ['idUsuario', 'usuario', 'idRol', 'idSede']
             });
 
             if (!user) {
