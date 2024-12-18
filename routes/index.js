@@ -280,6 +280,7 @@ module.exports = (app) => {
     
     // * RUTAS DE COMISIONES
     router.get('/comisiones', comisionesController.find);
+    router.get('/comisiones/porevento', comisionesController.findByEvento);
     router.get('/comisiones/activos', comisionesController.findActive); 
     router.get('/comisiones/inactivos', comisionesController.findInactive);
     router.get('/comisiones/:id', comisionesController.findById);
