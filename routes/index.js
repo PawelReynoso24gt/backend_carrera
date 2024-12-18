@@ -246,6 +246,7 @@ module.exports = (app) => {
 
     // * DETALLE HORARIOS
     router.get('/detalle_horarios', detalleHorariosController.findAll);
+    router.get('/detalle_horarios/comisiones', detalleHorariosController.findByCategoriaComisiones);
     router.get('/detalle_horarios/activos', detalleHorariosController.findActive);
     router.get('/detalle_horarios/inactivos', detalleHorariosController.findInactive);
     router.get('/detalle_horarios/:id', detalleHorariosController.findById);
