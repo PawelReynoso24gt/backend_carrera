@@ -32,7 +32,7 @@ function validateDetalleHorarioData(data) {
 
 module.exports = {
     // * Get detalles de horarios activos
-    async find(req, res) {
+    async findActive(req, res) {
         try {
             const detalles = await DetalleHorarios.findAll({
                 where: {
@@ -48,10 +48,28 @@ module.exports = {
         }
     },
 
+    // * Get detalles de horarios activos
+    async findInactive(req, res) {
+        try {
+            const detalles = await DetalleHorarios.findAll({
+                where: {
+                    estado: 0 // Filtrar por estado 0
+                },
+                include: ['horario', 'categoriaHorario']
+            });
+            return res.status(200).send(detalles);
+        } catch (error) {
+            return res.status(500).send({
+                message: 'Ocurrió un error al recuperar los datos.'
+            });
+        }
+    },
+
     // * Get todos los detalles de horarios
     async findAll(req, res) {
         try {
             const detalles = await DetalleHorarios.findAll({
+                where: {estado: 1},
                 include: ['horario', 'categoriaHorario']
             });
             return res.status(200).send(detalles);
