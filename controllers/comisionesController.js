@@ -19,7 +19,19 @@ module.exports = {
                     {
                         model: db.detalle_horarios,
                         as: 'detalleHorario',
-                        attributes: ['idDetalleHorario', 'cantidadPersonas', 'estado']
+                        attributes: ['idDetalleHorario', 'cantidadPersonas', 'estado'],
+                        include: [ 
+                            { 
+                                model: db.horarios, 
+                                as: 'horario', 
+                                attributes: ['idHorario', 'horarioInicio', 'horarioFinal', 'estado'] 
+                            },
+                            { 
+                                model: db.categoria_horarios, 
+                                as: 'categoriaHorario', 
+                                attributes: ['idCategoriaHorario', 'categoria', 'estado'] 
+                            }
+                        ]
                     }
                 ],
                 where: {
@@ -51,7 +63,19 @@ module.exports = {
                     {
                         model: db.detalle_horarios,
                         as: 'detalleHorario',
-                        attributes: ['idDetalleHorario', 'cantidadPersonas', 'estado']
+                        attributes: ['idDetalleHorario', 'cantidadPersonas', 'estado'],
+                        include: [ 
+                            { 
+                                model: db.horarios, 
+                                as: 'horario', 
+                                attributes: ['idHorario', 'horarioInicio', 'horarioFinal', 'estado'] 
+                            },
+                            { 
+                                model: db.categoria_horarios, 
+                                as: 'categoriaHorario', 
+                                attributes: ['idCategoriaHorario', 'categoria', 'estado'] 
+                            }
+                        ]
                     }
                 ]
             });
@@ -80,7 +104,19 @@ module.exports = {
                     {
                         model: db.detalle_horarios,
                         as: 'detalleHorario',
-                        attributes: ['idDetalleHorario', 'cantidadPersonas', 'estado']
+                        attributes: ['idDetalleHorario', 'cantidadPersonas', 'estado'],
+                        include: [ 
+                            { 
+                                model: db.horarios, 
+                                as: 'horario', 
+                                attributes: ['idHorario', 'horarioInicio', 'horarioFinal', 'estado'] 
+                            },
+                            { 
+                                model: db.categoria_horarios, 
+                                as: 'categoriaHorario', 
+                                attributes: ['idCategoriaHorario', 'categoria', 'estado'] 
+                            }
+                        ]
                     }
                 ]
             });
