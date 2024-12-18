@@ -32,6 +32,13 @@ module.exports = {
     // Obtener inscripciones activas
     async findActive(req, res) {
         try {
+            const { eventoId } = req.query;
+
+             // Validar si el id del evento fue proporcionado
+             if (!eventoId) {
+                return res.status(400).json({ message: 'Se requiere el ID del evento.' });
+            }
+            
             const inscripciones = await INSCRIPCION_COMISION.findAll({
                 where: { estado: 1 },
                 include: [
