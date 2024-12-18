@@ -58,7 +58,8 @@ function generateToken(user) {
         idUsuario: user.idUsuario,
         usuario: user.usuario,
         idRol: user.idRol,
-        idSede: user.idSede
+        idSede: user.idSede,
+        idPersona: user.idPersona
     };
 
     // Generar un token firmado con una duración de 1 hora
@@ -77,7 +78,8 @@ async function createToken(user) {
         idUsuario: userData.idUsuario,
         usuario: userData.usuario,
         idRol: userData.idRol,
-        idSede: userData.idSede
+        idSede: userData.idSede,
+        idPersona: user.persona?.idPersona
     });
 
     const expiresAt = new Date(Date.now() + 3600000); // Expira en 1 hora
@@ -115,7 +117,12 @@ module.exports = {
                     contrasenia: hashPassword(contrasenia),
                     estado: 1 // Verificamos que el usuario esté activo
                 },
-                //attributes: ['idUsuario', 'usuario', 'idRol', 'idSede']
+                include: [
+                    {
+                        model: PERSONAS, // Relación con PERSONAS
+                        attributes: ['idPersona'], // Solo necesitamos idPersona
+                    },
+                ],
             });
 
             if (!user) {
