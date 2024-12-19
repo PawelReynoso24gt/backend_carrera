@@ -2,22 +2,22 @@
 const { Model } = require('sequelize');
 
 module.exports = (sequelize, DataTypes) => {
-    class detalle_ventas extends Model {
+    class detalle_ventas_stands extends Model {
         static associate(models) {
-            detalle_ventas.belongsTo(models.ventas, {
+            detalle_ventas_stands.belongsTo(models.ventas, {
                 foreignKey: 'idVenta'
             });
-            detalle_ventas.belongsTo(models.productos, {
+            detalle_ventas_stands.belongsTo(models.productos, {
                 foreignKey: 'idProducto'
             });
-            detalle_ventas.hasMany(models.detalle_pago_ventas, {
-                foreignKey: 'idDetalleVenta'
+            detalle_ventas_stands.hasMany(models.detalle_pago_ventas, {
+                foreignKey: 'idDetalleVentaStand'
             });
         }
     }
 
-    detalle_ventas.init({
-        idDetalleVenta: {
+    detalle_ventas_stands.init({
+        idDetalleVentaStand: {
             type: DataTypes.INTEGER,
             autoIncrement: true,
             primaryKey: true
@@ -48,6 +48,10 @@ module.exports = (sequelize, DataTypes) => {
             type: DataTypes.INTEGER,
             allowNull: false
         },
+        idStand: {
+            type: DataTypes.INTEGER,
+            allowNull: false
+        },
         createdAt: {
             type: DataTypes.DATE,
             allowNull: false,
@@ -60,10 +64,10 @@ module.exports = (sequelize, DataTypes) => {
         }
     }, {
         sequelize,
-        modelName: 'detalle_ventas',
-        tableName: 'detalle_ventas',
+        modelName: 'detalle_ventas_stands',
+        tableName: 'detalle_ventas_stands',
         timestamps: true
     });
 
-    return detalle_ventas;
+    return detalle_ventas_stands;
 };

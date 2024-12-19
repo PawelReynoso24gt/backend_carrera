@@ -118,6 +118,7 @@ module.exports = {
 
         const nuevaRifa = { 
             nombreRifa: datos.nombreRifa,
+            precioBoleto: datos.precioBoleto,
             descripcion: datos.descripcion,
             idSede: datos.idSede,
             estado: datos.estado !== undefined ? datos.estado : 1 
@@ -149,6 +150,10 @@ module.exports = {
                 return res.status(400).json({ message: 'El nombre de la rifa contiene caracteres no válidos.' });
             }
             camposActualizados.nombreRifa = datos.nombreRifa;
+        }
+
+        if (datos.precioBoleto !== undefined) {
+            camposActualizados.precioBoleto = datos.precioBoleto;
         }
 
         if (datos.descripcion !== undefined) {

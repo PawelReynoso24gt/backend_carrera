@@ -248,8 +248,10 @@ module.exports = (app) => {
     router.delete('/municipios/:id', municipiosController.deleteMunicipio);
 
     // * DETALLE HORARIOS
-    router.get('/detalle_horarios/activos', detalleHorariosController.find);
     router.get('/detalle_horarios', detalleHorariosController.findAll);
+    router.get('/detalle_horarios/comisiones', detalleHorariosController.findByCategoriaComisiones);
+    router.get('/detalle_horarios/activos', detalleHorariosController.findActive);
+    router.get('/detalle_horarios/inactivos', detalleHorariosController.findInactive);
     router.get('/detalle_horarios/:id', detalleHorariosController.findById);
     router.post('/detalle_horarios', detalleHorariosController.create);
     router.put('/detalle_horarios/:id', detalleHorariosController.update);
