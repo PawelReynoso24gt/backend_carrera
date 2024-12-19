@@ -60,6 +60,8 @@ const detalle_ventasController = require('../controllers/detalle_ventasControlle
 const detalle_pago_ventasController = require('../controllers/detalle_pago_ventasController');
 const notificacionesController = require('../controllers/notificacionesController');
 const tipoNotificacionesController = require('../controllers/tipoNotificacionController');
+const detalleVentaStandsController = require('../controllers/detalleVentaStandsController');
+const detalleVentasStands = require('../models/detalleVentasStands');
 
 module.exports = (app) => {
 
@@ -113,6 +115,7 @@ module.exports = (app) => {
 
     // * RUTAS DE EVENTOS
     router.get('/eventos', eventosController.findAll);
+    router.get('/eventos/reporte', eventosController.obtenerReporteEventos);
     router.get('/eventos/activas', eventosController.findActive);
     router.get('/eventos/inactivas', eventosController.findInactive);
     router.get('/eventos/:idEvento', eventosController.findById);
@@ -578,6 +581,9 @@ module.exports = (app) => {
     app.get('/detalle_pago_ventas/:id', detalle_pago_ventasController.findById);
     app.post('/detalle_pago_ventas', detalle_pago_ventasController.create);
     app.put('/detalle_pago_ventas/update/:id', detalle_pago_ventasController.update);
+
+    // * RUTAS DE VENTAS STAND
+    router.get('/reporte/playeras', detalleVentaStandsController.obtenerReportePlayeras);
 
     // * RUTAS DE NOTIFICACIONES
     router.get('/notificaciones', notificacionesController.find);

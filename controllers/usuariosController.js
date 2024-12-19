@@ -55,7 +55,8 @@ function validatePasswordChange(currentPassword, newPassword) {
 function generateToken(user) {
     const payload = {
         idUsuario: user.idUsuario,
-        usuario: user.usuario
+        usuario: user.usuario,
+        idSede: user.idSede
     };
 
     // Generar un token firmado con una duración de 1 hora
@@ -65,15 +66,19 @@ function generateToken(user) {
 }
 
 // Crear un nuevo token y almacenar en la base de datos
-async function createToken(userId) {
-    const token = generateToken({ idUsuario: userId });
+async function createToken(userId, sedeId) {
+    // Generar el token con el idUsuario y el idSede
+    const token = generateToken({ idUsuario: userId, idSede: sedeId });
+
+    // Establecer la expiración del token en 1 hora
     const expiresAt = new Date(Date.now() + 3600000); // Expira en 1 hora
 
+    // Actualizar el token en la base de datos
     await USERS.update({
-        token,
-        tokenExpiresAt: expiresAt
+        token,            // El token generado
+        tokenExpiresAt: expiresAt // Fecha de expiración del token
     }, {
-        where: { idUsuario: userId }
+        where: { idUsuario: userId }  // Actualizar solo por el idUsuario
     });
 
     return token;
@@ -111,7 +116,7 @@ module.exports = {
             }
 
             // Generar el token JWT y almacenarlo en la base de datos
-            const token = await createToken(user.idUsuario);
+            const token = await createToken(user.idUsuario, user.idSede);
 
             return res.status(200).send({
                 message: 'Inicio de sesión exitoso.',
