@@ -4,8 +4,8 @@ const { Model } = require('sequelize');
 module.exports = (sequelize, DataTypes) => {
     class detalle_pago_ventas extends Model {
         static associate(models) {
-            detalle_pago_ventas.belongsTo(models.detalle_ventas, {
-                foreignKey: 'idDetalleVenta'
+            detalle_pago_ventas.belongsTo(models.detalle_ventas_stands, {
+                foreignKey: 'idDetalleVentaStand'
             });
             detalle_pago_ventas.belongsTo(models.tipo_pagos, {
                 foreignKey: 'idTipoPago'
@@ -36,7 +36,7 @@ module.exports = (sequelize, DataTypes) => {
             type: DataTypes.TEXT,
             allowNull: true
         },
-        idDetalleVenta: {
+        idDetalleVentaStand: {
             type: DataTypes.INTEGER,
             allowNull: false
         },

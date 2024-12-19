@@ -7,10 +7,7 @@ module.exports = (sequelize, DataTypes) => {
             ventas.belongsTo(models.tipo_publicos, {
                 foreignKey: 'idTipoPublico'
             });
-            ventas.belongsTo(models.stands, {
-                foreignKey: 'idStand'
-            });
-            ventas.hasMany(models.detalle_ventas, {
+            ventas.hasMany(models.detalle_ventas_stands, {
                 foreignKey: 'idVenta'
             });
         }
