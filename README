@@ -13,9 +13,12 @@ A continuación, se describen los pasos necesarios para la implementación del p
 1. Clona este repositorio:
    ```bash
    git clone https://github.com/PawelReynoso24gt/backend_carrera.git
+   ```
 
 2. Instala las dependencias necesarias para el proyecto:
+    ```bash
     nmp install
+    ```
 
 ## Uso del proyecto
 
