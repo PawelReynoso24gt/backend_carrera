@@ -10,6 +10,9 @@ module.exports = (sequelize, DataTypes) => {
             ventas.hasMany(models.detalle_ventas_stands, {
                 foreignKey: 'idVenta'
             });
+            ventas.hasMany(models.detalle_ventas_voluntarios, {
+                foreignKey: 'idVenta'
+            });
         }
     }
 
@@ -21,7 +24,8 @@ module.exports = (sequelize, DataTypes) => {
         },
         totalVenta: {
             type: DataTypes.DECIMAL(10,2),
-            allowNull: false
+            allowNull: false,
+            defaultValue: 0.00
         },
         fechaVenta: {
             type: DataTypes.DATE,
@@ -33,10 +37,6 @@ module.exports = (sequelize, DataTypes) => {
             defaultValue: 1
         },
         idTipoPublico: {
-            type: DataTypes.INTEGER,
-            allowNull: false
-        },
-        idStand: {
             type: DataTypes.INTEGER,
             allowNull: false
         },

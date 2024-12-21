@@ -7,7 +7,10 @@ module.exports = (sequelize, DataTypes) => {
       tipo_pagos.hasMany(models.detalle_pago_recaudacion_rifas, {
         foreignKey: 'idTipoPago',
       });
-      tipo_pagos.hasMany(models.detalle_pago_ventas, {
+      tipo_pagos.hasMany(models.detalle_pago_ventas_stands, {
+        foreignKey: 'idTipoPago'
+      });
+      tipo_pagos.hasMany(models.detalle_pago_ventas_voluntarios, {
         foreignKey: 'idTipoPago'
       });
     }
