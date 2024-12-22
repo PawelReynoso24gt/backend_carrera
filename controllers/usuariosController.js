@@ -8,6 +8,7 @@ const USERS = db.usuarios;
 const ROLES = db.roles;
 const PERSONAS = db.personas;
 const VOLUNTARIOS = db.voluntarios;
+const EMPLEADO = db.empleados;
 
 // Función para hashear la contraseña usando SHA-256
 function hashPassword(password) {
@@ -62,6 +63,7 @@ function generateToken(user) {
         idSede: user.idSede,
         idPersona: user.idPersona,
         idVoluntario: user.idVoluntario,
+        idEmpleado: user.idEmpleado ?? null,
     };
 
     // Generar un token firmado con una duración de 1 hora
@@ -83,6 +85,7 @@ async function createToken(user, idVoluntario) {
         idSede: userData.idSede,
         idPersona: user.persona?.idPersona,
         idVoluntario: idVoluntario,
+        idEmpleado: userData.idEmpleado ?? null,
     });
 
     const expiresAt = new Date(Date.now() + 3600000); // Expira en 1 hora
@@ -129,6 +132,10 @@ module.exports = {
                                 model: VOLUNTARIOS, // Relación desde personas a voluntarios
                                 attributes: ['idVoluntario'], // Extraer idVoluntario
                             },
+                            {
+                                model: EMPLEADO, // Relación desde personas a empleados
+                                attributes: ['idEmpleado'], // Extraer idEmpleado
+                            }
                         ],
                     },
                 ],
