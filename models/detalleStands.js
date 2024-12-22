@@ -7,13 +7,11 @@ module.exports = (sequelize, DataTypes) => {
             // Relación con productos
             this.belongsTo(models.productos, {
                 foreignKey: 'idProducto',
-                as: 'producto'
             });
 
             // Relación con stands
             this.belongsTo(models.stands, {
                 foreignKey: 'idStand',
-                as: 'detallesStands'
             });
         }
     }

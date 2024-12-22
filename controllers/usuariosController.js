@@ -116,7 +116,7 @@ module.exports = {
             }
 
             // Generar el token JWT y almacenarlo en la base de datos
-            const token = await createToken(user.idUsuario, user.idSede);
+            const token = await createToken(user.idUsuario, user.idSede); 
 
             return res.status(200).send({
                 message: 'Inicio de sesión exitoso.',

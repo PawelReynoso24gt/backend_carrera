@@ -324,7 +324,7 @@ module.exports = {
                   {
                     model: asistencia_eventos,
                     as: 'asistencias',
-                    attributes: ['idEmpleado'],
+                    attributes: ['idInscripcionEvento'],
                     where: {
                       estado: 1  // Solo contar asistencias activas
                     }
@@ -345,7 +345,7 @@ module.exports = {
             const voluntariosAsistieron = new Set();
             evento.inscripciones.forEach(inscripcion => {
               inscripcion.asistencias.forEach(asistencia => {
-                voluntariosAsistieron.add(asistencia.idEmpleado);  // Usamos un Set para contar de manera única
+                voluntariosAsistieron.add(asistencia.idInscripcionEvento);  // Usamos un Set para contar de manera única
               });
             });
       

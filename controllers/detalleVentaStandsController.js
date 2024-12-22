@@ -35,11 +35,9 @@ module.exports = {
         include: [
           {
             model: DETALLE_VENTAS_STANDS,  // Incluir detalles de ventas de stands
-            as: 'detalleVentas',  // Alias para relacionar los detalles de venta de stands
             include: [
               {
                 model: PRODUCTOS,
-                as: 'producto',  // Alias definido en la relación entre producto y detalleVentasStands
                 where: {
                   idCategoria: 1  // Solo seleccionamos los productos de tipo 'Playera'
                 },
@@ -56,11 +54,9 @@ module.exports = {
           },
           {
             model: DETALLE_STANDS, // Incluir detalles de asignaciones de productos a stands
-            as: 'detallesStands', // Alias para relacionar los detalles de asignación de stands
             include: [
               {
                 model: PRODUCTOS,
-                as: 'producto',  // Alias definido en la relación entre producto y detalleStands
                 where: {
                   idCategoria: 1 // Solo productos de tipo 'Playera'
                 },
