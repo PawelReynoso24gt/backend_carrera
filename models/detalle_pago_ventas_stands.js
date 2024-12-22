@@ -2,49 +2,45 @@
 const { Model } = require('sequelize');
 
 module.exports = (sequelize, DataTypes) => {
-    class detalle_ventas extends Model {
+    class detalle_pago_ventas_stands extends Model {
         static associate(models) {
-            detalle_ventas.belongsTo(models.ventas, {
-                foreignKey: 'idVenta'
+            detalle_pago_ventas_stands.belongsTo(models.detalle_ventas_stands, {
+                foreignKey: 'idDetalleVentaStand'
             });
-            detalle_ventas.belongsTo(models.productos, {
-                foreignKey: 'idProducto'
-            });
-            detalle_ventas.hasMany(models.detalle_pago_ventas, {
-                foreignKey: 'idDetalleVenta'
+            detalle_pago_ventas_stands.belongsTo(models.tipo_pagos, {
+                foreignKey: 'idTipoPago'
             });
         }
     }
 
-    detalle_ventas.init({
-        idDetalleVenta: {
+    detalle_pago_ventas_stands.init({
+        idDetallePagoVentaStand: {
             type: DataTypes.INTEGER,
             autoIncrement: true,
             primaryKey: true
-        },
-        cantidad: {
-            type: DataTypes.INTEGER,
-            allowNull: false
-        },
-        subTotal: {
-            type: DataTypes.DECIMAL(10, 2),
-            allowNull: false
-        },
-        donacion: {
-            type: DataTypes.DECIMAL(10, 2),
-            allowNull: false,
-            defaultValue: 0.00
         },
         estado: {
             type: DataTypes.INTEGER,
             allowNull: false,
             defaultValue: 1
         },
-        idVenta: {
+        pago: {
+            type: DataTypes.DECIMAL(10, 2),
+            allowNull: false
+        },
+        correlativo: {
+            type: DataTypes.STRING(255),
+            allowNull: true
+        },
+        imagenTransferencia: {
+            type: DataTypes.TEXT,
+            allowNull: true
+        },
+        idDetalleVentaStand: {
             type: DataTypes.INTEGER,
             allowNull: false
         },
-        idProducto: {
+        idTipoPago: {
             type: DataTypes.INTEGER,
             allowNull: false
         },
@@ -60,10 +56,10 @@ module.exports = (sequelize, DataTypes) => {
         }
     }, {
         sequelize,
-        modelName: 'detalle_ventas',
-        tableName: 'detalle_ventas',
+        modelName: 'detalle_pago_ventas_stands',
+        tableName: 'detalle_pago_ventas_stands',
         timestamps: true
     });
 
-    return detalle_ventas;
+    return detalle_pago_ventas_stands;
 };

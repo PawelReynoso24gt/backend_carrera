@@ -2,19 +2,19 @@
 const { Model } = require('sequelize');
 
 module.exports = (sequelize, DataTypes) => {
-    class detalle_pago_ventas extends Model {
+    class detalle_pago_ventas_voluntarios extends Model {
         static associate(models) {
-            detalle_pago_ventas.belongsTo(models.detalle_ventas, {
-                foreignKey: 'idDetalleVenta'
+            detalle_pago_ventas_voluntarios.belongsTo(models.detalle_ventas_voluntarios, {
+                foreignKey: 'idDetalleVentaVoluntario'
             });
-            detalle_pago_ventas.belongsTo(models.tipo_pagos, {
+            detalle_pago_ventas_voluntarios.belongsTo(models.tipo_pagos, {
                 foreignKey: 'idTipoPago'
             });
         }
     }
 
-    detalle_pago_ventas.init({
-        idDetallePagoVenta: {
+    detalle_pago_ventas_voluntarios.init({
+        idDetallePagoVentaVoluntario: {
             type: DataTypes.INTEGER,
             autoIncrement: true,
             primaryKey: true
@@ -36,7 +36,7 @@ module.exports = (sequelize, DataTypes) => {
             type: DataTypes.TEXT,
             allowNull: true
         },
-        idDetalleVenta: {
+        idDetalleVentaVoluntario: {
             type: DataTypes.INTEGER,
             allowNull: false
         },
@@ -56,10 +56,10 @@ module.exports = (sequelize, DataTypes) => {
         }
     }, {
         sequelize,
-        modelName: 'detalle_pago_ventas',
-        tableName: 'detalle_pago_ventas',
+        modelName: 'detalle_pago_ventas_voluntarios',
+        tableName: 'detalle_pago_ventas_voluntarios',
         timestamps: true
     });
 
-    return detalle_pago_ventas;
+    return detalle_pago_ventas_voluntarios;
 };

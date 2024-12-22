@@ -2,18 +2,17 @@
 const { Model } = require('sequelize');
 
 module.exports = (sequelize, DataTypes) => {
-    class detalleInscripcionActividades extends Model {
+    class detalle_inscripcion_actividades extends Model {
         static associate(models) {
+            // Relación con inscripcionComisiones
+            this.belongsTo(models.inscripcion_comisiones, {
+                foreignKey: 'idInscripcionComision'
+            });
+
             // Relación con inscripcionEventos
             this.belongsTo(models.inscripcion_eventos, {
                 foreignKey: 'idInscripcionEvento',
                 as: 'inscripcionEvento'
-            });
-
-            // Relación con comisiones
-            this.belongsTo(models.comisiones, {
-                foreignKey: 'idComision',
-                as: 'comision'
             });
 
             // Relación con actividades
@@ -24,7 +23,7 @@ module.exports = (sequelize, DataTypes) => {
         }
     }
 
-    detalleInscripcionActividades.init({
+    detalle_inscripcion_actividades.init({
         idDetalleInscripcionActividad: {
             type: DataTypes.INTEGER,
             autoIncrement: true,
@@ -41,7 +40,7 @@ module.exports = (sequelize, DataTypes) => {
             allowNull: false,
         },
 
-        idComision: {
+        idInscripcionComision: {
             type: DataTypes.INTEGER,
             allowNull: false
         },
@@ -57,5 +56,5 @@ module.exports = (sequelize, DataTypes) => {
         timestamps: true, 
     });
 
-    return detalleInscripcionActividades;
+    return detalle_inscripcion_actividades;
 };

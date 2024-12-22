@@ -32,7 +32,7 @@ function validateDetalleHorarioData(data) {
 
 module.exports = {
     // * Get detalles de horarios activos
-    async find(req, res) {
+    async findActive(req, res) {
         try {
             const detalles = await DetalleHorarios.findAll({
                 where: {
@@ -48,10 +48,28 @@ module.exports = {
         }
     },
 
+    // * Get detalles de horarios activos
+    async findInactive(req, res) {
+        try {
+            const detalles = await DetalleHorarios.findAll({
+                where: {
+                    estado: 0 // Filtrar por estado 0
+                },
+                include: ['horario', 'categoriaHorario']
+            });
+            return res.status(200).send(detalles);
+        } catch (error) {
+            return res.status(500).send({
+                message: 'Ocurrió un error al recuperar los datos.'
+            });
+        }
+    },
+
     // * Get todos los detalles de horarios
     async findAll(req, res) {
         try {
             const detalles = await DetalleHorarios.findAll({
+                where: {estado: 1},
                 include: ['horario', 'categoriaHorario']
             });
             return res.status(200).send(detalles);
@@ -80,6 +98,39 @@ module.exports = {
             return res.status(500).send({
                 message: 'Ocurrió un error al intentar recuperar el registro.'
             });
+        }
+    },
+
+    // * Traer detalle de hoarioa para comisiones
+    async findByCategoriaComisiones(req, res) {
+        try {
+            const detalles = await DetalleHorarios.findAll({
+                where: {
+                    idCategoriaHorario: 1, // Fijar el ID de la categoría a 1 para "Comisiones"
+                    estado: 1 // Solo traer los activos
+                },
+                include: [
+                    { 
+                        model: db.horarios, 
+                        as: 'horario', // Usa el alias definido en el modelo
+                        attributes: ['horarioInicio', 'horarioFinal', 'estado'] 
+                    },
+                    { 
+                        model: db.categoria_horarios, 
+                        as: 'categoriaHorario', // Usa el alias definido en el modelo
+                        attributes: ['categoria'] 
+                    }
+                ]
+            });
+
+            if (detalles.length === 0) {
+                return res.status(404).json({ message: 'No se encontraron detalles de horarios para la categoría especificada.' });
+            }
+
+            return res.status(200).json(detalles);
+        } catch (error) {
+            console.error('Error al filtrar detalles de horarios por categoría:', error);
+            return res.status(500).json({ error: 'Ocurrió un error al recuperar los detalles de horarios.' });
         }
     },
 

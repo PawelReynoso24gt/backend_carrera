@@ -2,7 +2,7 @@
 const db = require('../models');
 const DETALLE_INSCRIPCION_ACTIVIDADES = db.detalle_inscripcion_actividades;
 const INSCRIPCION_EVENTOS = db.inscripcion_eventos;
-const COMISIONES = db.comisiones;
+const INSCRIPCION_COMISIONES = db.inscripcion_comisiones;
 const ACTIVIDADES = db.actividades;
 
 module.exports = {
@@ -17,9 +17,8 @@ module.exports = {
                         attributes: ['idInscripcionEvento', 'fechaHoraInscripcion', 'estado']
                     },
                     {
-                        model: COMISIONES,
-                        as: 'comision',
-                        attributes: ['idComision', 'comision', 'descripcion', 'estado']
+                        model: INSCRIPCION_COMISIONES,
+                        attributes: ['idInscripcionComision', 'idComision', 'idVoluntario', 'estado']
                     },
                     {
                         model: ACTIVIDADES,
@@ -50,9 +49,8 @@ module.exports = {
                         attributes: ['idInscripcionEvento', 'fechaHoraInscripcion', 'estado']
                     },
                     {
-                        model: COMISIONES,
-                        as: 'comision',
-                        attributes: ['idComision', 'comision', 'descripcion', 'estado']
+                        model: INSCRIPCION_COMISIONES,
+                        attributes: ['idInscripcionComision', 'idComision', 'idVoluntario', 'estado']
                     },
                     {
                         model: ACTIVIDADES,
@@ -82,9 +80,8 @@ module.exports = {
                         attributes: ['idInscripcionEvento', 'fechaHoraInscripcion', 'estado']
                     },
                     {
-                        model: COMISIONES,
-                        as: 'comision',
-                        attributes: ['idComision', 'comision', 'descripcion', 'estado']
+                        model: INSCRIPCION_COMISIONES,
+                        attributes: ['idInscripcionComision', 'idComision', 'idVoluntario', 'estado']
                     },
                     {
                         model: ACTIVIDADES,
@@ -114,9 +111,8 @@ module.exports = {
                         attributes: ['idInscripcionEvento', 'fechaHoraInscripcion', 'estado']
                     },
                     {
-                        model: COMISIONES,
-                        as: 'comision',
-                        attributes: ['idComision', 'comision', 'descripcion', 'estado']
+                        model: INSCRIPCION_COMISIONES,
+                        attributes: ['idInscripcionComision', 'idComision', 'idVoluntario', 'estado']
                     },
                     {
                         model: ACTIVIDADES,
@@ -141,10 +137,10 @@ module.exports = {
 
     // Crear un nuevo detalle
     async create(req, res) {
-        const { idInscripcionEvento, idComision, idActividad } = req.body;
+        const { idInscripcionEvento, idInscripcionComision, idActividad } = req.body;
         const estado = req.body.estado !== undefined ? req.body.estado : 1;
         
-        if (!idInscripcionEvento || !idComision || !idActividad) {
+        if (!idInscripcionEvento || !idInscripcioComision || !idActividad) {
             return res.status(400).json({ message: 'Faltan campos requeridos.' });
         }
 
@@ -152,7 +148,7 @@ module.exports = {
             const nuevoDetalle = await DETALLE_INSCRIPCION_ACTIVIDADES.create({
                 estado,
                 idInscripcionEvento,
-                idComision,
+                idInscripcionComision,
                 idActividad
             });
 
@@ -174,7 +170,7 @@ module.exports = {
         const camposActualizados = {};
         if (estado !== undefined) camposActualizados.estado = estado;
         if (idInscripcionEvento !== undefined) camposActualizados.idInscripcionEvento = idInscripcionEvento;
-        if (idComision !== undefined) camposActualizados.idComision = idComision;
+        if (idInscripcionComision !== undefined) camposActualizados.idInscripcionComision = idInscripcionComision;
         if (idActividad !== undefined) camposActualizados.idActividad = idActividad;
 
         try {
@@ -194,9 +190,8 @@ module.exports = {
                         attributes: ['idInscripcionEvento', 'fechaHoraInscripcion', 'estado']
                     },
                     {
-                        model: COMISIONES,
-                        as: 'comision',
-                        attributes: ['idComision', 'comision', 'descripcion', 'estado']
+                        model: INSCRIPCION_COMISIONES,
+                        attributes: ['idInscripcionComision', 'idComision', 'idVoluntario', 'estado']
                     },
                     {
                         model: ACTIVIDADES,
