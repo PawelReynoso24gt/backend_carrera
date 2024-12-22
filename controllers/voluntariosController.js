@@ -4,6 +4,7 @@ const { v4: uuidv4 } = require('uuid'); // Sirve para generar identificadores ú
 const db = require("../models");
 const voluntarios = require("../models/voluntarios");
 const VOLUNTARIOS = db.voluntarios;
+const PERSONAS = db.personas; 
 
 // Método para generar un código QR numérico
 function generateQRCode() {
@@ -94,6 +95,26 @@ module.exports = {
             });
         });
     },
+
+    async findById(req, res) {
+        const { id } = req.params;
+    
+        try {
+            const voluntario = await VOLUNTARIOS.findByPk(id, {
+                include: [{ model: PERSONAS, as: 'persona' }],
+            });
+    
+            if (!voluntario) {
+                return res.status(404).json({ message: "Voluntario no encontrado" });
+            }
+    
+            return res.status(200).json(voluntario);
+        } catch (error) {
+            console.error("Error al obtener voluntario:", error);
+            return res.status(500).json({ error: "Error interno del servidor" });
+        }
+    },
+    
 
     createVol(req, res) {
         const datos = req.body;

@@ -70,7 +70,7 @@ module.exports = (app) => {
         router.get('/generateQR', voluntariosController.generateQR);
 
     // ! Todas las rutas a continuación requieren autenticación
-    //router.use(authenticateToken); // Middleware para proteger las rutas con autenticación
+   // router.use(authenticateToken); // Middleware para proteger las rutas con autenticación
 
     // * USUARIOS
     router.get('/usuarios/activos', usuariosController.find);
@@ -315,6 +315,7 @@ module.exports = (app) => {
 
     // * RUTAS DE VOLUNTARIOS
     router.get('/voluntarios', voluntariosController.find);
+    router.get('/voluntarios/:id', voluntariosController.findById);
     router.get('/voluntarios/activos', voluntariosController.findActivateVol); 
     router.get('/voluntarios/inactivos', voluntariosController.findaInactivateVol);
     router.post('/voluntarios/create', voluntariosController.createVol);

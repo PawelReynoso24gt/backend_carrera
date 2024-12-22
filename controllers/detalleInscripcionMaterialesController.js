@@ -3,6 +3,7 @@ const db = require('../models');
 const DETALLE_INSCRIPCION_MATERIALES = db.detalle_inscripcion_materiales;
 const INSCRIPCION_EVENTOS = db.inscripcion_eventos;
 const INSCRIPCION_COMISIONES = db.inscripcion_comisiones;
+const COMISIONES = db.comisiones;
 const MATERIALES = db.materiales;
 
 module.exports = {
@@ -49,8 +50,9 @@ module.exports = {
                         attributes: ['idInscripcionEvento', 'fechaHoraInscripcion', 'estado']
                     },
                     {
-                        model: INSCRIPCION_COMISIONES,
-                        attributes: ['idInscripcionComision', 'idComision', 'idVoluntario', 'estado']
+                        model: COMISIONES,
+                        as: 'comision',
+                        attributes: ['idComision', 'comision', 'descripcion', 'estado']
                     },
                     {
                         model: MATERIALES,
@@ -80,8 +82,9 @@ module.exports = {
                         attributes: ['idInscripcionEvento', 'fechaHoraInscripcion', 'estado']
                     },
                     {
-                        model: INSCRIPCION_COMISIONES,
-                        attributes: ['idInscripcionComision', 'idComision', 'idVoluntario', 'estado']
+                        model: COMISIONES,
+                        as: 'comision',
+                        attributes: ['idComision', 'comision', 'descripcion', 'estado']
                     },
                     {
                         model: MATERIALES,
@@ -111,8 +114,9 @@ module.exports = {
                         attributes: ['idInscripcionEvento', 'fechaHoraInscripcion', 'estado']
                     },
                     {
-                        model: INSCRIPCION_COMISIONES,
-                        attributes: ['idInscripcionComision', 'idComision', 'idVoluntario', 'estado']
+                        model: COMISIONES,
+                        as: 'comision',
+                        attributes: ['idComision', 'comision', 'descripcion', 'estado']
                     },
                     {
                         model: MATERIALES,
@@ -137,9 +141,9 @@ module.exports = {
 
     // Crear un nuevo detalle
     async create(req, res) {
-        const { idInscripcionEvento, cantidadMaterial, idInscripcionComision, idMaterial } = req.body;
+        const { idInscripcionEvento, cantidadMaterial, idComision, idMaterial } = req.body;
         const estado = req.body.estado !== undefined ? req.body.estado : 1;
-        if (!idInscripcionEvento || !cantidadMaterial || !idInscripcionComision || !idMaterial) {
+        if (!idInscripcionEvento || !cantidadMaterial || !idComision || !idMaterial) {
             return res.status(400).json({ message: 'Faltan campos requeridos.' });
         }
 
@@ -148,7 +152,7 @@ module.exports = {
                 estado,
                 cantidadMaterial,
                 idInscripcionEvento,
-                idInscripcionComision,
+                idComision,
                 idMaterial
             });
 
@@ -164,14 +168,14 @@ module.exports = {
 
     // Actualizar un detalle existente
     async update(req, res) {
-        const { estado, idInscripcionEvento, cantidadMaterial, idInscripcionComision, idMaterial } = req.body;
+        const { estado, idInscripcionEvento, cantidadMaterial, idComision, idMaterial } = req.body;
         const id = req.params.id;
 
         const camposActualizados = {};
         if (estado !== undefined) camposActualizados.estado = estado;
         if (idInscripcionEvento !== undefined) camposActualizados.idInscripcionEvento = idInscripcionEvento;
         if (cantidadMaterial !== undefined) camposActualizados.cantidadMaterial = cantidadMaterial;
-        if (idInscripcionComision !== undefined) camposActualizados.idInscripcionComision = idInscripcionComision;
+        if (idComision !== undefined) camposActualizados.idComision = idComision;
         if (idMaterial !== undefined) camposActualizados.idMaterial = idMaterial;
 
         try {
@@ -191,8 +195,9 @@ module.exports = {
                         attributes: ['idInscripcionEvento', 'fechaHoraInscripcion', 'estado']
                     },
                     {
-                        model: INSCRIPCION_COMISIONES,
-                        attributes: ['idInscripcionComision', 'idComision', 'idVoluntario', 'estado']
+                        model: COMISIONES,
+                        as: 'comision',
+                        attributes: ['idComision', 'comision', 'descripcion', 'estado']
                     },
                     {
                         model: MATERIALES,
