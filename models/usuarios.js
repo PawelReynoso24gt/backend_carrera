@@ -12,7 +12,10 @@ module.exports = (sequelize, DataTypes) => {
       })
       usuarios.hasMany(models.bitacoras, {
         foreignKey: 'idUsuario'
-     });
+      });
+      usuarios.belongsTo(models.sedes, {
+        foreignKey: 'idSede'
+      });
     }
   }
 

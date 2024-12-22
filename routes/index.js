@@ -56,8 +56,11 @@ const detallePagoRifasController = require('../controllers/detallePagoRifasContr
 const aspirantesController = require('../controllers/aspirantesController');
 const recaudacion_eventosController = require('../controllers/recaudacion_eventosController');
 const bitacorasController = require('../controllers/bitacorasController');
-const detalle_ventasController = require('../controllers/detalle_ventasController');
-const detalle_pago_ventasController = require('../controllers/detalle_pago_ventasController');
+const detalle_ventas_standsController = require('../controllers/detalle_ventas_standsController');
+const detalle_ventas_voluntariosController = require('../controllers/detalle_ventas_voluntariosController');
+const detalle_pago_ventas_standsController = require('../controllers/detalle_pago_ventas_standsController');
+const detalle_productos_voluntariosController = require('../controllers/detalle_productos_voluntariosController');
+const detalle_pago_ventas_voluntariosController = require('../controllers/detalle_pago_ventas_voluntariosController');
 const notificacionesController = require('../controllers/notificacionesController');
 const tipoNotificacionesController = require('../controllers/tipoNotificacionController');
 
@@ -246,6 +249,7 @@ module.exports = (app) => {
 
     // * DETALLE HORARIOS
     router.get('/detalle_horarios', detalleHorariosController.findAll);
+    router.get('/detalle_horarios/comisiones', detalleHorariosController.findByCategoriaComisiones);
     router.get('/detalle_horarios/activos', detalleHorariosController.findActive);
     router.get('/detalle_horarios/inactivos', detalleHorariosController.findInactive);
     router.get('/detalle_horarios/:id', detalleHorariosController.findById);
@@ -531,9 +535,11 @@ module.exports = (app) => {
 
     // * RUTAS DE VENTAS
     router.get('/ventas', ventasController.findAll);
+    router.get('/ventas/activas', ventasController.findActive);
+    router.get('/ventas/inactivas', ventasController.findInactive);
     router.get('/ventas/:id', ventasController.findById);
-    router.post('/ventas', ventasController.create);
-    router.put('/ventasUpdate/:id', ventasController.update);
+    router.post('/ventas/create', ventasController.create);
+    router.put('/ventas/update/:id', ventasController.update);
     
     //* RUTAS DETALLE PAGO RIFAS
     router.get('/detallespago', detallePagoRifasController.findAll);
@@ -572,17 +578,46 @@ module.exports = (app) => {
     router.put('/bitacora/update/:id', bitacorasController.updateBitacora);
     router.delete('/bitacora/delete/:id', bitacorasController.deleteBitacora);
 
-    // * RUTAS PARA DETALLE VENTAS
-    app.get('/detalle_ventas', detalle_ventasController.findAll);
-    app.get('/detalle_ventas/:id', detalle_ventasController.findById);
-    app.post('/detalle_ventas', detalle_ventasController.create);
-    app.put('/detalle_ventas/:id', detalle_ventasController.update);
+    // * RUTAS PARA DETALLE VENTAS STANDS
+    router.get('/detalle_ventas_stands', detalle_ventas_standsController.findAll);
+    router.get('/detalle_ventas_stands/activos', detalle_ventas_standsController.findActive),
+    router.get('/detalle_ventas_stands/inactivos', detalle_ventas_standsController.findInactive),
+    router.get('/detalle_ventas_stands/:id', detalle_ventas_standsController.findById);
+    router.post('/detalle_ventas_stands/create', detalle_ventas_standsController.create);
+    router.put('/detalle_ventas_stands/update/:id', detalle_ventas_standsController.update);
+    
+    // * RUTAS PARA DETALLE VENTAS VOLUNTARIOS
+    router.get('/detalle_ventas_voluntarios', detalle_ventas_voluntariosController.findAll);
+    router.get('/detalle_ventas_voluntarios/activos', detalle_ventas_voluntariosController.findActive);
+    router.get('/detalle_ventas_voluntarios/inactivos', detalle_ventas_voluntariosController.findInactive);
+    router.get('/detalle_ventas_voluntarios/:id', detalle_ventas_voluntariosController.findById);
+    router.post('/detalle_ventas_voluntarios/create', detalle_ventas_voluntariosController.create);
+    router.put('/detalle_ventas_voluntarios/update/:id', detalle_ventas_voluntariosController.update);
 
-    // * RUTAS DETALLE PAGO VENTAS
-    app.get('/detalle_pago_ventas', detalle_pago_ventasController.findAll);
-    app.get('/detalle_pago_ventas/:id', detalle_pago_ventasController.findById);
-    app.post('/detalle_pago_ventas', detalle_pago_ventasController.create);
-    app.put('/detalle_pago_ventas/update/:id', detalle_pago_ventasController.update);
+    // * RUTAS DETALLE PAGO VENTAS STANDS
+    router.get('/detalle_pago_ventas_stands', detalle_pago_ventas_standsController.findAll);
+    router.get('/detalle_pago_ventas_stands/activos', detalle_pago_ventas_standsController.findActive);
+    router.get('/detalle_pago_ventas_stands/inactivos', detalle_pago_ventas_standsController.findInactive);
+    router.get('/detalle_pago_ventas_stands/:id', detalle_pago_ventas_standsController.findById);
+    router.post('/detalle_pago_ventas_stands/create', detalle_pago_ventas_standsController.create);
+    router.put('/detalle_pago_ventas_stands/update/:id', detalle_pago_ventas_standsController.update);
+
+    // * RUTAS DETALLE PAGO VENTAS VOLUNTARIOS
+    router.get('/detalle_pago_ventas_voluntarios', detalle_pago_ventas_voluntariosController.findAll);
+    router.get('/detalle_pago_ventas_voluntarios/activos', detalle_pago_ventas_voluntariosController.findActive);
+    router.get('/detalle_pago_ventas_voluntarios/inactivos', detalle_pago_ventas_voluntariosController.findInactive);
+    router.get('/detalle_pago_ventas_voluntarios/:id', detalle_pago_ventas_voluntariosController.findById);
+    router.post('/detalle_pago_ventas_voluntarios/create', detalle_pago_ventas_voluntariosController.create);
+    router.put('/detalle_pago_ventas_voluntarios/update/:id', detalle_pago_ventas_voluntariosController.update);
+
+    // * RUTAS PARA DETALLE PRODUCTOS VOLUNTARIOS
+    router.get('/detalle_productos_voluntarios', detalle_productos_voluntariosController.find);
+    router.get('/detalle_productos_voluntarios/activos', detalle_productos_voluntariosController.findActive);
+    router.get('/detalle_productos_voluntarios/inactivos', detalle_productos_voluntariosController.findInactive);
+    router.get('/detalle_productos_voluntarios/:id', detalle_productos_voluntariosController.findById);
+    router.post('/detalle_productos_voluntarios/create', detalle_productos_voluntariosController.create);
+    router.put('/detalle_productos_voluntarios/update/:id', detalle_productos_voluntariosController.update);
+    router.delete('/detalle_productos_voluntarios/delete/:id', detalle_productos_voluntariosController.delete);
 
     // * RUTAS DE NOTIFICACIONES
     router.get('/notificaciones', notificacionesController.find);

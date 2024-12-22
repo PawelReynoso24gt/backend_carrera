@@ -101,6 +101,39 @@ module.exports = {
         }
     },
 
+    // * Traer detalle de hoarioa para comisiones
+    async findByCategoriaComisiones(req, res) {
+        try {
+            const detalles = await DetalleHorarios.findAll({
+                where: {
+                    idCategoriaHorario: 1, // Fijar el ID de la categoría a 1 para "Comisiones"
+                    estado: 1 // Solo traer los activos
+                },
+                include: [
+                    { 
+                        model: db.horarios, 
+                        as: 'horario', // Usa el alias definido en el modelo
+                        attributes: ['horarioInicio', 'horarioFinal', 'estado'] 
+                    },
+                    { 
+                        model: db.categoria_horarios, 
+                        as: 'categoriaHorario', // Usa el alias definido en el modelo
+                        attributes: ['categoria'] 
+                    }
+                ]
+            });
+
+            if (detalles.length === 0) {
+                return res.status(404).json({ message: 'No se encontraron detalles de horarios para la categoría especificada.' });
+            }
+
+            return res.status(200).json(detalles);
+        } catch (error) {
+            console.error('Error al filtrar detalles de horarios por categoría:', error);
+            return res.status(500).json({ error: 'Ocurrió un error al recuperar los detalles de horarios.' });
+        }
+    },
+
     // * Crear detalle de horario
     async create(req, res) {
         const datos = req.body;

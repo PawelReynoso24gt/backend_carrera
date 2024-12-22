@@ -14,7 +14,7 @@ module.exports = (sequelize, DataTypes) => {
         foreignKey: 'idStand',
         as: 'asignaciones'
       });
-      this.hasMany(models.ventas, {
+      this.hasMany(models.detalle_ventas_stands, {
         foreignKey: 'idStand'
       });
     }
