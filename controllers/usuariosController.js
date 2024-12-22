@@ -141,7 +141,7 @@ module.exports = {
             }
             // Extraer datos necesarios para el token
             const idVoluntario = user.persona?.voluntarios?.[0]?.idVoluntario || null;
-            console.log("ID del voluntario:", idVoluntario); // Log para depuración
+            //console.log("ID del voluntario:", idVoluntario); // Log para depuración
 
             // Generar el token JWT y almacenarlo en la base de datos
             const token = await createToken(user, idVoluntario);
