@@ -73,7 +73,7 @@ module.exports = (app) => {
         router.get('/generateQR', voluntariosController.generateQR);
 
     // ! Todas las rutas a continuación requieren autenticación
-    router.use(authenticateToken); // Middleware para proteger las rutas con autenticación
+    // router.use(authenticateToken); // Middleware para proteger las rutas con autenticación
 
     // * USUARIOS
     router.get('/usuarios/activos', usuariosController.find);
@@ -535,8 +535,10 @@ module.exports = (app) => {
     router.get('/ventas', ventasController.findAll);
     router.get('/ventas/activas', ventasController.findActive);
     router.get('/ventas/inactivas', ventasController.findInactive);
+    router.get('/detalle_ventas_voluntarios/ventaCompleta/:idVenta', ventasController.findByVentaId);
     router.get('/ventas/:id', ventasController.findById);
     router.post('/ventas/create', ventasController.create);
+    router.post('/ventas/create/completa', ventasController.createFullVenta);
     router.put('/ventas/update/:id', ventasController.update);
     
     //* RUTAS DETALLE PAGO RIFAS
