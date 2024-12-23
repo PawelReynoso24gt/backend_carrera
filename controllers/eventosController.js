@@ -1,10 +1,12 @@
 // ! Controlador de eventos
 'use strict';
-
+const moment = require('moment');  // Importa moment.js
 const db = require('../models');
 const Sequelize = require('sequelize');
 const EVENTOS = db.eventos;
 const SEDES = db.sedes;
+const { eventos, recaudacion_eventos, inscripcion_eventos, asistencia_eventos } = require('../models');
+const { Op } = Sequelize; 
 
 module.exports = {
 
@@ -276,6 +278,99 @@ module.exports = {
                 message: error.message || 'Error al eliminar el evento.'
             });
         });
-    }
-    
+    },
+
+    async obtenerReporteEventos(req, res) {
+        try {
+          const { fechaInicio, fechaFin } = req.query;
+      
+          // Verificar que las fechas se proporcionen
+          if (!fechaInicio || !fechaFin) {
+            return res.status(400).json({ message: 'Se requieren las fechas de inicio y fin.' });
+          }
+      
+          // Convertir las fechas de formato DD-MM-YYYY a YYYY-MM-DD
+          const fechaInicioFormato = fechaInicio.split("-").reverse().join("-"); // Convierte de DD-MM-YYYY a YYYY-MM-DD
+          const fechaFinFormato = fechaFin.split("-").reverse().join("-"); // Convierte de DD-MM-YYYY a YYYY-MM-DD
+      
+          // Validar que las fechas sean válidas
+          const fechaInicioValida = moment(fechaInicioFormato, 'YYYY-MM-DD', true).isValid();
+          const fechaFinValida = moment(fechaFinFormato, 'YYYY-MM-DD', true).isValid();
+      
+          if (!fechaInicioValida || !fechaFinValida) {
+            return res.status(400).json({ message: 'Las fechas no son válidas. Formato esperado: DD-MM-YYYY' });
+          }
+      
+          // Realizar la consulta para obtener los eventos dentro del rango de fechas
+          const eventosEnRango = await eventos.findAll({
+            where: {
+              fechaHoraInicio: {
+                [Op.gte]: fechaInicioFormato,  // Mayor o igual que la fecha de inicio
+              },
+              fechaHoraFin: {
+                [Op.lte]: fechaFinFormato,  // Menor o igual que la fecha de fin
+              },
+            },
+            include: [
+              {
+                model: recaudacion_eventos,
+                as: 'recaudaciones',
+                attributes: ['recaudacion'],
+              },
+              {
+                model: inscripcion_eventos,
+                as: 'inscripciones',
+                include: [
+                  {
+                    model: asistencia_eventos,
+                    as: 'asistencias',
+                    attributes: ['idInscripcionEvento'],
+                    where: {
+                      estado: 1  // Solo contar asistencias activas
+                    }
+                  }
+                ]
+              }
+            ]
+          });
+      
+          // Preparar los resultados
+          const resultados = [];
+      
+          for (const evento of eventosEnRango) {
+            // Calcular la recaudación total del evento
+            const recaudacionTotal = evento.recaudaciones.reduce((total, recaudacion) => total + parseFloat(recaudacion.recaudacion), 0);
+      
+            // Contar la cantidad de voluntarios que asistieron
+            const voluntariosAsistieron = new Set();
+            evento.inscripciones.forEach(inscripcion => {
+              inscripcion.asistencias.forEach(asistencia => {
+                voluntariosAsistieron.add(asistencia.idInscripcionEvento);  // Usamos un Set para contar de manera única
+              });
+            });
+      
+            const cantidadVoluntariosAsistieron = voluntariosAsistieron.size;
+      
+            // Verificar si se cumplió con la meta (este ejemplo supone que 'metaRecaudacion' es un campo en el evento)
+            const metaCumplida = recaudacionTotal >= evento.metaRecaudacion; // Asegúrate de tener 'metaRecaudacion' en tu modelo
+      
+            // Preparar el reporte por evento
+            resultados.push({
+              nombreEvento: evento.nombreEvento,
+              recaudacionTotal,
+              cantidadVoluntariosAsistieron,
+              fechaHoraInicio: evento.fechaHoraInicio,
+              fechaHoraFin: evento.fechaHoraFin,
+            });
+          }
+      
+          // Enviar el reporte como respuesta
+          return res.status(200).json({ eventos: resultados });
+      
+        } catch (error) {
+          console.error('Error al obtener el reporte de eventos:', error);
+          return res.status(500).json({ message: 'Error al obtener el reporte de eventos.' });
+        }
+      }
+      
 };

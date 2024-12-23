@@ -25,7 +25,6 @@ module.exports = (sequelize, DataTypes) => {
             // Relacion con inscripcion de actividades
             this.hasMany(models.detalle_inscripcion_actividades, {
                 foreignKey: 'idInscripcionEvento',
-                as: 'actividadesInscripcion'
             });  
             
             // Relacion con inscripcion de materiales

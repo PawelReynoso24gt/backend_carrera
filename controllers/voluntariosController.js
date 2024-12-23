@@ -5,6 +5,9 @@ const db = require("../models");
 const voluntarios = require("../models/voluntarios");
 const VOLUNTARIOS = db.voluntarios;
 
+
+
+
 // Método para generar un código QR numérico
 function generateQRCode() {
     // Generar un número único de 9 dígitos
@@ -182,5 +185,7 @@ module.exports = {
             console.error('Error al eliminar voluntario:', error);
             return res.status(500).json({ error: 'Error al eliminar voluntario' });
         }
-    }
+    },
+
+    
 };
