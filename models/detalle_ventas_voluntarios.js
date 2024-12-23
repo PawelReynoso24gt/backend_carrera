@@ -1,27 +1,26 @@
 'use strict';
 const { Model } = require('sequelize');
 
-
 module.exports = (sequelize, DataTypes) => {
-    class detalle_ventas_stands extends Model {
+    class detalle_ventas_voluntarios extends Model {
         static associate(models) {
-            detalle_ventas_stands.belongsTo(models.ventas, {
+            detalle_ventas_voluntarios.belongsTo(models.ventas, {
                 foreignKey: 'idVenta'
             });
-            detalle_ventas_stands.belongsTo(models.productos, {
+            detalle_ventas_voluntarios.belongsTo(models.productos, {
                 foreignKey: 'idProducto'
             });
-            detalle_ventas_stands.belongsTo(models.stands, {
-                foreignKey: 'idStand'
+            detalle_ventas_voluntarios.belongsTo(models.voluntarios, {
+                foreignKey: 'idVoluntario'
             });
-            detalle_ventas_stands.hasMany(models.detalle_pago_ventas_stands, {
-                foreignKey: 'idDetalleVentaStand'
+            detalle_ventas_voluntarios.hasMany(models.detalle_pago_ventas_voluntarios, {
+                foreignKey: 'idDetalleVentaVoluntario'
             });
         }
     }
 
-    detalle_ventas_stands.init({
-        idDetalleVentaStand: {
+    detalle_ventas_voluntarios.init({
+        idDetalleVentaVoluntario: {
             type: DataTypes.INTEGER,
             autoIncrement: true,
             primaryKey: true
@@ -32,7 +31,8 @@ module.exports = (sequelize, DataTypes) => {
         },
         subTotal: {
             type: DataTypes.DECIMAL(10, 2),
-            allowNull: false
+            allowNull: false,
+            defaultValue: 0.00
         },
         donacion: {
             type: DataTypes.DECIMAL(10, 2),
@@ -52,7 +52,7 @@ module.exports = (sequelize, DataTypes) => {
             type: DataTypes.INTEGER,
             allowNull: false
         },
-        idStand: {
+        idVoluntario: {
             type: DataTypes.INTEGER,
             allowNull: false
         },
@@ -68,10 +68,10 @@ module.exports = (sequelize, DataTypes) => {
         }
     }, {
         sequelize,
-        modelName: 'detalle_ventas_stands',
-        tableName: 'detalle_ventas_stands',
+        modelName: 'detalle_ventas_voluntarios',
+        tableName: 'detalle_ventas_voluntarios',
         timestamps: true
     });
 
-    return detalle_ventas_stands;
+    return detalle_ventas_voluntarios;
 };

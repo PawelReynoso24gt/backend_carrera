@@ -14,20 +14,22 @@ module.exports = (sequelize, DataTypes) => {
                 foreignKey: 'idProducto',
             });
 
-            this.hasMany(models.detalleVentasStands, {
-                foreignKey: 'idProducto',
-            });
-
             productos.hasMany(models.detalle_traslados, {
                 foreignKey: 'idProducto'
-              });
-              productos.hasMany(models.detalle_pedidos, {
+            });
+            productos.hasMany(models.detalle_pedidos, {
                 foreignKey: 'idProducto'
             });
             productos.hasMany(models.detalle_productos, {
                 foreignKey: 'idProducto'
             });
             productos.hasMany(models.detalle_ventas_stands, {
+                foreignKey: 'idProducto'
+            });
+            productos.hasMany(models.detalle_ventas_voluntarios, {
+                foreignKey: 'idProducto'
+            });
+            productos.hasMany(models.detalle_productos_voluntarios, {
                 foreignKey: 'idProducto'
             });
         }

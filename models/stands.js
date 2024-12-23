@@ -13,14 +13,11 @@ module.exports = (sequelize, DataTypes) => {
         foreignKey: 'idStand',
         as: 'asignaciones'
       });
-      this.hasMany(models.ventas, {
-        foreignKey: 'idStand'
+      this.hasMany(models.detalle_ventas_stands, {
+        foreignKey: 'idStand',
+        as: 'detallesStands'
       });
       
-      this.hasMany(models.detalleVentasStands, {
-        foreignKey: 'idStand',
-        as: 'detalleVentas', 
-      });
     }
   }
   stands.init({

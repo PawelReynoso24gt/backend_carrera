@@ -2,37 +2,25 @@
 const { Model } = require('sequelize');
 
 module.exports = (sequelize, DataTypes) => {
-    class detalleStands extends Model {
+    class detalle_productos_voluntarios extends Model {
         static associate(models) {
             // Relación con productos
             this.belongsTo(models.productos, {
                 foreignKey: 'idProducto',
-                as: 'producto'
             });
 
-            // Relación con stands
-            this.belongsTo(models.stands, {
-                foreignKey: 'idStand',
-                as: 'detallesStands'
+            // Relación con voluntarios
+            this.belongsTo(models.voluntarios, {
+                foreignKey: 'idVoluntario'
             });
         }
     }
 
-    detalleStands.init({
-        idDetalleStands: {
+    detalle_productos_voluntarios.init({
+        idDetalleProductoVoluntario: {
             type: DataTypes.INTEGER,
             autoIncrement: true,
             primaryKey: true
-        },
-
-        cantidad: {
-            type: DataTypes.INTEGER,
-            allowNull: false
-        },
-
-        estado: {
-            type: DataTypes.INTEGER,
-            allowNull: false
         },
 
         idProducto: {
@@ -40,16 +28,27 @@ module.exports = (sequelize, DataTypes) => {
             allowNull: false,
         },
 
-        idStand: {
+        cantidad: {
+            type: DataTypes.INTEGER,
+            allowNull: false
+        },
+
+        idVoluntario: {
+            type: DataTypes.INTEGER,
+            allowNull: false
+        },
+
+        estado: {
             type: DataTypes.INTEGER,
             allowNull: false
         }
+
     }, {
         sequelize,
-        modelName: 'detalle_stands',
-        tableName: 'detalle_stands',
+        modelName: 'detalle_productos_voluntarios',
+        tableName: 'detalle_productos_voluntarios',
         timestamps: true, 
     });
 
-    return detalleStands;
+    return detalle_productos_voluntarios;
 };
