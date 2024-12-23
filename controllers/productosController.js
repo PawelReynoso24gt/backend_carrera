@@ -18,7 +18,6 @@ module.exports = {
                     },
                     {
                         model: db.detalle_stands,
-                        as: "detallesStands",
                         attributes: ["idDetalleStands", "cantidad", "estado", "idStand"],
                         include: {
                             model: db.stands,
@@ -61,7 +60,6 @@ module.exports = {
                     },
                     {
                         model: db.detalle_stands,
-                        as: "detallesStands",
                         attributes: ["idDetalleStands", "cantidad", "estado", "idStand"],
                         include: {
                             model: db.stands,
@@ -261,7 +259,6 @@ module.exports = {
                     },
                     {
                         model: db.detalle_stands,
-                        as: "detallesStands",
                         attributes: ["idDetalleStands", "cantidad", "estado", "idStand"],
                         include: {
                             model: db.stands,
@@ -302,7 +299,6 @@ module.exports = {
                     },
                     {
                         model: db.detalle_stands,
-                        as: "detallesStands",
                         attributes: ["idDetalleStands", "cantidad", "estado", "idStand"],
                         include: {
                             model: db.stands,

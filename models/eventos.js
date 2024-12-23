@@ -27,7 +27,8 @@ module.exports = (sequelize, DataTypes) => {
         as: 'inscripciones'
       });
       eventos.hasMany(models.recaudacion_eventos, {
-        foreignKey: 'idEvento'
+        foreignKey: 'idEvento',
+        as: 'recaudaciones'
       });
     }
   }
