@@ -62,7 +62,7 @@ function generateToken(user) {
         idRol: user.idRol,
         idSede: user.idSede,
         idPersona: user.idPersona,
-        idVoluntario: user.idVoluntario,
+        idVoluntario: user.idVoluntario ?? null,
         idEmpleado: user.idEmpleado ?? null,
     };
 
@@ -74,7 +74,7 @@ function generateToken(user) {
 }
 
 // Crear un nuevo token y almacenar en la base de datos
-async function createToken(user, idVoluntario) {
+async function createToken(user, idVoluntario, idEmpleado) {
     // Extrae solo los valores planos del usuario
     const userData = user.get({ plain: true });
 
@@ -85,7 +85,7 @@ async function createToken(user, idVoluntario) {
         idSede: userData.idSede,
         idPersona: user.persona?.idPersona,
         idVoluntario: idVoluntario,
-        idEmpleado: userData.idEmpleado ?? null,
+        idEmpleado: idEmpleado,
     });
 
     const expiresAt = new Date(Date.now() + 3600000); // Expira en 1 hora
@@ -148,10 +148,11 @@ module.exports = {
             }
             // Extraer datos necesarios para el token
             const idVoluntario = user.persona?.voluntarios?.[0]?.idVoluntario || null;
+            const idEmpleado = user.persona?.empleados?.[0]?.idEmpleado || null;
             //console.log("ID del voluntario:", idVoluntario); // Log para depuración
 
             // Generar el token JWT y almacenarlo en la base de datos
-            const token = await createToken(user, idVoluntario);
+            const token = await createToken(user, idVoluntario, idEmpleado);
 
             return res.status(200).send({
                 message: 'Inicio de sesión exitoso.',
@@ -162,7 +163,8 @@ module.exports = {
                     idRol: user.idRol,
                     idSede: user.idSede,
                     idPersona: user.idPersona,
-                    idVoluntario: idVoluntario,
+                    idVoluntario: idVoluntario ?? null,
+                    idEmpleado: idEmpleado ?? null,
                 },
                 token: token // Devolver el token al cliente
             });
