@@ -41,6 +41,8 @@ function validateDetalleVentaData(datos) {
     // Verificar que al menos un campo esté presente para actualizaciones
     if (
         datos.cantidad === undefined &&
+        datos.subTotal === undefined &&
+        datos.donacion === undefined &&
         datos.idVenta === undefined &&
         datos.idProducto === undefined &&
         datos.idVoluntario === undefined &&
@@ -211,11 +213,13 @@ module.exports = {
                 ]
             });
 
+             // Devolver un arreglo vacío si no se encuentra el detalle
             if (!detalle) {
-                return res.status(404).send({ message: 'Detalle de venta no encontrado.' });
+                return res.status(200).send([]);
             }
 
-            return res.status(200).send(detalle);
+            // Si se encuentra, devolver el detalle en un arreglo
+            return res.status(200).send([detalle]);
         } catch (error) {
             console.error('Error al recuperar el detalle de venta:', error);
             return res.status(500).send({ message: 'Ocurrió un error al recuperar el detalle de venta.' });
