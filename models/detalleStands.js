@@ -13,7 +13,7 @@ module.exports = (sequelize, DataTypes) => {
             // Relación con stands
             this.belongsTo(models.stands, {
                 foreignKey: 'idStand',
-                as: 'detallesStands'
+                as: 'stand'
             });
         }
     }

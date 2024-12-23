@@ -395,9 +395,11 @@ module.exports = {
               },
               {
                 model: DETALLE_STANDS, // Incluir detalles de asignaciones de productos a stands
+                as: 'detallesStands', 
                 include: [
                   {
                     model: PRODUCTOS,
+                    as: 'producto',
                     where: {
                       idCategoria: 1 // Solo productos de tipo 'Playera'
                     },
@@ -426,37 +428,46 @@ module.exports = {
             let totalRecaudado = 0; // Inicializar el total recaudado por stand
     
             // Asignación de playeras por talla (detalle_stands)
-            stand.detallesStands.forEach((detalle) => {
-              if (detalle.producto) {
-                const talla = detalle.producto.talla;
-                playerasAsignadas[talla] = (playerasAsignadas[talla] || 0) + detalle.cantidad;
-              }
-            });
-    
+          // Asignación de playeras por talla (detalle_stands)
+            if (stand.detallesStands && Array.isArray(stand.detallesStands)) {
+                stand.detallesStands.forEach((detalle) => {
+                    if (detalle.producto) {
+                        const talla = detalle.producto.talla;
+                        playerasAsignadas[talla] = (playerasAsignadas[talla] || 0) + detalle.cantidad;
+                    }
+                });
+            }
+
             // Ventas de playeras por talla (detalle_ventas_stands)
-            stand.detalleVentas.forEach((detalleVenta) => {
-              if (detalleVenta.producto) {
-                const talla = detalleVenta.producto.talla;
-                playerasVendidas[talla] = (playerasVendidas[talla] || 0) + detalleVenta.cantidad;
-    
-                // Calcular el subtotal para cada venta de playera
-                const subTotal = parseFloat(detalleVenta.subTotal) || 0;  // Convertir a número (flotante)
-                subtotalesVendidos[talla] = (subtotalesVendidos[talla] || 0) + subTotal;
-                totalRecaudado += subTotal; // Sumar el subtotal al total recaudado
-              }
-            });
+            if (stand.detalle_ventas_stands && Array.isArray(stand.detalle_ventas_stands)) {
+                stand.detalle_ventas_stands.forEach((detalleVenta) => {
+                    if (detalleVenta.producto) {
+                        const talla = detalleVenta.producto.talla;
+                        playerasVendidas[talla] = (playerasVendidas[talla] || 0) + detalleVenta.cantidad;
+            
+                        // Calcular el subtotal para cada venta
+                        const subTotal = parseFloat(detalleVenta.subTotal) || 0;
+                        subtotalesVendidos[talla] = (subtotalesVendidos[talla] || 0) + subTotal;
+                        totalRecaudado += subTotal; // Sumar al total recaudado
+                    }
+                });
+            }
+            
+
     
             // Agregar el reporte del stand, incluyendo los subtotales de cada talla y el total recaudado
             resultados.push({
-              nombreStand: stand.nombreStand,
-              playerasAsignadas,
-              playerasVendidas,
-              subtotalesVendidos,
-              totalRecaudado: parseInt(totalRecaudado) // Redondear el total recaudado a un número entero
+                nombreStand: stand.nombreStand,
+                playerasAsignadas,
+                playerasVendidas,
+                subtotalesVendidos,
+                totalRecaudado: parseInt(totalRecaudado) // Convertir a entero
             });
           }
     
+          
           // Enviar el reporte como respuesta
+         // console.log('Datos recuperados:', JSON.stringify(standsConReporte, null, 2));
           return res.status(200).json({ reporte: resultados });
     
         } catch (error) {

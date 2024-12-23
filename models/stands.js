@@ -7,6 +7,7 @@ module.exports = (sequelize, DataTypes) => {
       // Relación con detalleStands
       this.hasMany(models.detalle_stands, {
         foreignKey: 'idStand',
+        as: 'detallesStands'
       });
       // Relación con asignacion de stands
       this.hasMany(models.asignacion_stands, {
@@ -14,10 +15,8 @@ module.exports = (sequelize, DataTypes) => {
         as: 'asignaciones'
       });
       this.hasMany(models.detalle_ventas_stands, {
-        foreignKey: 'idStand',
-        as: 'detallesStands'
+        foreignKey: 'idStand'
       });
-      
     }
   }
   stands.init({

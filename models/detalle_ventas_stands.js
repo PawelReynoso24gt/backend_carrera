@@ -1,7 +1,6 @@
 'use strict';
 const { Model } = require('sequelize');
 
-
 module.exports = (sequelize, DataTypes) => {
     class detalle_ventas_stands extends Model {
         static associate(models) {
