@@ -1,55 +1,27 @@
 // ! Controlador de Ventas
 'use strict';
 
+const { zonedTimeToUtc, format } = require('date-fns-tz');
+const { parse, isValid } = require('date-fns'); // isValid para validar fechas
 const db = require('../models');
 const VENTAS = db.ventas;
 const TIPO_PUBLICOS = db.tipo_publicos;
-const STANDS = db.stands;
 
 // Validación de entrada
 function validateVentaData(datos) {
-    if (datos.totalVenta !== undefined) {
-        if (isNaN(datos.totalVenta) || datos.totalVenta <= 0) {
-            return { error: 'El total de la venta debe ser un número mayor a 0.' };
-        }
+    const errors = [];
+
+    // Validar idTipoPublico
+    if (datos.idTipoPublico && (isNaN(datos.idTipoPublico) || datos.idTipoPublico < 1)) {
+        errors.push('El tipo de público debe ser un número válido mayor a 0.');
     }
 
-    if (datos.fechaVenta !== undefined) {
-        if (isNaN(Date.parse(datos.fechaVenta))) {
-            return { error: 'La fecha de la venta debe ser una fecha válida.' };
-        }
+    // Validar estado
+    if (datos.estado !== undefined && ![0, 1].includes(datos.estado)) {
+        errors.push('El estado debe ser 0 o 1.');
     }
 
-    if (datos.idTipoPublico !== undefined) {
-        if (isNaN(datos.idTipoPublico) || datos.idTipoPublico < 1) {
-            return { error: 'El tipo de público debe ser un número válido mayor a 0.' };
-        }
-    }
-
-    if (datos.idStand !== undefined) {
-        if (isNaN(datos.idStand) || datos.idStand < 1) {
-            return { error: 'El ID del stand debe ser un número válido mayor a 0.' };
-        }
-    }
-
-    // Verificar que al menos un campo esté presente para actualizaciones
-    if (
-        datos.totalVenta === undefined &&
-        datos.fechaVenta === undefined &&
-        datos.idTipoPublico === undefined &&
-        datos.idStand === undefined &&
-        datos.estado === undefined
-    ) {
-        return { error: 'Debe proporcionar al menos un campo para actualizar.' };
-    }
-
-    if (datos.estado !== undefined) {
-        if (datos.estado !== 0 && datos.estado !== 1) {
-            return { error: 'El estado debe ser 0 o 1.' };
-        }
-    }
-
-    return null;
+    return errors.length > 0 ? errors : null;
 }
 
 module.exports = {
@@ -60,19 +32,56 @@ module.exports = {
                 include: [
                     {
                         model: TIPO_PUBLICOS,
-                        attributes: ['nombreTipo']
+                        attributes: ['idTipoPublico', 'nombreTipo'],
                     },
-                    {
-                        model: STANDS,
-                        attributes: ['nombreStand', 'direccion']
-                    }
-                ]
+                ],
+                where: { estado: 1 },
             });
 
-            return res.status(200).send(ventas);
+            return res.status(200).json(ventas);
         } catch (error) {
             console.error('Error al recuperar las ventas:', error);
-            return res.status(500).send({ message: 'Ocurrió un error al recuperar las ventas.' });
+            return res.status(500).json({ message: 'Error al recuperar las ventas.' });
+        }
+    },
+
+    // * Obtener ventas activas
+    async findActive(req, res) {
+        try {
+            const ventas = await VENTAS.findAll({
+                include: [
+                    {
+                        model: TIPO_PUBLICOS,
+                        attributes: ['idTipoPublico', 'nombreTipo'],
+                    },
+                ],
+                where: { estado: 1 },
+            });
+
+            return res.status(200).json(ventas);
+        } catch (error) {
+            console.error('Error al recuperar las ventas activas:', error);
+            return res.status(500).json({ message: 'Error al recuperar las ventas activas.' });
+        }
+    },
+
+    // * Obtener ventas inactivas
+    async findInactive(req, res) {
+        try {
+            const ventas = await VENTAS.findAll({
+                include: [
+                    {
+                        model: TIPO_PUBLICOS,
+                        attributes: ['idTipoPublico', 'nombreTipo'],
+                    },
+                ],
+                where: { estado: 0 },
+            });
+
+            return res.status(200).json(ventas);
+        } catch (error) {
+            console.error('Error al recuperar las ventas inactivas:', error);
+            return res.status(500).json({ message: 'Error al recuperar las ventas inactivas.' });
         }
     },
 
@@ -85,23 +94,19 @@ module.exports = {
                 include: [
                     {
                         model: TIPO_PUBLICOS,
-                        attributes: ['nombreTipo']
+                        attributes: ['idTipoPublico', 'nombreTipo'],
                     },
-                    {
-                        model: STANDS,
-                        attributes: ['nombreStand', 'direccion']
-                    }
-                ]
+                ],
             });
 
             if (!venta) {
-                return res.status(404).send({ message: 'Venta no encontrada.' });
+                return res.status(404).json({ message: 'Venta no encontrada.' });
             }
 
-            return res.status(200).send(venta);
+            return res.status(200).json(venta);
         } catch (error) {
             console.error('Error al recuperar la venta:', error);
-            return res.status(500).send({ message: 'Ocurrió un error al recuperar la venta.' });
+            return res.status(500).json({ message: 'Error al recuperar la venta.' });
         }
     },
 
@@ -109,61 +114,92 @@ module.exports = {
     async create(req, res) {
         const datos = req.body;
 
-        // Validar los datos de la venta
-        const error = validateVentaData(datos);
-        if (error) {
-            return res.status(400).send({ error });
+        // Validar datos
+        const validationErrors = validateVentaData(datos);
+        if (validationErrors) {
+            return res.status(400).json({ errors: validationErrors });
         }
-
-        const nuevaVenta = {
-            totalVenta: datos.totalVenta,
-            fechaVenta: datos.fechaVenta,
-            estado: datos.estado || 1,
-            idTipoPublico: datos.idTipoPublico,
-            idStand: datos.idStand
-        };
-
         try {
-            const ventaCreada = await VENTAS.create(nuevaVenta);
-            return res.status(201).send(ventaCreada);
+            const nuevaVenta = await VENTAS.create({
+                totalVenta: datos.totalVenta || 0.0,
+                fechaVenta: new Date(),
+                estado: datos.estado !== undefined ? datos.estado : 1,
+                idTipoPublico: datos.idTipoPublico,
+            });
+
+            // Convertir fecha al formato UTC-6 para la respuesta
+            const ventaConFormato = {
+                ...nuevaVenta.toJSON(),
+                fechaVenta: format(new Date(nuevaVenta.fechaVenta), "yyyy-MM-dd HH:mm:ss", {
+                    timeZone: "America/Guatemala",
+                }),
+            };
+    
+                return res.status(201).json({
+                message: "Venta creada con éxito",
+                createdVenta: ventaConFormato,
+            });
         } catch (error) {
             console.error('Error al crear la venta:', error);
-            return res.status(500).send({ message: 'Ocurrió un error al crear la venta.' });
+            return res.status(500).json({ message: 'Error al crear la venta.' });
         }
     },
 
     // * Actualizar una venta
     async update(req, res) {
+        const { totalVenta, fechaVenta, estado, idTipoPublico } = req.body;
         const id = req.params.id;
-        const datos = req.body;
-
-        // Validar los datos de la venta
-        const error = validateVentaData(datos);
-        if (error) {
-            return res.status(400).send({ error });
-        }
-
+    
         const camposActualizados = {};
-
-        if (datos.totalVenta !== undefined) camposActualizados.totalVenta = datos.totalVenta;
-        if (datos.fechaVenta !== undefined) camposActualizados.fechaVenta = datos.fechaVenta;
-        if (datos.estado !== undefined) camposActualizados.estado = datos.estado;
-        if (datos.idTipoPublico !== undefined) camposActualizados.idTipoPublico = datos.idTipoPublico;
-        if (datos.idStand !== undefined) camposActualizados.idStand = datos.idStand;
-
-        try {
-            const [rowsUpdated] = await VENTAS.update(camposActualizados, {
-                where: { idVenta: id }
-            });
-
-            if (rowsUpdated === 0) {
-                return res.status(404).send({ message: 'Venta no encontrada.' });
+    
+        // Validar y asignar campos actualizados
+        if (totalVenta !== undefined) camposActualizados.totalVenta = totalVenta;
+        if (fechaVenta !== undefined) camposActualizados.fechaVenta = fechaVenta;
+        if (estado !== undefined) camposActualizados.estado = estado;
+    
+        if (idTipoPublico !== undefined) {
+            const tipoPublicoExistente = await TIPO_PUBLICOS.findByPk(idTipoPublico);
+            if (!tipoPublicoExistente) {
+                return res.status(400).json({ message: 'El tipo de público especificado no existe.' });
             }
-
-            return res.status(200).send({ message: 'La venta ha sido actualizada exitosamente.' });
-        } catch (error) {
-            console.error('Error al actualizar la venta:', error);
-            return res.status(500).send({ message: 'Ocurrió un error al actualizar la venta.' });
+            camposActualizados.idTipoPublico = idTipoPublico;
         }
-    }
+    
+        try {
+            // Actualizar los campos en la base de datos
+            const [rowsUpdated] = await VENTAS.update(camposActualizados, {
+                where: { idVenta: id },
+            });
+    
+            if (rowsUpdated === 0) {
+                return res.status(404).json({ message: 'Venta no encontrada.' });
+            }
+    
+            // Recuperar la venta actualizada
+            const ventaActualizada = await VENTAS.findByPk(id, {
+                include: [
+                    {
+                        model: TIPO_PUBLICOS,
+                        attributes: ['idTipoPublico', 'nombreTipo'],
+                    },
+                ],
+            });
+    
+            // Formatear la fecha para la respuesta
+            const ventaConFormato = {
+                ...ventaActualizada.toJSON(),
+                fechaVenta: format(new Date(ventaActualizada.fechaVenta), "yyyy-MM-dd HH:mm:ss", {
+                    timeZone: "America/Guatemala",
+                }),
+            };
+    
+            return res.status(200).json({
+                message: `La venta con ID: ${id} ha sido actualizada`,
+                updatedVenta: ventaConFormato,
+            });
+        } catch (error) {
+            console.error(`Error al actualizar la venta con ID ${id}:`, error);
+            return res.status(500).json({ error: 'Error al actualizar la venta.' });
+        }
+    },    
 };

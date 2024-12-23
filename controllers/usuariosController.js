@@ -7,6 +7,8 @@ const db = require('../models');
 const USERS = db.usuarios;
 const ROLES = db.roles;
 const PERSONAS = db.personas;
+const VOLUNTARIOS = db.voluntarios;
+const EMPLEADO = db.empleados;
 
 // Función para hashear la contraseña usando SHA-256
 function hashPassword(password) {
@@ -53,27 +55,46 @@ function validatePasswordChange(currentPassword, newPassword) {
 
 // Función para generar un token JWT
 function generateToken(user) {
+    //console.log('Datos del usuario antes de generar el token:', user);
     const payload = {
         idUsuario: user.idUsuario,
-        usuario: user.usuario
+        usuario: user.usuario,
+        idRol: user.idRol,
+        idSede: user.idSede,
+        idPersona: user.idPersona,
+        idVoluntario: user.idVoluntario ?? null,
+        idEmpleado: user.idEmpleado ?? null,
     };
 
     // Generar un token firmado con una duración de 1 hora
     const token = jwt.sign(payload, process.env.SECRET_KEY, { expiresIn: '1h' });
+    //console.log('Token generado:', token); // Imprime el token generado
 
     return token;
 }
 
 // Crear un nuevo token y almacenar en la base de datos
-async function createToken(userId) {
-    const token = generateToken({ idUsuario: userId });
+async function createToken(user, idVoluntario, idEmpleado) {
+    // Extrae solo los valores planos del usuario
+    const userData = user.get({ plain: true });
+
+    const token = generateToken({
+        idUsuario: userData.idUsuario,
+        usuario: userData.usuario,
+        idRol: userData.idRol,
+        idSede: userData.idSede,
+        idPersona: user.persona?.idPersona,
+        idVoluntario: idVoluntario,
+        idEmpleado: idEmpleado,
+    });
+
     const expiresAt = new Date(Date.now() + 3600000); // Expira en 1 hora
 
     await USERS.update({
         token,
         tokenExpiresAt: expiresAt
     }, {
-        where: { idUsuario: userId }
+        where: { idUsuario: userData.idUsuario }
     });
 
     return token;
@@ -101,7 +122,23 @@ module.exports = {
                     usuario: usuario,
                     contrasenia: hashPassword(contrasenia),
                     estado: 1 // Verificamos que el usuario esté activo
-                }
+                },
+                include: [
+                    {
+                        model: PERSONAS, // Relación con personas
+                        attributes: ['idPersona'], // Extraer idPersona
+                        include: [
+                            {
+                                model: VOLUNTARIOS, // Relación desde personas a voluntarios
+                                attributes: ['idVoluntario'], // Extraer idVoluntario
+                            },
+                            {
+                                model: EMPLEADO, // Relación desde personas a empleados
+                                attributes: ['idEmpleado'], // Extraer idEmpleado
+                            }
+                        ],
+                    },
+                ],
             });
 
             if (!user) {
@@ -109,9 +146,13 @@ module.exports = {
                     message: 'Credenciales inválidas o cuenta inactiva.'
                 });
             }
+            // Extraer datos necesarios para el token
+            const idVoluntario = user.persona?.voluntarios?.[0]?.idVoluntario || null;
+            const idEmpleado = user.persona?.empleados?.[0]?.idEmpleado || null;
+            //console.log("ID del voluntario:", idVoluntario); // Log para depuración
 
             // Generar el token JWT y almacenarlo en la base de datos
-            const token = await createToken(user.idUsuario);
+            const token = await createToken(user, idVoluntario, idEmpleado);
 
             return res.status(200).send({
                 message: 'Inicio de sesión exitoso.',
@@ -121,7 +162,9 @@ module.exports = {
                     estado: user.estado,
                     idRol: user.idRol,
                     idSede: user.idSede,
-                    idPersona: user.idPersona
+                    idPersona: user.idPersona,
+                    idVoluntario: idVoluntario ?? null,
+                    idEmpleado: idEmpleado ?? null,
                 },
                 token: token // Devolver el token al cliente
             });
