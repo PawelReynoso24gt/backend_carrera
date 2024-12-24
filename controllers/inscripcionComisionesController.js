@@ -119,6 +119,18 @@ module.exports = {
         }
 
         try {
+            // Verificar si ya existe una inscripción con el mismo idVoluntario e idComision
+            const existente = await INSCRIPCION_COMISION.findOne({
+                where: {
+                    idComision,
+                    idVoluntario
+                }
+            });
+
+            if (existente) {
+                return res.status(400).json({ message: 'El voluntario ya está inscrito en esta comisión.' });
+            }
+
             const nuevaInscripcion = await INSCRIPCION_COMISION.create({
                 idComision,
                 idVoluntario,
@@ -164,6 +176,21 @@ module.exports = {
         }
 
         try {
+            // Verificar si ya existe una inscripción duplicada
+            if (idComision !== undefined && idVoluntario !== undefined) {
+                const existente = await INSCRIPCION_COMISION.findOne({
+                    where: {
+                        idComision,
+                        idVoluntario,
+                        idInscripcionComision: { [db.Sequelize.Op.ne]: id } // Excluir el registro actual
+                    }
+                });
+
+                if (existente) {
+                    return res.status(400).json({ message: 'El voluntario ya está inscrito en esta comisión.' });
+                }
+            }
+            
             // Realizar la actualización con solo los campos enviados
             const [updatedRows] = await INSCRIPCION_COMISION.update(
                 camposActualizados,

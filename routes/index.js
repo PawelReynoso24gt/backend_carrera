@@ -116,6 +116,7 @@ module.exports = (app) => {
 
     // * RUTAS DE EVENTOS
     router.get('/eventos', eventosController.findAll);
+    router.get('/eventos/reporte', eventosController.obtenerReporteEventos);
     router.get('/eventos/activas', eventosController.findActive);
     router.get('/eventos/inactivas', eventosController.findInactive);
     router.get('/eventos/:idEvento', eventosController.findById);
@@ -582,6 +583,7 @@ module.exports = (app) => {
     router.get('/detalle_ventas_stands', detalle_ventas_standsController.findAll);
     router.get('/detalle_ventas_stands/activos', detalle_ventas_standsController.findActive),
     router.get('/detalle_ventas_stands/inactivos', detalle_ventas_standsController.findInactive),
+    router.get('/reporte/playeras', detalle_ventas_standsController.obtenerReportePlayeras),
     router.get('/detalle_ventas_stands/:id', detalle_ventas_standsController.findById);
     router.post('/detalle_ventas_stands/create', detalle_ventas_standsController.create);
     router.put('/detalle_ventas_stands/update/:id', detalle_ventas_standsController.update);
@@ -618,6 +620,7 @@ module.exports = (app) => {
     router.post('/detalle_productos_voluntarios/create', detalle_productos_voluntariosController.create);
     router.put('/detalle_productos_voluntarios/update/:id', detalle_productos_voluntariosController.update);
     router.delete('/detalle_productos_voluntarios/delete/:id', detalle_productos_voluntariosController.delete);
+
 
     // * RUTAS DE NOTIFICACIONES
     router.get('/notificaciones', notificacionesController.find);

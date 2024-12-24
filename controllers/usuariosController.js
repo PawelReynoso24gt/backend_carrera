@@ -8,6 +8,7 @@ const USERS = db.usuarios;
 const ROLES = db.roles;
 const PERSONAS = db.personas;
 const VOLUNTARIOS = db.voluntarios;
+const EMPLEADO = db.empleados;
 
 // Función para hashear la contraseña usando SHA-256
 function hashPassword(password) {
@@ -61,7 +62,8 @@ function generateToken(user) {
         idRol: user.idRol,
         idSede: user.idSede,
         idPersona: user.idPersona,
-        idVoluntario: user.idVoluntario,
+        idVoluntario: user.idVoluntario ?? null,
+        idEmpleado: user.idEmpleado ?? null,
     };
 
     // Generar un token firmado con una duración de 1 hora
@@ -72,7 +74,7 @@ function generateToken(user) {
 }
 
 // Crear un nuevo token y almacenar en la base de datos
-async function createToken(user, idVoluntario) {
+async function createToken(user, idVoluntario, idEmpleado) {
     // Extrae solo los valores planos del usuario
     const userData = user.get({ plain: true });
 
@@ -83,13 +85,15 @@ async function createToken(user, idVoluntario) {
         idSede: userData.idSede,
         idPersona: user.persona?.idPersona,
         idVoluntario: idVoluntario,
+        idEmpleado: idEmpleado,
     });
 
     const expiresAt = new Date(Date.now() + 3600000); // Expira en 1 hora
 
+    // Actualizar el token en la base de datos
     await USERS.update({
-        token,
-        tokenExpiresAt: expiresAt
+        token,            // El token generado
+        tokenExpiresAt: expiresAt // Fecha de expiración del token
     }, {
         where: { idUsuario: userData.idUsuario }
     });
@@ -129,6 +133,10 @@ module.exports = {
                                 model: VOLUNTARIOS, // Relación desde personas a voluntarios
                                 attributes: ['idVoluntario'], // Extraer idVoluntario
                             },
+                            {
+                                model: EMPLEADO, // Relación desde personas a empleados
+                                attributes: ['idEmpleado'], // Extraer idEmpleado
+                            }
                         ],
                     },
                 ],
@@ -141,10 +149,11 @@ module.exports = {
             }
             // Extraer datos necesarios para el token
             const idVoluntario = user.persona?.voluntarios?.[0]?.idVoluntario || null;
+            const idEmpleado = user.persona?.empleados?.[0]?.idEmpleado || null;
             //console.log("ID del voluntario:", idVoluntario); // Log para depuración
 
             // Generar el token JWT y almacenarlo en la base de datos
-            const token = await createToken(user, idVoluntario);
+            const token = await createToken(user, idVoluntario, idEmpleado);
 
             return res.status(200).send({
                 message: 'Inicio de sesión exitoso.',
@@ -155,7 +164,8 @@ module.exports = {
                     idRol: user.idRol,
                     idSede: user.idSede,
                     idPersona: user.idPersona,
-                    idVoluntario: idVoluntario,
+                    idVoluntario: idVoluntario ?? null,
+                    idEmpleado: idEmpleado ?? null,
                 },
                 token: token // Devolver el token al cliente
             });
