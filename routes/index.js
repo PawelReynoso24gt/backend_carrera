@@ -1,5 +1,6 @@
 const { Router } = require('express');
 const router = Router();
+const { checkPermissions } = require('../middlewares/permissionToken');
 const authenticateToken = require('../middlewares/authenticateToken');
 
 // Aqui van los imports
@@ -81,7 +82,7 @@ module.exports = (app) => {
     router.get('/usuarios', usuariosController.findAllUsers);
     router.get('/usuariosById/:id', usuariosController.findById);
     router.get('/usuarios/verify/:idUsuario?', usuariosController.verifyChangedPassword);
-    router.post('/usuarios', usuariosController.create);
+    router.post('/usuarios', checkPermissions('Crear usuario'), usuariosController.create);
     router.post("/renew", usuariosController.renewToken);
     router.put('/usuarios/:id', usuariosController.update);
     router.put('/usuarios/:id/contrasenia', usuariosController.updatePassword);
