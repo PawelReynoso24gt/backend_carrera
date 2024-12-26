@@ -217,6 +217,13 @@ module.exports = {
             return res.status(400).json({ message: "Faltan datos para crear la venta." });
         }
 
+         // Validar que los detalles tengan los campos requeridos
+        for (const detalle of detalles) {
+            if (!detalle.idProducto || detalle.cantidad <= 0 || !detalle.subTotal) {
+                throw new Error(`El detalle de venta es inválido: ${JSON.stringify(detalle)}`);
+            }
+        }        
+
         const transaction = await db.sequelize.transaction(); // Transacción para asegurar atomicidad
 
         try {
@@ -257,9 +264,8 @@ module.exports = {
                         idVenta,
                         idProducto: detalle.idProducto,
                         cantidad: detalle.cantidad,
-                        subTotal: detalle.subtotal,
-                        donacion: detalle.donacion || 0,
-                        estado: detalle.estado || 1, // Asegurar que el estado esté presente
+                        subTotal: detalle.subTotal || 0, // Asegúrate de usar el campo correcto
+                        donacion: detalle.donacion || 0, // Incluye la donación en caso de estar presente
                         idVoluntario: detalle.idVoluntario, // Asegurar que se incluya el ID del voluntario
                     },
                     { transaction }
@@ -314,9 +320,13 @@ module.exports = {
                     { transaction }
                 );
             }
-
+            console.log("Datos recibidos en createFullVenta:", req.body);
             await transaction.commit(); // Confirmar la transacción
-            return res.status(201).json({ message: "Venta creada con éxito.", venta: nuevaVenta });
+            return res.status(201).json({
+                message: "Venta creada con éxito.",
+                venta: nuevaVenta,
+                detalles: detallesVentaIds,
+            });            
         } catch (error) {
             await transaction.rollback(); // Revertir cambios en caso de error
             console.error("Error al crear la venta:", error);
