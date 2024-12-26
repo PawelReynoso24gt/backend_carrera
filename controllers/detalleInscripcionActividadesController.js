@@ -14,28 +14,45 @@ module.exports = {
                     {
                         model: INSCRIPCION_EVENTOS,
                         as: 'inscripcionEvento',
-                        attributes: ['idInscripcionEvento', 'fechaHoraInscripcion', 'estado']
+                        attributes: ['idInscripcionEvento', 'fechaHoraInscripcion', 'estado'],
+                        include: [
+                            {
+                                model: db.eventos,
+                                as: 'evento',
+                                attributes: ['nombreEvento'], // Incluir el nombre del evento
+                            },
+                        ],
                     },
                     {
                         model: INSCRIPCION_COMISIONES,
-                        attributes: ['idInscripcionComision', 'idComision', 'idVoluntario', 'estado']
+                        as: 'inscripcion_comisione',
+                        attributes: ['idInscripcionComision', 'idComision', 'estado'],
+                        include: [
+                            {
+                                model: db.comisiones,
+                                as: 'comisione',
+                                attributes: ['comision'], // Incluir el nombre de la comisión
+                            },
+                        ],
                     },
                     {
                         model: ACTIVIDADES,
                         as: 'actividad',
-                        attributes: ['idActividad', 'actividad', 'descripcion', 'estado']
-                    }
+                        attributes: ['actividad', 'descripcion', 'estado'], // Datos de la actividad
+                    },
                 ],
-                where: { estado: 1 } // Solo activos por defecto
+                where: { estado: 1 }, // Solo activos
             });
+    
             return res.status(200).json(detalles);
         } catch (error) {
             console.error('Error al recuperar los detalles de inscripción de actividades:', error);
             return res.status(500).json({
-                message: 'Ocurrió un error al recuperar los detalles.'
+                message: 'Ocurrió un error al recuperar los detalles.',
             });
         }
     },
+    
 
     // Obtener detalles activos
     async findActive(req, res) {
@@ -140,7 +157,7 @@ module.exports = {
         const { idInscripcionEvento, idInscripcionComision, idActividad } = req.body;
         const estado = req.body.estado !== undefined ? req.body.estado : 1;
         
-        if (!idInscripcionEvento || !idInscripcioComision || !idActividad) {
+        if (!idInscripcionEvento || !idInscripcionComision || !idActividad) {
             return res.status(400).json({ message: 'Faltan campos requeridos.' });
         }
 

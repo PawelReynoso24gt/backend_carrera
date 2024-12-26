@@ -434,6 +434,7 @@ module.exports = (app) => {
     router.get('/inscripcion_eventos/activos', inscripcionEventosController.findActive);
     router.get('/inscripcion_eventos/inactivos', inscripcionEventosController.findInactive);
     router.get('/inscripcion_eventos/:id', inscripcionEventosController.findById);
+    router.get( "/inscripciones/voluntario/:idVoluntario", inscripcionEventosController.obtenerInscripcionesPorVoluntario);
     router.post('/inscripcion_eventos/create', inscripcionEventosController.create); 
     router.put('/inscripcion_eventos/update/:id', inscripcionEventosController.update);
     router.delete('/inscripcion_eventos/delete/:id', inscripcionEventosController.delete); 

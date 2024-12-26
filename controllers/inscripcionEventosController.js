@@ -180,6 +180,41 @@ module.exports = {
         }
     },
 
+
+            // Obtener las inscripciones asociadas a un voluntario
+        async obtenerInscripcionesPorVoluntario(req, res) {
+            const { idVoluntario } = req.params;
+
+            try {
+                // Buscar la inscripción al evento
+                const inscripcionEvento = await INSCRIPCION_EVENTOS.findOne({
+                    where: { idVoluntario },
+                    attributes: ["idInscripcionEvento"],
+                });
+
+                // Buscar la inscripción a la comisión
+                const inscripcionComision = await db.inscripcion_comisiones.findOne({
+                    where: { idVoluntario },
+                    attributes: ["idInscripcionComision"],
+                });
+
+                if (!inscripcionEvento || !inscripcionComision) {
+                    return res.status(404).json({
+                        message: "No se encontraron inscripciones asociadas al voluntario.",
+                    });
+                }
+
+                // Enviar los datos encontrados
+                res.json({
+                    idInscripcionEvento: inscripcionEvento.idInscripcionEvento,
+                    idInscripcionComision: inscripcionComision.idInscripcionComision,
+                });
+            } catch (error) {
+                console.error("Error al obtener inscripciones del voluntario:", error);
+                res.status(500).json({ message: "Error al obtener inscripciones." });
+            }
+        },
+
     async update(req, res) {
         const { fechaHoraInscripcion, estado, idVoluntario, idEvento } = req.body;
         const id = req.params.id;
