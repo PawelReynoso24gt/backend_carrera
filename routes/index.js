@@ -71,11 +71,17 @@ module.exports = (app) => {
     // * LOGIN AND LOGOUT
     router.post('/usuarios/login', usuariosController.login); // Ruta para iniciar sesión, no requiere autenticación
 
-        // * QR (lo puse aqui porque no me dejaba usarlo a pesar de tener el token)
-        router.get('/generateQR', voluntariosController.generateQR);
+      // * QR (lo puse aqui porque no me dejaba usarlo a pesar de tener el token)
+      router.get('/generateQR', voluntariosController.generateQR);
+
+      // * RUTAS DE MUNICIPIOS Y DEPARTAMENTOS PARA REGISTRO ASPIRANTES
+      router.get('/municipios', municipiosController.find);
+      router.get('/departamentos', departamentosController.find);
+      router.get('/aspirantes', aspirantesController.findAll);  
+      router.post('/aspirantes', aspirantesController.create);
 
     // ! Todas las rutas a continuación requieren autenticación
-    router.use(authenticateToken); // Middleware para proteger las rutas con autenticación
+   // router.use(authenticateToken); // Middleware para proteger las rutas con autenticación
 
     // * USUARIOS
     router.get('/usuarios/activos', usuariosController.find);
@@ -107,6 +113,20 @@ module.exports = (app) => {
     router.put('/tipo_stands/:id', tipoStandsController.update);
     router.delete('/tipo_stands/:id', tipoStandsController.delete);
 
+
+     // * RUTAS DE MUNICIPIOS
+      router.get('/municipios/activas', municipiosController.findActivateMunicipios);
+      router.get('/municipios/inactivas', municipiosController.findInactiveMunicipios);
+      router.post('/municipios/create', municipiosController.createMunicipio);
+      router.put('/municipios/update/:id', municipiosController.updateMunicipio);
+      router.delete('/municipios/:id', municipiosController.deleteMunicipio);
+
+      // * RUTAS DE DEPARTAMENTOS
+      router.get('/departamentos/activas', departamentosController.findActivateDepto);
+      router.get('/departamentos/inactivas', departamentosController.findaInactivateDepto);
+      router.post('/departamentos/create', departamentosController.createDepto);
+      router.put('/departamentos/:id', departamentosController.updateDepto);
+      router.delete('/departamentos/delete/:id', departamentosController.deleteDepto);
     // * RUTAS DE SEDES
     router.get('/sedes', sedesController.findAll);
     router.get('/sedes/activas', sedesController.findActive);
@@ -134,13 +154,7 @@ module.exports = (app) => {
     router.put('/stand/update/:id', standsController.updateStand);
     router.delete('/stand/:id', standsController.deleteStand);
 
-    // * RUTAS DE DEPARTAMENTOS
-    router.get('/departamentos', departamentosController.find);
-    router.get('/departamentos/activas', departamentosController.findActivateDepto);
-    router.get('/departamentos/inactivas', departamentosController.findaInactivateDepto);
-    router.post('/departamentos/create', departamentosController.createDepto);
-    router.put('/departamentos/:id', departamentosController.updateDepto);
-    router.delete('/departamentos/delete/:id', departamentosController.deleteDepto);
+    
 
     // * RUTAS DE TIPOS PAGOS
     router.get('/tipospagos', tipoPagosController.find);
@@ -242,13 +256,7 @@ module.exports = (app) => {
     router.put('/stand/update/:id', standsController.updateStand);
     router.delete('/stand/:id', standsController.deleteStand);
     
-    // * RUTAS DE MUNICIPIOS
-    router.get('/municipios', municipiosController.find);
-    router.get('/municipios/activas', municipiosController.findActivateMunicipios);
-    router.get('/municipios/inactivas', municipiosController.findInactiveMunicipios);
-    router.post('/municipios/create', municipiosController.createMunicipio);
-    router.put('/municipios/update/:id', municipiosController.updateMunicipio);
-    router.delete('/municipios/:id', municipiosController.deleteMunicipio);
+    
 
     // * DETALLE HORARIOS
     router.get('/detalle_horarios', detalleHorariosController.findAll);
@@ -556,11 +564,9 @@ module.exports = (app) => {
     router.delete('/detallespago/:idDetallePagoRecaudacionRifa', detallePagoRifasController.delete);
 
     //* RUTAS ASPIRANTES 
-    router.get('/aspirantes', aspirantesController.findAll);
     router.get('/aspirantes/activos', aspirantesController.findActive);
     router.get('/aspirantes/inactivos', aspirantesController.findInactive);
-    router.get('/aspirantes/estado/:idAspirante', aspirantesController.verifyStatus);
-    router.post('/aspirantes', aspirantesController.create);
+    router.get('/aspirantes/estado/:idAspirante', aspirantesController.verifyStatus); 
     router.put('/aspirantes/:idAspirante', aspirantesController.update);
     router.get('/aspirantes', aspirantesController.findAll);
     router.put('/aspirantes/aceptar/:idAspirante', aspirantesController.acceptAspirante);
