@@ -63,6 +63,8 @@ const detalle_productos_voluntariosController = require('../controllers/detalle_
 const detalle_pago_ventas_voluntariosController = require('../controllers/detalle_pago_ventas_voluntariosController');
 const notificacionesController = require('../controllers/notificacionesController');
 const tipoNotificacionesController = require('../controllers/tipoNotificacionController');
+const tipo_situacionesController = require('../controllers/tipo_situacionesController');
+const situacionesController = require('../controllers/situacionesController');
 
 module.exports = (app) => {
 
@@ -539,8 +541,10 @@ module.exports = (app) => {
     router.get('/ventas', ventasController.findAll);
     router.get('/ventas/activas', ventasController.findActive);
     router.get('/ventas/inactivas', ventasController.findInactive);
+    router.get('/detalle_ventas_voluntarios/ventaCompleta/:idVenta', ventasController.findByVentaId);
     router.get('/ventas/:id', ventasController.findById);
     router.post('/ventas/create', ventasController.create);
+    router.post('/ventas/create/completa', ventasController.createFullVenta);
     router.put('/ventas/update/:id', ventasController.update);
     
     //* RUTAS DETALLE PAGO RIFAS
@@ -622,6 +626,28 @@ module.exports = (app) => {
     router.put('/detalle_productos_voluntarios/update/:id', detalle_productos_voluntariosController.update);
     router.delete('/detalle_productos_voluntarios/delete/:id', detalle_productos_voluntariosController.delete);
 
+    // * RUTAS DE TIPOS DE SITUACIONES
+    router.get('/tipo_situaciones', tipo_situacionesController.findAll);
+    router.get('/tipo_situaciones/activos', tipo_situacionesController.findActive);
+    router.get('/tipo_situaciones/inactivos', tipo_situacionesController.findInactive);
+    router.get('/tipo_situaciones/:id', tipo_situacionesController.findById);
+    router.post('/tipo_situaciones/create', tipo_situacionesController.create);
+    router.put('/tipo_situaciones/update/:id', tipo_situacionesController.update);
+    router.delete('/tipo_situaciones/delete/:id', tipo_situacionesController.delete);
+
+    // * RUTAS DE SITUACIONES
+    router.get('/situaciones', situacionesController.findAll);
+    router.get('/situaciones/reportadas', situacionesController.findReportadas);
+    router.get('/situaciones/en_revision', situacionesController.findEnRevision);
+    router.get('/situaciones/en_proceso', situacionesController.findEnProceso);
+    router.get('/situaciones/proximo_a_solucionarse', situacionesController.findProximoASolucionarse);
+    router.get('/situaciones/en_reparacion', situacionesController.findEnReparacion);
+    router.get('/situaciones/resueltas', situacionesController.findResueltas);
+    router.get('/situaciones/sin_solucion', situacionesController.findSinSolucion);
+    router.get('/situaciones/:id', situacionesController.findById);
+    router.post('/situaciones/create', situacionesController.create);
+    router.put('/situaciones/update/reporte/:id', situacionesController.updateReporte);
+    router.put('/situaciones/update/respuesta/:id', situacionesController.updateRespuesta);
 
     // * RUTAS DE NOTIFICACIONES
     router.get('/notificaciones', notificacionesController.find);
