@@ -474,6 +474,117 @@ module.exports = {
           console.error('Error al obtener el reporte de playeras:', error);
           return res.status(500).json({ message: 'Error al obtener el reporte de playeras.' });
     }
-    }
+    },
+
+    async obtenerReporteMercanciaVoluntarios(req, res) {
+        try {
+            const { fechaInicio, fechaFin } = req.query;
+    
+            // Verificar que las fechas se proporcionen
+            if (!fechaInicio || !fechaFin) {
+                return res.status(400).json({ message: 'Se requieren las fechas de inicio y fin.' });
+            }
+    
+            // Convertir las fechas de formato DD-MM-YYYY a YYYY-MM-DD
+            const fechaInicioFormato = fechaInicio.split("-").reverse().join("-");
+            const fechaFinFormato = fechaFin.split("-").reverse().join("-");
+    
+            // Validar que las fechas sean válidas
+            const fechaInicioValida = moment(fechaInicioFormato, 'YYYY-MM-DD', true).isValid();
+            const fechaFinValida = moment(fechaFinFormato, 'YYYY-MM-DD', true).isValid();
+    
+            if (!fechaInicioValida || !fechaFinValida) {
+                return res.status(400).json({ message: 'Las fechas no son válidas. Formato esperado: DD-MM-YYYY' });
+            }
+    
+            // Realizar la consulta para obtener los datos
+            const reporteVoluntarios = await DETALLE_STANDS.findAll({
+                where: {
+                    idStand: 1, // Solo stands de voluntarios
+                    estado: 1,
+                    createdAt: {
+                        [Op.gte]: fechaInicioFormato,
+                        [Op.lte]: fechaFinFormato,
+                    },
+                },
+                include: [
+                    {
+                        model: DETALLE_VENTAS_STANDS,
+                        where: {
+                            idStand: 1, // Solo ventas de stands de voluntarios
+                            estado: 1,
+                            createdAt: {
+                                [Op.gte]: fechaInicioFormato,
+                                [Op.lte]: fechaFinFormato,
+                            },
+                        },
+                        include: [
+                            {
+                                model: PRODUCTOS,
+                                attributes: ['idProducto', 'nombreProducto', 'talla', 'precio'],
+                            },
+                        ],
+                    },
+                    {
+                        model: PRODUCTOS,
+                        as: 'producto',
+                        where: {
+                            idCategoria: 1, // Solo productos de tipo 'Playera'
+                        },
+                        attributes: ['idProducto', 'nombreProducto', 'talla'],
+                    },
+                ],
+            });
+    
+            if (!reporteVoluntarios || reporteVoluntarios.length === 0) {
+                return res.status(404).json({ message: 'No se encontraron datos para voluntarios en el rango de fechas especificado.' });
+            }
+    
+            // Preparar el reporte
+            const resultados = [];
+    
+            for (const detalle of reporteVoluntarios) {
+                const playerasAsignadas = {};
+                const playerasVendidas = {};
+                const subtotalesVendidos = {};
+                let totalRecaudado = 0;
+    
+                // Asignación de playeras
+                if (detalle.producto) {
+                    const talla = detalle.producto.talla;
+                    playerasAsignadas[talla] = (playerasAsignadas[talla] || 0) + detalle.cantidad;
+                }
+    
+                // Ventas de playeras
+                if (detalle.detalle_ventas_stands && Array.isArray(detalle.detalle_ventas_stands)) {
+                    detalle.detalle_ventas_stands.forEach((venta) => {
+                        if (venta.producto) {
+                            const talla = venta.producto.talla;
+                            playerasVendidas[talla] = (playerasVendidas[talla] || 0) + venta.cantidad;
+    
+                            const subTotal = parseFloat(venta.subTotal) || 0;
+                            subtotalesVendidos[talla] = (subtotalesVendidos[talla] || 0) + subTotal;
+                            totalRecaudado += subTotal;
+                        }
+                    });
+                }
+    
+                // Agregar datos al reporte
+                resultados.push({
+                    nombreStand: detalle.nombreStand || 'Stand de Voluntarios',
+                    playerasAsignadas,
+                    playerasVendidas,
+                    subtotalesVendidos,
+                    totalRecaudado: parseInt(totalRecaudado),
+                });
+            }
+    
+            // Enviar el reporte como respuesta
+            return res.status(200).json({ reporte: resultados });
+        } catch (error) {
+            console.error('Error al obtener el reporte de voluntarios:', error);
+            return res.status(500).json({ message: 'Error al obtener el reporte de voluntarios.' });
+        }
+    }    
 
 };

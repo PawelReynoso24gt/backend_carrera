@@ -374,10 +374,10 @@ module.exports = {
         const id = req.params.id; // ID del usuario obtenido de los parámetros de la solicitud
 
         // Validar la nueva contraseña
-        const error = validatePasswordChange(newPassword); // Reutilizar la función para validar contraseñas
+        /*const error = validatePasswordChange(newPassword); // Reutilizar la función para validar contraseñas
         if (error) {
             return res.status(400).json({ error });
-        }
+        }*/
 
         try {
             // Buscar el usuario por ID

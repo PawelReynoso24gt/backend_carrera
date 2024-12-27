@@ -581,6 +581,7 @@ module.exports = (app) => {
     router.get('/detalle_ventas_stands/inactivos', detalle_ventas_standsController.findInactive),
     router.get('/reporte/playeras', detalle_ventas_standsController.obtenerReportePlayeras),
     router.get('/detalle_ventas_stands/:id', detalle_ventas_standsController.findById);
+    router.get('/detalle_ventas_stands/getReporte', detalle_ventas_standsController.obtenerReporteMercanciaVoluntarios);
     router.post('/detalle_ventas_stands/create', detalle_ventas_standsController.create);
     router.put('/detalle_ventas_stands/update/:id', detalle_ventas_standsController.update);
     
