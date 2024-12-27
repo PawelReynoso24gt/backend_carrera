@@ -1,7 +1,7 @@
 'use strict';
 
 const db = require('../models');
-const { Op } = require('sequelize');
+const { Op, where } = require('sequelize');
 const moment = require('moment');
 
 const detalle_ventas_stands = require('../models/detalle_ventas_stands');
@@ -509,29 +509,28 @@ module.exports = {
                 },
                 include: [
                     {
-                        model: DETALLE_VENTAS_STANDS,
+                        model: STANDS,
+                        as: 'stand',
                         where: {
                             idStand: 1, // Solo ventas de stands de voluntarios
                             estado: 1,
-                            createdAt: {
-                                [Op.gte]: fechaInicioFormato,
-                                [Op.lte]: fechaFinFormato,
-                            },
                         },
                         include: [
                             {
-                                model: PRODUCTOS,
-                                attributes: ['idProducto', 'nombreProducto', 'talla', 'precio'],
+                                model: DETALLE_VENTAS_STANDS,
+                                where: {
+                                    idStand: 1,
+                                    estado: 1,
+                                },
+                                attributes: ['idProducto', 'cantidad', 'subTotal', 'donacion'],
+                                include: [
+                                    {
+                                        model: PRODUCTOS,
+                                        attributes: ['idProducto', 'nombreProducto', 'talla', 'precio'],
+                                    },
+                                ],
                             },
                         ],
-                    },
-                    {
-                        model: PRODUCTOS,
-                        as: 'producto',
-                        where: {
-                            idCategoria: 1, // Solo productos de tipo 'Playera'
-                        },
-                        attributes: ['idProducto', 'nombreProducto', 'talla'],
                     },
                 ],
             });
@@ -541,50 +540,54 @@ module.exports = {
             }
     
             // Preparar el reporte
-            const resultados = [];
+            let totalSubTotal = 0;
+            let totalDonaciones = 0;
     
-            for (const detalle of reporteVoluntarios) {
-                const playerasAsignadas = {};
-                const playerasVendidas = {};
-                const subtotalesVendidos = {};
-                let totalRecaudado = 0;
+            const resultados = reporteVoluntarios.map((detalle) => {
+                const ventas = [];
     
-                // Asignación de playeras
-                if (detalle.producto) {
-                    const talla = detalle.producto.talla;
-                    playerasAsignadas[talla] = (playerasAsignadas[talla] || 0) + detalle.cantidad;
-                }
+                // Procesar las ventas asociadas al stand
+                if (
+                    detalle.stand &&
+                    detalle.stand.detalle_ventas_stands &&
+                    Array.isArray(detalle.stand.detalle_ventas_stands)
+                ) {
+                    detalle.stand.detalle_ventas_stands.forEach((venta) => {
+                        const subTotal = parseFloat(venta.subTotal) || 0;
+                        const donacion = parseFloat(venta.donacion) || 0;
     
-                // Ventas de playeras
-                if (detalle.detalle_ventas_stands && Array.isArray(detalle.detalle_ventas_stands)) {
-                    detalle.detalle_ventas_stands.forEach((venta) => {
-                        if (venta.producto) {
-                            const talla = venta.producto.talla;
-                            playerasVendidas[talla] = (playerasVendidas[talla] || 0) + venta.cantidad;
+                        totalSubTotal += subTotal;
+                        totalDonaciones += donacion;
     
-                            const subTotal = parseFloat(venta.subTotal) || 0;
-                            subtotalesVendidos[talla] = (subtotalesVendidos[talla] || 0) + subTotal;
-                            totalRecaudado += subTotal;
-                        }
+                        ventas.push({
+                            idProducto: venta.idProducto,
+                            nombreProducto: venta.producto ? venta.producto.nombreProducto : null,
+                            talla: venta.producto ? venta.producto.talla : null,
+                            precio: venta.producto ? venta.producto.precio : null,
+                            cantidadVendida: venta.cantidad,
+                            subTotal,
+                            donacion,
+                        });
                     });
                 }
     
-                // Agregar datos al reporte
-                resultados.push({
-                    nombreStand: detalle.nombreStand || 'Stand de Voluntarios',
-                    playerasAsignadas,
-                    playerasVendidas,
-                    subtotalesVendidos,
-                    totalRecaudado: parseInt(totalRecaudado),
-                });
-            }
+                return {
+                    nombreStand: detalle.stand ? detalle.stand.nombreStand : 'Stand desconocido',
+                    ventas,
+                };
+            });
+    
+            // Agregar totales al reporte
+            const totales = {
+                totalSubTotal: parseFloat(totalSubTotal.toFixed(2)),
+                totalDonaciones: parseFloat(totalDonaciones.toFixed(2)),
+            };
     
             // Enviar el reporte como respuesta
-            return res.status(200).json({ reporte: resultados });
+            return res.status(200).json({ reporte: resultados, totales });
         } catch (error) {
             console.error('Error al obtener el reporte de voluntarios:', error);
             return res.status(500).json({ message: 'Error al obtener el reporte de voluntarios.' });
         }
     }    
-
 };
