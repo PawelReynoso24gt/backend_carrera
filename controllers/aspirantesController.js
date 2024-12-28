@@ -3,6 +3,9 @@
 const db = require('../models');
 const ASPIRANTES = db.aspirantes;
 const VOLUNTARIOS = db.voluntarios;
+const PERSONAS = db.personas;
+const moment = require('moment');
+const { Op } = require('sequelize');
 
 module.exports = {
     async acceptAspirante(req, res) {
@@ -215,5 +218,85 @@ module.exports = {
                 message: error.message || 'Error al eliminar el aspirante.'
             });
         });
+    },
+
+    // Metodo para reporte de aspirantes
+    async reporteAspirantes(req, res) {
+        try {
+            const { fechaInicio, fechaFin } = req.body;
+    
+            // Verificar que las fechas se proporcionen
+            if (!fechaInicio || !fechaFin) {
+                return res.status(400).json({ message: 'Se requieren las fechas de inicio y fin.' });
+            }
+    
+            // Convertir las fechas de formato DD-MM-YYYY a YYYY-MM-DD
+            const fechaInicioFormato = fechaInicio.split("-").reverse().join("-");
+            const fechaFinFormato = fechaFin.split("-").reverse().join("-");
+    
+            // Validar que las fechas sean válidas
+            const fechaInicioValida = moment(fechaInicioFormato, 'YYYY-MM-DD', true).isValid();
+            const fechaFinValida = moment(fechaFinFormato, 'YYYY-MM-DD', true).isValid();
+    
+            if (!fechaInicioValida || !fechaFinValida) {
+                return res.status(400).json({ message: 'Las fechas no son válidas. Formato esperado: DD-MM-YYYY' });
+            }
+    
+            // Realizar la consulta para obtener los datos
+            const aspirantes = await ASPIRANTES.findAll({
+                where: {
+                    estado: 1, // Solo registros activos
+                    fechaRegistro: {
+                        [Op.gte]: fechaInicioFormato,
+                        [Op.lte]: fechaFinFormato,
+                    },
+                },
+                include: [
+                    {
+                        model: PERSONAS,
+                        attributes: [
+                            'idPersona',
+                            'nombre',
+                            'fechaNacimiento',
+                            'telefono',
+                            'domicilio',
+                            'CUI',
+                            'correo',
+                        ],
+                    },
+                ],
+            });
+    
+            if (!aspirantes || aspirantes.length === 0) {
+                return res.status(404).json({ message: 'No se encontraron aspirantes en el rango de fechas especificado.' });
+            }
+    
+            // Preparar el reporte
+            const reporte = aspirantes.map((aspirante) => {
+                const persona = aspirante.persona || {};
+                return {
+                    idAspirante: aspirante.idAspirante,
+                    idPersona: persona.idPersona || "No disponible",
+                    nombre: persona.nombre || "No disponible",
+                    fechaNacimiento: persona.fechaNacimiento ? moment(persona.fechaNacimiento).format('DD-MM-YYYY') : "No disponible",
+                    telefono: persona.telefono || "No disponible",
+                    domicilio: persona.domicilio || "No disponible",
+                    CUI: persona.CUI || "No disponible",
+                    correo: persona.correo || "No disponible",
+                    fechaRegistro: moment(aspirante.fechaRegistro).format('DD-MM-YYYY'),
+                };
+            });
+    
+            // Totales del reporte
+            const totales = {
+                totalAspirantes: aspirantes.length,
+            };
+    
+            // Enviar el reporte como respuesta
+            return res.status(200).json({ reporte, totales });
+        } catch (error) {
+            console.error('Error al generar el reporte de aspirantes:', error);
+            return res.status(500).json({ message: 'Error al generar el reporte de aspirantes.' });
+        }
     }
 };

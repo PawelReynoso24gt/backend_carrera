@@ -663,6 +663,9 @@ module.exports = (app) => {
     // * RUTAS DE TIPOS DE NOTIFICACIONES
     router.get('/tipoNotificaciones', tipoNotificacionesController.find);
 
+    // * RUTAS DE REPORTES
+    router.post('/reportesAspirantes', aspirantesController.reporteAspirantes);
+
     app.use('/', router);
 
 };
