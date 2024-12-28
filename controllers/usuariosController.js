@@ -180,11 +180,11 @@ module.exports = {
     // * Logout
     async logout(req, res) {
         const id = req.params.id;
-    
+
         if (!id) {
             return res.status(400).send({ error: 'ID de usuario no proporcionado' });
         }
-    
+
         try {
             // Buscar el usuario por ID
             console.log("Buscando usuario con ID:", id); // Log para depuración
@@ -192,20 +192,20 @@ module.exports = {
             if (!user) {
                 return res.status(404).send({ message: 'Usuario no encontrado' });
             }
-    
+
             // Eliminar el token del usuario
             console.log("Eliminando token del usuario..."); // Log para depuración
             user.token = null;
             user.tokenExpiresAt = null;
             await user.save();
-    
+
             console.log("Token eliminado exitosamente."); // Log para depuración
             return res.status(200).send({ message: 'Sesión cerrada exitosamente' });
         } catch (error) {
             console.error('Error al cerrar sesión:', error);
             return res.status(500).send({ error: 'Error al cerrar sesión' });
         }
-    },    
+    },
 
     // * Obtener usuarios activos
     async find(req, res) {
@@ -213,18 +213,18 @@ module.exports = {
             const users = await USERS.findAll({
                 include: [
                     {
-                      model: ROLES,
-                      attributes: ['roles'], 
+                        model: ROLES,
+                        attributes: ['roles'],
                     },
-                {model: PERSONAS, attributes: ['idPersona', 'nombre', 'fechaNacimiento', 'telefono', 'domicilio', 'correo', 'idMunicipio', 'createdAt']}],
+                    { model: PERSONAS, attributes: ['idPersona', 'nombre', 'fechaNacimiento', 'telefono', 'domicilio', 'correo', 'idMunicipio', 'createdAt'] }],
                 where: { estado: 1 }
             });
-    
+
             const dataUsers = users.map(user => {
                 const { contrasenia, token, tokenExpiresAt, ...userWithoutPasswordAndTokens } = user.dataValues;
                 return userWithoutPasswordAndTokens;
             });
-    
+
             return res.status(200).send(dataUsers);
         } catch (error) {
             console.error('Error al recuperar los datos:', error);
@@ -234,11 +234,11 @@ module.exports = {
 
     // * Get todos los usuarios
     async findAllUsers(req, res) {
-        try{
+        try {
             const users = await USERS.findAll({
                 include: [{
                     model: ROLES,
-                    attributes: ['roles'] 
+                    attributes: ['roles']
                 }]
             });
 
@@ -249,7 +249,7 @@ module.exports = {
             return res.status(200).send(dataUsers);
         } catch {
             console.error('Error al traer los datos:', error);
-            return res.status(500).send({ message: 'Ocurrio un error al traer los datos'})
+            return res.status(500).send({ message: 'Ocurrio un error al traer los datos' })
         }
     },
 
@@ -424,22 +424,22 @@ module.exports = {
         try {
             const idUsuario = req.userId; // Obtenido del token
             // console.log("ID del usuario autenticado:", idUsuario);
-    
+
             const user = await USERS.findByPk(idUsuario, {
                 attributes: ['changedPassword'], // Solo obtenemos los campos necesarios
             });
-    
+
             if (!user) {
                 return res.status(404).send({ message: 'Usuario no encontrado.' });
             }
-    
+
             if (user.changedPassword === 0) {
                 return res.status(200).send({
                     changedPassword: 0,
                     message: 'Necesitas cambiar tu contraseña.',
                 });
             }
-    
+
             return res.status(200).send({
                 changedPassword: 1,
                 message: 'Tu contraseña ya ha sido cambiada.',
@@ -449,25 +449,25 @@ module.exports = {
             return res.status(500).send({ message: 'Error interno del servidor.' });
         }
     },
-    
+
     async renewToken(req, res) {
         const token = req.headers.authorization?.split(" ")[1];
-    
+
         if (!token) {
             return res.status(401).json({ message: "Token no proporcionado." });
         }
-    
+
         try {
             // Verificar el token y extraer el payload
             const payload = jwt.verify(token, process.env.SECRET_KEY);
-    
+
             // Generar un nuevo token con una nueva expiración
             const newToken = jwt.sign(
                 { idUsuario: payload.idUsuario },
                 process.env.SECRET_KEY,
                 { expiresIn: "15m" } // Renueva por 15 minutos más
             );
-    
+
             return res.status(200).json({ token: newToken });
         } catch (error) {
             return res.status(401).json({ message: "Token inválido o expirado." });
@@ -476,32 +476,32 @@ module.exports = {
 
     async getLoggedUser(req, res) {
         try {
-          // El token incluye el `idUsuario` extraído previamente
-          const idUsuario = req.userId; // Asegúrate de que `req.userId` sea extraído del middleware de autenticación
-      
-          const user = await USERS.findOne({
-            where: { idUsuario },
-            include: [
-              {
-                model: PERSONAS,
-                as: "persona",
-                attributes: ["nombre"], // Solo necesitamos el nombre de la persona
-              },
-            ],
-          });
-      
-          if (!user) {
-            return res.status(404).json({ message: "Usuario no encontrado." });
-          }
-      
-          return res.status(200).json({
-            idUsuario: user.idUsuario,
-            usuario: user.usuario,
-            nombre: user.persona?.nombre || "Sin nombre",
-          });
+            // El token incluye el `idUsuario` extraído previamente
+            const idUsuario = req.userId; // Asegúrate de que `req.userId` sea extraído del middleware de autenticación
+
+            const user = await USERS.findOne({
+                where: { idUsuario },
+                include: [
+                    {
+                        model: PERSONAS,
+                        as: "persona",
+                        attributes: ["nombre"], // Solo necesitamos el nombre de la persona
+                    },
+                ],
+            });
+
+            if (!user) {
+                return res.status(404).json({ message: "Usuario no encontrado." });
+            }
+
+            return res.status(200).json({
+                idUsuario: user.idUsuario,
+                usuario: user.usuario,
+                nombre: user.persona?.nombre || "Sin nombre",
+            });
         } catch (error) {
-          console.error("Error al obtener el usuario logueado:", error);
-          return res.status(500).json({ message: "Error al obtener el usuario logueado." });
+            console.error("Error al obtener el usuario logueado:", error);
+            return res.status(500).json({ message: "Error al obtener el usuario logueado." });
         }
-      }
+    }
 };
