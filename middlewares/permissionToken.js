@@ -31,7 +31,7 @@ function checkPermissions(requiredPermission) {
             });
 
             if (!hasPermission) {
-                return res.status(403).json({ message: 'Acceso denegado: Permiso insuficiente.' });
+                return res.status(409).json({ message: 'Acceso denegado: Permiso insuficiente.' });
             }
 
             next(); // Si el permiso es válido, continúa al controlador

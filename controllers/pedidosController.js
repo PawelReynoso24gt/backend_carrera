@@ -34,63 +34,58 @@ module.exports = {
         });
     },
 
-    // * Listar todos los pedidos activos
     async findActive(req, res) {
-        return PEDIDOS.findAll({
-            where: {
-                estado: 1
-            },
+        try {
+          const pedidos = await PEDIDOS.findAll({
+            where: { estado: 1 },
             include: [
-                {
-                    model: SEDES,
-                    as: 'sede',
-                    attributes: ['nombreSede']
-                },
-                {
-                    model: USUARIOS,
-                    as: 'usuario',
-                    attributes: ['usuario']
-                }
-            ]
-        })
-        .then((pedidos) => {
-            res.status(200).send(pedidos);
-        })
-        .catch((error) => {
-            res.status(500).send({
-                message: error.message || 'Error al listar los pedidos activos.'
-            });
-        });
-    },
-
-     // * Listar todos los pedidos activos
-     async findInactive(req, res) {
-        return PEDIDOS.findAll({
-            where: {
-                estado: 0
-            },
+              {
+                model: SEDES,
+                as: 'sede',
+                attributes: ['nombreSede'],
+              },
+              {
+                model: USUARIOS,
+                as: 'usuario',
+                attributes: ['usuario'],
+              },
+            ],
+          });
+          return res.status(200).json(pedidos);
+        } catch (error) {
+          console.error('Error al listar pedidos activos:', error);
+          return res.status(500).json({
+            message: error.message || 'Error al listar los pedidos activos.',
+          });
+        }
+      },
+    
+      // * Listar todos los pedidos inactivos
+      async findInactive(req, res) {
+        try {
+          const pedidos = await PEDIDOS.findAll({
+            where: { estado: 0 },
             include: [
-                {
-                    model: SEDES,
-                    as: 'sede',
-                    attributes: ['nombreSede']
-                },
-                {
-                    model: USUARIOS,
-                    as: 'usuario',
-                    attributes: ['usuario']
-                }
-            ]
-        })
-        .then((pedidos) => {
-            res.status(200).send(pedidos);
-        })
-        .catch((error) => {
-            res.status(500).send({
-                message: error.message || 'Error al listar los pedidos inactivos.'
-            });
-        });
-    },
+              {
+                model: SEDES,
+                as: 'sede',
+                attributes: ['nombreSede'],
+              },
+              {
+                model: USUARIOS,
+                as: 'usuario',
+                attributes: ['usuario'],
+              },
+            ],
+          });
+          return res.status(200).json(pedidos);
+        } catch (error) {
+          console.error('Error al listar pedidos inactivos:', error);
+          return res.status(500).json({
+            message: error.message || 'Error al listar los pedidos inactivos.',
+          });
+        }
+      },
 
     // * Crear un nuevo pedido
     async create(req, res) {
@@ -149,7 +144,7 @@ module.exports = {
 
     // * Actualizar un pedido
     async update(req, res) {
-        const { fecha, descripcion, idSede, idUsuario } = req.body;
+        const { fecha, descripcion, idSede, idUsuario, estado } = req.body;
         const idPedido = req.params.id;
     
         const camposActualizados = {};
@@ -183,6 +178,11 @@ module.exports = {
             }
             camposActualizados.idUsuario = idUsuario;
         }
+
+        if (estado !== undefined) {
+            camposActualizados.estado = estado;
+        }
+
     
         try {
 
