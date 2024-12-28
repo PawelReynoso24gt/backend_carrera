@@ -196,6 +196,49 @@ module.exports = {
         }
     },
 
+    // Obtener comisiones por ID de Evento
+        async findByEvento(req, res) {
+            const { eventoId } = req.query;
+
+            try {
+                // Validar que el eventoId fue proporcionado
+                if (!eventoId) {
+                    return res.status(400).json({ message: 'Se requiere el ID del evento.' });
+                }
+
+                // Buscar las comisiones asociadas al idEvento
+                const comisiones = await COMISIONES.findAll({
+                    where: { 
+                        idEvento: eventoId,
+                        estado: 1 // Filtrar solo las comisiones activas
+                    },
+                    include: [
+                        {
+                            model: db.eventos,
+                            as: 'evento',
+                            attributes: ['idEvento', 'nombreEvento', 'fechaHoraInicio', 'fechaHoraFin', 'descripcion']
+                        },
+                        {
+                            model: db.detalle_horarios,
+                            as: 'detalleHorario',
+                            attributes: ['idDetalleHorario', 'cantidadPersonas', 'estado']
+                        }
+                    ]
+                });
+
+                // Validar si no se encontraron comisiones
+                if (!comisiones.length) {
+                    return res.status(404).json({ message: 'No se encontraron comisiones para este evento.' });
+                }
+
+                // Responder con las comisiones encontradas
+                return res.status(200).json(comisiones);
+            } catch (error) {
+                console.error('Error al recuperar comisiones por evento:', error);
+                return res.status(500).json({ message: 'Error al recuperar comisiones por evento.' });
+            }
+        },
+        
     // Actualizar una comisión existente
     async update(req, res) {
         const { comision, descripcion, estado, idEvento, idDetalleHorario } = req.body;

@@ -16,6 +16,9 @@ module.exports = (sequelize, DataTypes) => {
       usuarios.belongsTo(models.sedes, {
         foreignKey: 'idSede'
       });
+      usuarios.hasMany(models.situaciones, {
+        foreignKey: 'idUsuario'
+      });
     }
   }
 

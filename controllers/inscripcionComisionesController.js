@@ -2,6 +2,7 @@
 
 const db = require('../models');
 const INSCRIPCION_COMISION = db.inscripcion_comisiones;
+const VOLUNTARIOS = db.voluntarios;
 
 module.exports = {
 
@@ -27,28 +28,44 @@ module.exports = {
         }
     },
 
-    // Obtener inscripciones activas
-    async findActive(req, res) {
-        try {
-            const inscripciones = await INSCRIPCION_COMISION.findAll({
-                where: { estado: 1 },
-                include: [
-                    {
-                        model: db.comisiones,
-                        attributes: ['idComision', 'comision']
-                    },
-                    {
-                        model: db.voluntarios,
-                        attributes: ['idVoluntario']
-                    }
-                ]
-            });
-            return res.status(200).json(inscripciones);
-        } catch (error) {
-            console.error('Error al recuperar inscripciones activas:', error);
-            return res.status(500).json({ message: 'Error al recuperar inscripciones activas.' });
-        }
-    },
+        // Obtener inscripciones activas
+        async findActive(req, res) {
+            try {
+                const { eventoId } = req.query;
+
+                // Validar si el id del evento fue proporcionado
+                if (!eventoId) {
+                    return res.status(400).json({ message: 'Se requiere el ID del evento.' });
+                }
+
+                const inscripciones = await INSCRIPCION_COMISION.findAll({
+                    where: { estado: 1 },
+                    include: [
+                        {
+                            model: db.comisiones,
+                            attributes: ['idComision', 'comision']
+                        },
+                        {
+                            model: db.voluntarios,
+                            attributes: ['idVoluntario'],
+                            include: [
+                                {
+                                    model: db.personas,
+                                    as: 'persona', 
+                                    attributes: ['nombre'] 
+                                }
+                            ]
+                        }
+                    ]
+                });
+
+                return res.status(200).json(inscripciones);
+            } catch (error) {
+                console.error('Error al recuperar inscripciones activas:', error);
+                return res.status(500).json({ message: 'Error al recuperar inscripciones activas.' });
+            }
+        },
+
 
     // Obtener inscripciones inactivas
     async findInactive(req, res) {

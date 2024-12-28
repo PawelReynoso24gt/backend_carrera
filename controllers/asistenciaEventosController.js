@@ -119,6 +119,7 @@ module.exports = {
         }
     },
 
+    
     // Crear una nueva asistencia
     async create(req, res) {
         const { idInscripcionEvento, idEmpleado } = req.body;

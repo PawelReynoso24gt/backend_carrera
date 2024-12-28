@@ -3,40 +3,58 @@ const db = require('../models');
 const DETALLE_INSCRIPCION_MATERIALES = db.detalle_inscripcion_materiales;
 const INSCRIPCION_EVENTOS = db.inscripcion_eventos;
 const INSCRIPCION_COMISIONES = db.inscripcion_comisiones;
+const COMISIONES = db.comisiones;
 const MATERIALES = db.materiales;
 
 module.exports = {
     // Obtener todos los detalles de inscripción de materiales
     async find(req, res) {
         try {
-            const detalles = await DETALLE_INSCRIPCION_MATERIALES.findAll({
+            const detalles = await DETALLE_INSCRIPCION_ACTIVIDADES.findAll({
                 include: [
                     {
                         model: INSCRIPCION_EVENTOS,
                         as: 'inscripcionEvento',
-                        attributes: ['idInscripcionEvento', 'fechaHoraInscripcion', 'estado']
+                        attributes: ['idInscripcionEvento', 'fechaHoraInscripcion', 'idEvento', 'estado'],
+                        include: [
+                            {
+                                model: db.eventos,
+                                as: 'evento',
+                                attributes: ['idEvento', 'nombreEvento'],
+                            },
+                        ],
                     },
                     {
                         model: INSCRIPCION_COMISIONES,
-                        attributes: ['idInscripcionComision', 'idComision', 'idVoluntario', 'estado']
+                        as: 'inscripcion_comisione', // Alias correcto
+                        attributes: ['idInscripcionComision', 'idComision', 'idVoluntario', 'estado'],
+                        include: [
+                            {
+                                model: db.comisiones,
+                                as: 'comisione', // Alias correcto
+                                attributes: ['idComision', 'comision'],
+                            },
+                        ],
                     },
                     {
-                        model: MATERIALES,
-                        as: 'material',
-                        attributes: ['idMaterial', 'material', 'cantidad', 'descripcion', 'estado']
-                    }
+                        model: ACTIVIDADES,
+                        as: 'actividad',
+                        attributes: ['idActividad', 'actividad', 'descripcion', 'estado'], // Aquí se agrega la relación de actividades
+                    },
                 ],
-                where: { estado: 1 } // Solo activos por defecto
+                where: { estado: 1 } // Solo mostrar las inscripciones activas
             });
+    
             return res.status(200).json(detalles);
         } catch (error) {
-            console.error('Error al recuperar los detalles de inscripción de materiales:', error);
+            console.error('Error al recuperar los detalles de inscripción de actividades:', error);
             return res.status(500).json({
                 message: 'Ocurrió un error al recuperar los detalles.'
             });
         }
     },
-
+    
+    
     // Obtener detalles activos
     async findActive(req, res) {
         try {
@@ -49,8 +67,9 @@ module.exports = {
                         attributes: ['idInscripcionEvento', 'fechaHoraInscripcion', 'estado']
                     },
                     {
-                        model: INSCRIPCION_COMISIONES,
-                        attributes: ['idInscripcionComision', 'idComision', 'idVoluntario', 'estado']
+                        model: COMISIONES,
+                        as: 'comision',
+                        attributes: ['idComision', 'comision', 'descripcion', 'estado']
                     },
                     {
                         model: MATERIALES,
@@ -80,8 +99,9 @@ module.exports = {
                         attributes: ['idInscripcionEvento', 'fechaHoraInscripcion', 'estado']
                     },
                     {
-                        model: INSCRIPCION_COMISIONES,
-                        attributes: ['idInscripcionComision', 'idComision', 'idVoluntario', 'estado']
+                        model: COMISIONES,
+                        as: 'comision',
+                        attributes: ['idComision', 'comision', 'descripcion', 'estado']
                     },
                     {
                         model: MATERIALES,
@@ -101,49 +121,66 @@ module.exports = {
 
     // Obtener un detalle por ID
     async findById(req, res) {
-        const id = req.params.id;
         try {
-            const detalle = await DETALLE_INSCRIPCION_MATERIALES.findByPk(id, {
+            const detalles = await DETALLE_INSCRIPCION_MATERIALES.findAll({
                 include: [
                     {
                         model: INSCRIPCION_EVENTOS,
                         as: 'inscripcionEvento',
-                        attributes: ['idInscripcionEvento', 'fechaHoraInscripcion', 'estado']
+                        attributes: ['idInscripcionEvento', 'fechaHoraInscripcion', 'idEvento'],
+                        include: [
+                            {
+                                model: db.eventos,
+                                as: 'evento',
+                                attributes: ['idEvento', 'nombreEvento'],
+                            },
+                        ],
                     },
                     {
                         model: INSCRIPCION_COMISIONES,
-                        attributes: ['idInscripcionComision', 'idComision', 'idVoluntario', 'estado']
+                        as: 'inscripcion_comisione', // Alias correcto
+                        attributes: ['idInscripcionComision', 'idComision'],
+                        include: [
+                            {
+                                model: db.comisiones,
+                                as: 'comisione', // Alias correcto
+                                attributes: ['idComision', 'comision'],
+                            },
+                        ],
                     },
                     {
                         model: MATERIALES,
                         as: 'material',
-                        attributes: ['idMaterial', 'material', 'cantidad', 'descripcion', 'estado']
-                    }
-                ]
+                        attributes: ['idMaterial', 'material'], // Cambiar 'nombre' a 'material'
+                    },
+                ],
+                where: { idDetalleInscripcionMaterial: req.params.id }, // Filtrar por ID
             });
-
-            if (!detalle) {
-                return res.status(404).json({ message: 'Detalle no encontrado' });
-            }
-
-            return res.status(200).json(detalle);
+            return res.status(200).json(detalles);
         } catch (error) {
-            console.error(`Error al buscar el detalle con ID ${id}:`, error);
-            return res.status(500).json({
-                message: 'Ocurrió un error al recuperar el detalle.'
-            });
+            console.error('Error al obtener los detalles:', error);
+            return res.status(500).json({ message: 'Error al obtener los detalles.' });
         }
     },
-
+    
+    
+    
     // Crear un nuevo detalle
     async create(req, res) {
         const { idInscripcionEvento, cantidadMaterial, idInscripcionComision, idMaterial } = req.body;
         const estado = req.body.estado !== undefined ? req.body.estado : 1;
+    
         if (!idInscripcionEvento || !cantidadMaterial || !idInscripcionComision || !idMaterial) {
             return res.status(400).json({ message: 'Faltan campos requeridos.' });
         }
-
+    
         try {
+            // Validar si el evento existe
+            const eventoExistente = await INSCRIPCION_EVENTOS.findByPk(idInscripcionEvento);
+            if (!eventoExistente) {
+                return res.status(400).json({ message: 'El idInscripcionEvento no existe.' });
+            }
+    
             const nuevoDetalle = await DETALLE_INSCRIPCION_MATERIALES.create({
                 estado,
                 cantidadMaterial,
@@ -151,7 +188,7 @@ module.exports = {
                 idInscripcionComision,
                 idMaterial
             });
-
+    
             return res.status(201).json({
                 message: 'Detalle creado con éxito',
                 createdDetalle: nuevoDetalle
@@ -161,17 +198,18 @@ module.exports = {
             return res.status(500).json({ message: 'Error al crear el detalle.' });
         }
     },
+    
 
     // Actualizar un detalle existente
     async update(req, res) {
-        const { estado, idInscripcionEvento, cantidadMaterial, idInscripcionComision, idMaterial } = req.body;
+        const { estado, idInscripcionEvento, cantidadMaterial, idComision, idMaterial } = req.body;
         const id = req.params.id;
 
         const camposActualizados = {};
         if (estado !== undefined) camposActualizados.estado = estado;
         if (idInscripcionEvento !== undefined) camposActualizados.idInscripcionEvento = idInscripcionEvento;
         if (cantidadMaterial !== undefined) camposActualizados.cantidadMaterial = cantidadMaterial;
-        if (idInscripcionComision !== undefined) camposActualizados.idInscripcionComision = idInscripcionComision;
+        if (idComision !== undefined) camposActualizados.idComision = idComision;
         if (idMaterial !== undefined) camposActualizados.idMaterial = idMaterial;
 
         try {
@@ -191,8 +229,9 @@ module.exports = {
                         attributes: ['idInscripcionEvento', 'fechaHoraInscripcion', 'estado']
                     },
                     {
-                        model: INSCRIPCION_COMISIONES,
-                        attributes: ['idInscripcionComision', 'idComision', 'idVoluntario', 'estado']
+                        model: COMISIONES,
+                        as: 'comision',
+                        attributes: ['idComision', 'comision', 'descripcion', 'estado']
                     },
                     {
                         model: MATERIALES,

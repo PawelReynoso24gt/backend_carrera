@@ -59,6 +59,10 @@ module.exports = (sequelize, DataTypes) => {
             type: DataTypes.STRING,
             allowNull: false,
         },
+        foto: {
+            type: DataTypes.TEXT,
+            allowNull: false
+          },
         estado: {
             type: DataTypes.INTEGER,
             allowNull: false

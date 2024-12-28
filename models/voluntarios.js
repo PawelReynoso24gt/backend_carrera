@@ -46,7 +46,7 @@ module.exports = (sequelize, DataTypes) => {
     },
     fechaSalida: {
         type: DataTypes.DATE,
-        allowNull: false
+        allowNull: true
     },
     estado: {
         type: DataTypes.INTEGER,
