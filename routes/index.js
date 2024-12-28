@@ -79,6 +79,7 @@ module.exports = (app) => {
       router.get('/departamentos', departamentosController.find);
       router.get('/aspirantes', aspirantesController.findAll);  
       router.post('/aspirantes', aspirantesController.create);
+      router.post('/personas/create', personasController.create);
 
     // ! Todas las rutas a continuación requieren autenticación
    router.use(authenticateToken); // Middleware para proteger las rutas con autenticación
@@ -281,7 +282,7 @@ module.exports = (app) => {
     router.get('/personas/activos', personasController.findActive);
     router.get('/personas/inactivos', personasController.findInactive);
     router.get('/personas/:id', personasController.findById);
-    router.post('/personas/create', personasController.create);
+    
     router.put('/personas/update/:id', personasController.update);
     router.delete('/personas/delete/:id', personasController.delete);
 
