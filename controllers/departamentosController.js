@@ -22,6 +22,22 @@ module.exports = {
             });
         }
     },
+    async findMovilDep(req, res) {
+        try {
+            const departamentos = await DEPARTAMENTOS.findAll({
+                where: {
+                    estado: 1
+                }
+            });
+            
+            return res.status(200).json(departamentos);
+        } catch (error) {
+            console.error('Error al recuperar los departamentos:', error);
+            return res.status(500).json({
+                message: 'Ocurrió un error al recuperar los datos.'
+            });
+        }
+    },
     
     async findActivateDepto(req, res) {
         return DEPARTAMENTOS.findAll({

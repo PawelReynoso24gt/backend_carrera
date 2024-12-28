@@ -81,6 +81,20 @@ module.exports = {
         });
     },
 
+     // * Listar todos los aspirantes movil
+     async findAllMovil(req, res) {
+        return ASPIRANTES.findAll()
+        .then((aspirantes) => {
+            res.status(200).send(aspirantes);
+        })
+        .catch((error) => {
+            res.status(500).send({
+                message: error.message || 'Error al listar los aspirantes.'
+            });
+        });
+    },
+
+
     // * Listar todos los aspirantes activos
     async findActive(req, res) {
         return ASPIRANTES.findAll({

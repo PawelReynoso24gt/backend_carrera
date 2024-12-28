@@ -26,6 +26,23 @@ module.exports = {
             });
         }
     },
+
+    async findMovil(req, res) {
+        try {
+            const municipios = await Municipios.findAll({
+                where: {
+                    estado: 1
+                }
+            });
+            
+            return res.status(200).json(municipios);
+        } catch (error) {
+            console.error('Error al recuperar los municipios:', error);
+            return res.status(500).json({
+                message: 'Ocurrió un error al recuperar los datos.'
+            });
+        }
+    },
     
     async findActivateMunicipios(req, res) {
         return Municipios.findAll({
