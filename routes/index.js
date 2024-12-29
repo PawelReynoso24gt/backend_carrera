@@ -65,6 +65,7 @@ const notificacionesController = require('../controllers/notificacionesControlle
 const tipoNotificacionesController = require('../controllers/tipoNotificacionController');
 const tipo_situacionesController = require('../controllers/tipo_situacionesController');
 const situacionesController = require('../controllers/situacionesController');
+const reportesController = require('../controllers/reportesController');
 
 module.exports = (app) => {
 
@@ -665,6 +666,7 @@ module.exports = (app) => {
 
     // * RUTAS DE REPORTES
     router.post('/reportesAspirantes', aspirantesController.reporteAspirantes);
+    router.post("/reportesRifas", reportesController.reporteRifas);
 
     app.use('/', router);
 
