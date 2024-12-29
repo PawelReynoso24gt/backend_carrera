@@ -25,6 +25,9 @@ module.exports = (sequelize, DataTypes) => {
       sedes.hasMany(models.usuarios, {
         foreignKey: 'idSede'
       });
+      sedes.hasMany(models.stands, {
+        foreignKey: 'idSede'
+      });
     }
   }
 

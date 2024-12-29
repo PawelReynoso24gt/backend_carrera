@@ -4,6 +4,7 @@ const { v4: uuidv4 } = require('uuid'); // Sirve para generar identificadores ú
 const db = require("../models");
 const voluntarios = require("../models/voluntarios");
 const VOLUNTARIOS = db.voluntarios;
+const PERSONAS = db.personas;
 
 // Método para generar un código QR numérico
 function generateQRCode() {
@@ -51,6 +52,11 @@ module.exports = {
             const voluntarios = await VOLUNTARIOS.findAll({
                 where: {
                     estado: 1
+                },
+                include: {
+                    model: PERSONAS,
+                    as: 'persona',
+                    attributes: ['idPersona', 'nombre'],
                 }
             });
             
@@ -208,6 +214,7 @@ module.exports = {
                 attributes: ['idPersona', 'nombre', 'telefono', 'domicilio'], // Información del voluntario
             },
             ],
+            where: { estado: 1 }
         });
     
         if (!voluntariosConProductos || voluntariosConProductos.length === 0) {

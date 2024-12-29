@@ -6,6 +6,9 @@ module.exports = (sequelize, DataTypes) => {
   class tipo_stands extends Model {
     static associate(models) {
         // * Aqui van las relaciones
+        tipo_stands.hasMany(models.stands, {
+          foreignKey: 'idTipoStands',
+        });
     }
   }
 

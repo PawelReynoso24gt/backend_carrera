@@ -238,6 +238,8 @@ module.exports = (app) => {
     router.get('/stand/activas', standsController.findActivateStand);
     router.get('/stand/inactivas', standsController.findaInactivateStand);
     router.get('/stands/virtual/products', standsController.findVirtualStandProducts);
+    router.get('/stands/detalles', standsController.findStandDetalles);
+    router.get('/stands/voluntarios/:idStand', standsController.getVoluntariosEnStands);
     router.post('/stand/create', standsController.createStand);
     router.put('/stand/update/:id', standsController.updateStand);
     router.delete('/stand/:id', standsController.deleteStand);
@@ -537,13 +539,19 @@ module.exports = (app) => {
 
     // * RUTAS DE VENTAS
     router.get('/ventas', ventasController.findAll);
+    router.get('/ventas/stands', ventasController.findAllVentasStands);
     router.get('/ventas/activas', ventasController.findActive);
+    router.get('/ventas/stands/activas', ventasController.findActiveVentasStands);
     router.get('/ventas/inactivas', ventasController.findInactive);
+    router.get('/ventas/stands/inactivas', ventasController.findInactiveVentasStands);
     router.get('/detalle_ventas_voluntarios/ventaCompleta/:idVenta', ventasController.findByVentaId);
+    router.get('/detalle_ventas_stands/ventaCompleta/:idVenta', ventasController.findByVentaIdStand);
     router.get('/ventas/:id', ventasController.findById);
     router.post('/ventas/create', ventasController.create);
     router.post('/ventas/create/completa', ventasController.createFullVenta);
+    router.post('/ventas/create/stands/completa', ventasController.createFullVentaStand);
     router.put('/ventas/update/:id', ventasController.update);
+    router.put('/ventas/update/completa/:id', ventasController.updateFullVenta);
     
     //* RUTAS DETALLE PAGO RIFAS
     router.get('/detallespago', detallePagoRifasController.findAll);
