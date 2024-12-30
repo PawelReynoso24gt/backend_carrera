@@ -75,7 +75,7 @@ module.exports = (app) => {
         router.get('/generateQR', voluntariosController.generateQR);
 
     // ! Todas las rutas a continuación requieren autenticación
-    // router.use(authenticateToken); // Middleware para proteger las rutas con autenticación
+    router.use(authenticateToken); // Middleware para proteger las rutas con autenticación
 
     // * USUARIOS
     router.get('/usuarios/activos', usuariosController.find);
@@ -218,6 +218,7 @@ module.exports = (app) => {
     router.get('/rifas', rifasController.find);
     router.get('/rifas/activos', rifasController.findActive);
     router.get('/rifas/inactivos', rifasController.findInactive);
+    router.get('/rifas/talonarios/:idRifa', rifasController.findTalonariosVoluntarios);
     router.get('/rifas/:id', rifasController.findById);
     router.post('/rifas', rifasController.create);
     router.put('/rifas/:id', rifasController.update);
@@ -533,7 +534,11 @@ module.exports = (app) => {
     router.get('/recaudaciones/activas', recaudacionRifasController.findActive);
     router.get('/recaudaciones/inactivas', recaudacionRifasController.findInactive);
     router.get('/recaudaciones/fecha/:fecha', recaudacionRifasController.getByDate);
+    router.get('/recaudaciones/detalle/:idRecaudacionRifa', recaudacionRifasController.getRecaudacionCompleta);
+    router.get('/recaudaciones/todas', recaudacionRifasController.getTodasRecaudaciones)
+    router.get('/recaudaciones/todas/inactivas', recaudacionRifasController.getTodasRecaudacionesInactive);
     router.post('/recaudaciones', recaudacionRifasController.create);
+    router.post('/recaudaciones/rifa/completa', recaudacionRifasController.createRecaudacionRifa);
     router.put('/recaudaciones/:idRecaudacionRifa', recaudacionRifasController.update);
     router.delete('/recaudaciones/:idRecaudacionRifa', recaudacionRifasController.delete);
 
@@ -572,6 +577,8 @@ module.exports = (app) => {
 
     // * RUTAS RECAUDACION EVENTOS
     router.get('/recaudacion_evento', recaudacion_eventosController.find);
+    router.get('/recaudacion_evento/activos', recaudacion_eventosController.findActive);
+    router.get('/recaudacion_evento/inactivos', recaudacion_eventosController.findInactive);
     router.get('/recaudacion_evento/:id', recaudacion_eventosController.findById);
     router.post('/recaudacion_evento/create', recaudacion_eventosController.createRecaudacionEvento);
     router.put('/recaudacion_evento/update/:id', recaudacion_eventosController.updateRecaudacionEvento);

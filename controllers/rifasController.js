@@ -5,6 +5,10 @@ const { parse, isValid } = require('date-fns'); // isValid para validar fechas
 const db = require("../models");
 const RIFAS = db.rifas;
 const SEDES = db.sedes;
+const TALONARIOS = db.talonarios;
+const SOLICITUD_TALONARIOS = db.solicitudTalonarios;
+const VOLUNTARIOS = db.voluntarios;
+const PERSONAS = db.personas;
 
 // Métodos CRUD
 module.exports = {
@@ -72,6 +76,55 @@ module.exports = {
         }
     },
 
+    // Obtener los talonarios con solicitudes por rifa
+    async findTalonariosVoluntarios(req, res) {
+        const { idRifa } = req.params;
+
+        try {
+            // Validar que se haya proporcionado un idRifa válido
+            if (!idRifa) {
+                return res.status(400).json({ message: 'El idRifa es requerido.' });
+            }
+
+            // Consultar los talonarios asociados a la rifa
+            const talonarios = await TALONARIOS.findAll({
+                where: { idRifa },
+                include: [
+                    {
+                        model: RIFAS, // Incluir la información de la rifa
+                        attributes: ['nombreRifa', 'precioBoleto', 'descripcion', 'estado'],
+                    },
+                    {
+                        model: SOLICITUD_TALONARIOS, // Información de las solicitudes asociadas
+                        required: true,
+                        include: [
+                            {
+                                model: VOLUNTARIOS, // Información de los voluntarios en las solicitudes
+                                include: [
+                                    {
+                                        model: PERSONAS, // Información adicional del voluntario
+                                        attributes: ['idPersona', 'nombre', 'telefono', 'correo'],
+                                    },
+                                ],
+                            },
+                        ],
+                    },
+                ],
+            });
+
+            // Verificar si se encontraron resultados
+            if (!talonarios || talonarios.length === 0) {
+                return res.status(404).json({ message: 'No se encontraron talonarios para esta rifa.' });
+            }
+
+            // Responder con los datos
+            return res.status(200).json(talonarios);
+        } catch (error) {
+            console.error('Error al obtener talonarios por rifa:', error);
+            return res.status(500).json({ message: 'Error interno del servidor.' });
+        }
+    },
+
     // Obtener rifa por ID
     async findById(req, res) {
         const id = req.params.id;
@@ -114,16 +167,16 @@ module.exports = {
         }
 
         // Validación de fechas
-        const fechaInicio = parse(datos.fechaInicio, "yyyy-MM-dd", new Date());
-        const fechaFin = parse(datos.fechaFin, "yyyy-MM-dd", new Date());
+        const fechaInicio = parse(datos.fechaInicio, "yyyy-MM-dd", new Date(), {
+            timeZone: "America/Guatemala",
+        });
+        const fechaFin = parse(datos.fechaFin, "yyyy-MM-dd", new Date(), {
+            timeZone: "America/Guatemala",
+        });
 
         if (!isValid(fechaInicio) || !isValid(fechaFin)) {
             return res.status(400).json({ message: 'Una o ambas fechas no son válidas.' });
         }
-
-        // Asegurar formato UTC para base de datos
-        const fechaInicioUtc = zonedTimeToUtc(fechaInicio, "America/Guatemala");
-        const fechaFinUtc = zonedTimeToUtc(fechaFin, "America/Guatemala");
 
         // Verificar si la sede existe
         const sede = await SEDES.findByPk(datos.idSede);
@@ -135,8 +188,8 @@ module.exports = {
             nombreRifa: datos.nombreRifa,
             precioBoleto: datos.precioBoleto,
             descripcion: datos.descripcion,
-            fechaInicio: fechaInicioUtc,
-            fechaFin: fechaFinUtc,
+            fechaInicio,
+            fechaFin,
             ventaTotal: 0,
             idSede: datos.idSede,
             estado: datos.estado !== undefined ? datos.estado : 1 
@@ -179,11 +232,26 @@ module.exports = {
         }
 
         if (datos.fechaInicio !== undefined) {
-            camposActualizados.fechaInicio = datos.fechaInicio;
+            // Validar y convertir fechaInicio
+            const fechaInicio = parse(datos.fechaInicio, "yyyy-MM-dd", new Date());
+            if (!isValid(fechaInicio)) {
+                return res.status(400).json({ message: 'La fecha de inicio no es válida.' });
+            }
+            camposActualizados.fechaInicio = fechaInicio;
         }
-        
+    
         if (datos.fechaFin !== undefined) {
-                camposActualizados.fechaFin = datos.fechaFin;
+            // Validar y convertir fechaFin
+            const fechaFin = parse(datos.fechaFin, "yyyy-MM-dd", new Date());
+            if (!isValid(fechaFin)) {
+                return res.status(400).json({ message: 'La fecha de fin no es válida.' });
+            }
+            camposActualizados.fechaFin = fechaFin;
+    
+            // Verificar que fechaFin no sea menor a fechaInicio
+            if (camposActualizados.fechaInicio && camposActualizados.fechaFin < camposActualizados.fechaInicio) {
+                return res.status(400).json({ message: 'La fecha de fin no puede ser menor a la fecha de inicio.' });
+            }
         }
 
         if (datos.ventaTotal !== undefined) {
