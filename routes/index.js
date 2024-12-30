@@ -544,10 +544,13 @@ module.exports = (app) => {
 
     // * RUTAS DE VENTAS
     router.get('/ventas', ventasController.findAll);
+    router.get('/ventas/voluntarios', ventasController.findAllVoluntarios);
     router.get('/ventas/stands', ventasController.findAllVentasStands);
     router.get('/ventas/activas', ventasController.findActive);
+    router.get('/ventas/voluntarios/activas', ventasController.findActiveVoluntarios);
     router.get('/ventas/stands/activas', ventasController.findActiveVentasStands);
     router.get('/ventas/inactivas', ventasController.findInactive);
+    router.get('/ventas/voluntarios/inactivas', ventasController.findInactiveVoluntarios);
     router.get('/ventas/stands/inactivas', ventasController.findInactiveVentasStands);
     router.get('/detalle_ventas_voluntarios/ventaCompleta/:idVenta', ventasController.findByVentaId);
     router.get('/detalle_ventas_stands/ventaCompleta/:idVenta', ventasController.findByVentaIdStand);

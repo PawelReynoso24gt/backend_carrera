@@ -40,6 +40,25 @@ module.exports = {
             const ventas = await VENTAS.findAll({
                 include: [
                     {
+                        model: TIPO_PUBLICOS,
+                        attributes: ['idTipoPublico', 'nombreTipo'],
+                    },
+                ],
+                where: { estado: 1 },
+            });
+
+            return res.status(200).json(ventas);
+        } catch (error) {
+            console.error('Error al recuperar las ventas:', error);
+            return res.status(500).json({ message: 'Error al recuperar las ventas.' });
+        }
+    },
+
+    async findAllVoluntarios(req, res) {
+        try {
+            const ventas = await VENTAS.findAll({
+                include: [
+                    {
                         model: DETALLE_VENTAS_VOLUNTARIOS, // Relación con detalles de ventas de voluntarios
                         as: 'detalle_ventas_voluntarios',
                         include: [
@@ -130,6 +149,46 @@ module.exports = {
             const ventas = await VENTAS.findAll({
                 include: [
                     {
+                        model: TIPO_PUBLICOS,
+                        attributes: ['idTipoPublico', 'nombreTipo'],
+                    },
+                ],
+                where: { estado: 1 },
+            });
+
+            return res.status(200).json(ventas);
+        } catch (error) {
+            console.error('Error al recuperar las ventas activas:', error);
+            return res.status(500).json({ message: 'Error al recuperar las ventas activas.' });
+        }
+    },
+
+    // * Obtener ventas inactivas
+    async findInactive(req, res) {
+        try {
+            const ventas = await VENTAS.findAll({
+                include: [
+                    {
+                        model: TIPO_PUBLICOS,
+                        attributes: ['idTipoPublico', 'nombreTipo'],
+                    },
+                ],
+                where: { estado: 0 },
+            });
+
+            return res.status(200).json(ventas);
+        } catch (error) {
+            console.error('Error al recuperar las ventas inactivas:', error);
+            return res.status(500).json({ message: 'Error al recuperar las ventas inactivas.' });
+        }
+    },
+
+    // * Obtener ventas activas de voluntarios
+    async findActiveVoluntarios(req, res) {
+        try {
+            const ventas = await VENTAS.findAll({
+                include: [
+                    {
                         model: DETALLE_VENTAS_VOLUNTARIOS, // Relación con detalles de ventas de voluntarios
                         as: 'detalle_ventas_voluntarios',
                         include: [
@@ -214,8 +273,8 @@ module.exports = {
         }
     },
 
-    // * Obtener ventas inactivas
-    async findInactive(req, res) {
+    // * Obtener ventas inactivas de voluntarios
+    async findInactiveVoluntarios(req, res) {
         try {
             const ventas = await VENTAS.findAll({
                 include: [
