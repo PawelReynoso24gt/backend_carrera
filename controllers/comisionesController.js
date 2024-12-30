@@ -88,6 +88,63 @@ module.exports = {
         }
     },
 
+
+    async findActiveComiById(req, res) {
+        const { idVoluntario } = req.query; // Obtener el ID del voluntario desde la solicitud
+
+        try {
+            const comisiones = await COMISIONES.findAll({
+                where: {
+                    estado: 1 // Solo comisiones activas
+                },
+                include: [
+                    {
+                        model: db.eventos,
+                        as: 'evento', // Alias definido en el modelo
+                        attributes: ['idEvento', 'nombreEvento', 'fechaHoraInicio', 'fechaHoraFin', 'descripcion']
+                    },
+                    {
+                        model: db.detalle_horarios,
+                        as: 'detalleHorario', // Alias definido en el modelo
+                        attributes: ['idDetalleHorario', 'cantidadPersonas', 'estado'],
+                        include: [
+                            {
+                                model: db.horarios,
+                                as: 'horario',
+                                attributes: ['idHorario', 'horarioInicio', 'horarioFinal', 'estado']
+                            },
+                            {
+                                model: db.categoria_horarios,
+                                as: 'categoriaHorario',
+                                attributes: ['idCategoriaHorario', 'categoria', 'estado']
+                            }
+                        ]
+                    },
+                    {
+                        model: db.inscripcion_comisiones, // Usa el nombre del modelo directamente
+                        attributes: ['idVoluntario'], // Atributos que necesitas
+                        where: idVoluntario ? { idVoluntario } : {}, // Filtrar por idVoluntario
+                        required: false // Incluir aunque no haya inscripciones
+                    }
+                ]
+            });
+
+            // Añadir el campo `isInscrito` a cada comisión
+            const comisionesConEstado = comisiones.map((comision) => ({
+                ...comision.toJSON(),
+                isInscrito: comision.inscripcion_comisiones && comision.inscripcion_comisiones.length > 0 // Verifica si hay inscripciones
+            }));
+
+            return res.status(200).json(comisionesConEstado);
+        } catch (error) {
+            console.error('Error al listar las comisiones activas:', error);
+            return res.status(500).json({
+                message: error.message || 'Error al listar las comisiones activas.'
+            });
+        }
+    },
+
+
     // Obtener todas las comisiones inactivas
     async findInactive(req, res) {
         try {

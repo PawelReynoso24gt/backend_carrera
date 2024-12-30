@@ -5,6 +5,7 @@ const db = require('../models');
 const Sequelize = require('sequelize');
 const EVENTOS = db.eventos;
 const SEDES = db.sedes;
+const INSCRIPCIONES = db.inscripcion_eventos;
 const { eventos, recaudacion_eventos, inscripcion_eventos, asistencia_eventos } = require('../models');
 const { Op } = Sequelize; 
 
@@ -50,6 +51,45 @@ module.exports = {
             });
         });
     },
+
+    // * Listar todos los eventos activos con estado de inscripción
+    async findActiveById(req, res) {
+        const { idVoluntario } = req.query; // Obtén el idVoluntario de los parámetros de la solicitud
+
+        return EVENTOS.findAll({
+            where: {
+                estado: 1 // Solo eventos activos
+            },
+            include: [
+                {
+                    model: SEDES,
+                    as: 'sede',
+                    attributes: ['nombreSede']
+                },
+                {
+                    model: INSCRIPCIONES, // Asegúrate de usar el modelo de inscripciones
+                    as: 'inscripciones',
+                    where: idVoluntario ? { idVoluntario } : {}, // Filtra por idVoluntario si está presente
+                    required: false // Esto asegura que también se incluyan eventos sin inscripciones
+                }
+            ]
+        })
+        .then((eventos) => {
+            // Mapear eventos para añadir `isInscrito` basado en las inscripciones
+            const eventosConEstado = eventos.map((evento) => ({
+                ...evento.toJSON(),
+                isInscrito: evento.inscripciones && evento.inscripciones.length > 0 // Verifica si hay inscripciones
+            }));
+
+            res.status(200).send(eventosConEstado);
+        })
+        .catch((error) => {
+            res.status(500).send({
+                message: error.message || 'Error al listar los eventos activos.'
+            });
+        });
+    },
+
 
     // * Listar todos los eventos inactivos
     async findInactive(req, res) {

@@ -142,6 +142,7 @@ module.exports = (app) => {
     router.get('/eventos/reporte', eventosController.obtenerReporteEventos);
     router.get('/eventos/activas', eventosController.findActive);
     router.get('/eventos/inactivas', eventosController.findInactive);
+    router.get('/eventos/activo', eventosController.findActiveById);
     router.get('/eventos/:idEvento', eventosController.findById);
     router.post('/eventos', eventosController.create);
     router.put('/eventos/:idEvento', eventosController.update);
@@ -300,6 +301,7 @@ module.exports = (app) => {
     router.get('/comisiones/porevento', comisionesController.findByEvento);
     router.get('/comisiones/activos', comisionesController.findActive); 
     router.get('/comisiones/inactivos', comisionesController.findInactive);
+    router.get('/comisiones/active', comisionesController.findActiveComiById);
     router.get('/comisiones/:id', comisionesController.findById);
     router.post('/comisiones/create', comisionesController.create);
     router.put('/comisiones/update/:id', comisionesController.update); 
