@@ -718,13 +718,22 @@ module.exports = {
 
         // Validar datos generales
         if (!venta || !detalles || !pagos) {
+            console.error('Datos recibidos son inválidos:', req.body);
             return res.status(400).json({ message: "Faltan datos para crear la venta." });
         }
+
+        // Determinar si todos los pagos son de tipo solicitado (idTipoPago === 5)
+        const esPagoSolicitado = pagos.every((pago) => pago.idTipoPago === 5);
 
         // Validar detalles de venta
         // Validar que los detalles tengan los campos requeridos
         for (const detalle of detalles) {
-            if (!detalle.idProducto || detalle.cantidad <= 0 || !detalle.subTotal) {
+            if (
+                !detalle.idProducto || 
+                detalle.cantidad <= 0 || 
+                detalle.subTotal === undefined || 
+                detalle.subTotal === null
+            ) {
                 throw new Error(`El detalle de venta es inválido: ${JSON.stringify(detalle)}`);
             }
         }
@@ -740,10 +749,25 @@ module.exports = {
         const transaction = await db.sequelize.transaction();
 
         try {
-            // Crear la venta principal
+
+            if (esPagoSolicitado) {
+            // Lógica para pagos solicitados directamente aquí
+            console.log('Procesando pagos solicitados');
+            
+            // Validar que todos los detalles tengan un voluntario
+            for (const detalle of detalles) {
+                if (!detalle.idVoluntario) {
+                    throw new Error(`El detalle de venta requiere un idVoluntario válido: ${JSON.stringify(detalle)}`);
+                }
+            }
+
+            // Calcular el total de la venta basado en los valores ingresados o forzar a 0
+            const totalVenta = detalles.reduce((sum, detalle) => sum + (detalle.subTotal || 0), 0) + (venta.donacion || 0);
+
+            // Crear la venta
             const nuevaVenta = await VENTAS.create(
                 {
-                    totalVenta: venta.totalVenta,
+                    totalVenta,
                     fechaVenta: new Date(),
                     estado: venta.estado || 1,
                     idTipoPublico: venta.idTipoPublico,
@@ -753,18 +777,20 @@ module.exports = {
 
             const idVenta = nuevaVenta.idVenta;
 
-            // Crear detalles de venta y actualizar inventario de productos
+             // Crear detalles de venta y actualizar inventario de productos
             const detallesVentaIds = [];
 
+            // Crear detalles de venta
             for (const detalle of detalles) {
+
                 const producto = await DETALLE_STANDS.findOne({
                     where: { idProducto: detalle.idProducto, idStand: detalle.idStand },
                 });
-
+        
                 if (!producto || producto.cantidad < detalle.cantidad) {
                     throw new Error(`El producto con ID ${detalle.idProducto} no tiene suficiente inventario en el stand ${detalle.idStand}.`);
                 }
-
+        
                 // Restar inventario al producto
                 await producto.update(
                     { cantidad: producto.cantidad - detalle.cantidad },
@@ -780,7 +806,8 @@ module.exports = {
                         subTotal: detalle.subTotal || 0,
                         donacion: detalle.donacion || 0,
                         idStand: detalle.idStand,
-                        idVoluntario: detalle.idVoluntario || null, // Puede ser nulo si no hay voluntario
+                        idVoluntario: detalle.idVoluntario,
+                        estado: detalle.estado || 1,
                     },
                     { transaction }
                 );
@@ -791,40 +818,23 @@ module.exports = {
                 });
             }
 
-            // Crear detalles de pagos
+            // Crear pagos
             for (const pago of pagos) {
                 const detalleVenta = detallesVentaIds.find(
                     (detalle) => detalle.idProducto === pago.idProducto
                 );
-
+        
                 if (!detalleVenta) {
                     throw new Error(`No se encontró un detalle de venta para el producto con ID ${pago.idProducto}.`);
                 }
 
-                let correlativo = pago.correlativo || "NA";
-                let imagenTransferencia = pago.imagenTransferencia || "efectivo";
-
-                if ([1, 2, 4].includes(pago.idTipoPago)) {
-                    if (!pago.correlativo || !pago.imagenTransferencia) {
-                        throw new Error(`El tipo de pago ${pago.idTipoPago} requiere correlativo e imagen.`);
-                    }
-                    correlativo = pago.correlativo;
-                    imagenTransferencia = pago.imagenTransferencia;
-                } else if (pago.idTipoPago === 3) { // Efectivo
-                    correlativo = "NA";
-                    imagenTransferencia = "efectivo";
-                } else if (pago.idTipoPago === 5) { // Solicitado
-                    correlativo = "NA";
-                    imagenTransferencia = "solicitado";
-                }
-
                 await DETALLE_PAGO_VENTAS_STANDS.create(
                     {
-                        idDetalleVentaStand: detalleVenta.idDetalleVentaStand,
+                       idDetalleVentaStand: detalleVenta.idDetalleVentaStand, // Asociar correctamente
                         idTipoPago: pago.idTipoPago,
-                        pago: pago.monto,
-                        correlativo: correlativo,
-                        imagenTransferencia: imagenTransferencia,
+                        pago: pago.monto || 0, // Si no se especifica, forzar a 0
+                        correlativo: pago.correlativo || "NA", // Si no se especifica, forzar a "NA"
+                        imagenTransferencia: pago.imagenTransferencia || "solicitado", // Si no se especifica, forzar a "solicitado"
                         estado: pago.estado || 1,
                     },
                     { transaction }
@@ -837,10 +847,180 @@ module.exports = {
                 venta: nuevaVenta,
                 detalles: detallesVentaIds,
             });
+
+            } else {
+                console.log('Procesando lógica para otros pagos');
+                // Crear la venta principal
+                const nuevaVenta = await VENTAS.create(
+                    {
+                        totalVenta: venta.totalVenta,
+                        fechaVenta: new Date(),
+                        estado: venta.estado || 1,
+                        idTipoPublico: venta.idTipoPublico,
+                    },
+                    { transaction }
+                );
+
+                const idVenta = nuevaVenta.idVenta;
+
+                // Crear detalles de venta y actualizar inventario de productos
+                const detallesVentaIds = [];
+
+                for (const detalle of detalles) {
+                    const producto = await DETALLE_STANDS.findOne({
+                        where: { idProducto: detalle.idProducto, idStand: detalle.idStand },
+                    });
+
+                    if (!producto || producto.cantidad < detalle.cantidad) {
+                        throw new Error(`El producto con ID ${detalle.idProducto} no tiene suficiente inventario en el stand ${detalle.idStand}.`);
+                    }
+
+                    // Restar inventario al producto
+                    await producto.update(
+                        { cantidad: producto.cantidad - detalle.cantidad },
+                        { transaction }
+                    );
+
+                    // Crear detalle de venta
+                    const nuevoDetalleVenta = await DETALLE_VENTAS_STANDS.create(
+                        {
+                            idVenta,
+                            idProducto: detalle.idProducto,
+                            cantidad: detalle.cantidad,
+                            subTotal: detalle.subTotal || 0,
+                            donacion: detalle.donacion || 0,
+                            idStand: detalle.idStand,
+                            idVoluntario: detalle.idVoluntario || null, // Puede ser nulo si no hay voluntario
+                        },
+                        { transaction }
+                    );
+
+                    detallesVentaIds.push({
+                        idProducto: detalle.idProducto,
+                        idDetalleVentaStand: nuevoDetalleVenta.idDetalleVentaStand,
+                    });
+                }
+
+                // Crear detalles de pagos
+                for (const pago of pagos) {
+                    const detalleVenta = detallesVentaIds.find(
+                        (detalle) => detalle.idProducto === pago.idProducto
+                    );
+
+                    if (!detalleVenta) {
+                        throw new Error(`No se encontró un detalle de venta para el producto con ID ${pago.idProducto}.`);
+                    }
+
+                    let correlativo = pago.correlativo || "NA";
+                    let imagenTransferencia = pago.imagenTransferencia || "efectivo";
+
+                    if ([1, 2, 4].includes(pago.idTipoPago)) {
+                        if (!pago.correlativo || !pago.imagenTransferencia) {
+                            throw new Error(`El tipo de pago ${pago.idTipoPago} requiere correlativo e imagen.`);
+                        }
+                        correlativo = pago.correlativo;
+                        imagenTransferencia = pago.imagenTransferencia;
+                    } else if (pago.idTipoPago === 3) { // Efectivo
+                        correlativo = "NA";
+                        imagenTransferencia = "efectivo";
+                    }
+
+                    await DETALLE_PAGO_VENTAS_STANDS.create(
+                        {
+                            idDetalleVentaStand: detalleVenta.idDetalleVentaStand,
+                            idTipoPago: pago.idTipoPago,
+                            pago: pago.monto,
+                            correlativo: correlativo,
+                            imagenTransferencia: imagenTransferencia,
+                            estado: pago.estado || 1,
+                        },
+                        { transaction }
+                    );
+                }
+
+                await transaction.commit();
+                return res.status(201).json({
+                    message: "Venta creada con éxito.",
+                    venta: nuevaVenta,
+                    detalles: detallesVentaIds,
+                });
+            }
         } catch (error) {
             await transaction.rollback();
             console.error("Error al crear la venta:", error);
             return res.status(500).json({ message: "Error al crear la venta.", error: error.message });
+        }
+    },
+
+    // Método auxiliar para manejar pagos solicitados
+    async handlePagoSolicitado(venta, detalles, pagos, transaction) {
+        // Validar que todos los detalles tengan un voluntario
+        for (const detalle of detalles) {
+            if (!detalle.idVoluntario) {
+                throw new Error(`El detalle de venta requiere un idVoluntario válido: ${JSON.stringify(detalle)}`);
+            }
+        }
+
+        // Calcular el total de la venta basado en los valores ingresados o forzarlos a 0
+        const totalVenta = detalles.reduce((sum, detalle) => sum + (detalle.subTotal || 0), 0) + (venta.donacion || 0);
+
+        // Crear la venta
+        const nuevaVenta = await VENTAS.create(
+            {
+                totalVenta, // Puede ser calculado o 0
+                fechaVenta: new Date(),
+                estado: venta.estado || 1,
+                idTipoPublico: venta.idTipoPublico,
+            },
+            { transaction }
+        );
+
+        const idVenta = nuevaVenta.idVenta;
+
+        // Crear detalles
+        const detallesVentaIds = [];
+        for (const detalle of detalles) {
+            const nuevoDetalleVenta = await DETALLE_VENTAS_STANDS.create(
+                {
+                    idVenta,
+                    idProducto: detalle.idProducto,
+                    cantidad: detalle.cantidad,
+                    subTotal: detalle.subTotal || 0, // Si no se especifica, forzar a 0
+                    donacion: detalle.donacion || 0, // Si no se especifica, forzar a 0
+                    idStand: detalle.idStand,
+                    idVoluntario: detalle.idVoluntario,
+                    estado: detalle.estado || 1,
+                },
+                { transaction }
+            );
+
+            detallesVentaIds.push({
+                idProducto: detalle.idProducto,
+                idDetalleVentaStand: nuevoDetalleVenta.idDetalleVentaStand,
+            });
+        }
+
+        // Crear pagos
+        for (const pago of pagos) {
+            const detalleVenta = detallesVentaIds.find(
+                (detalle) => detalle.idProducto === pago.idProducto
+            );
+
+            if (!detalleVenta) {
+                throw new Error(`No se encontró un detalle de venta para el producto con ID ${pago.idProducto}.`);
+            }
+
+            await DETALLE_PAGO_VENTAS_STANDS.create(
+                {
+                    idDetalleVentaStand: detalleVenta.idDetalleVentaStand,
+                    idTipoPago: 5, // Tipo solicitado
+                    pago: pago.monto || 0, // Si no se especifica, forzar a 0
+                    correlativo: pago.correlativo || "NA", // Si no se especifica, forzar a "NA"
+                    imagenTransferencia: pago.imagenTransferencia || "solicitado", // Si no se especifica, forzar a "solicitado"
+                    estado: pago.estado || 1,
+                },
+                { transaction }
+            );
         }
     },
     

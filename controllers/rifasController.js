@@ -1,4 +1,7 @@
 'use strict';
+
+const { zonedTimeToUtc, format } = require('date-fns-tz');
+const { parse, isValid } = require('date-fns'); // isValid para validar fechas
 const db = require("../models");
 const RIFAS = db.rifas;
 const SEDES = db.sedes;
@@ -99,7 +102,7 @@ module.exports = {
         const datos = req.body;
 
         // Verificar campos requeridos
-        if (!datos.nombreRifa || !datos.descripcion || !datos.idSede) {
+        if (!datos.nombreRifa || !datos.descripcion || !datos.idSede || !datos.precioBoleto || !datos.fechaInicio || !datos.fechaFin) {
             return res.status(400).json({ message: 'Faltan campos requeridos.' });
         }
 
@@ -109,6 +112,18 @@ module.exports = {
         if (!regexRifa.test(datos.nombreRifa)) {
             return res.status(400).json({ message: 'El nombre de la rifa contiene caracteres no válidos.' });
         }
+
+        // Validación de fechas
+        const fechaInicio = parse(datos.fechaInicio, "yyyy-MM-dd", new Date());
+        const fechaFin = parse(datos.fechaFin, "yyyy-MM-dd", new Date());
+
+        if (!isValid(fechaInicio) || !isValid(fechaFin)) {
+            return res.status(400).json({ message: 'Una o ambas fechas no son válidas.' });
+        }
+
+        // Asegurar formato UTC para base de datos
+        const fechaInicioUtc = zonedTimeToUtc(fechaInicio, "America/Guatemala");
+        const fechaFinUtc = zonedTimeToUtc(fechaFin, "America/Guatemala");
 
         // Verificar si la sede existe
         const sede = await SEDES.findByPk(datos.idSede);
@@ -120,6 +135,9 @@ module.exports = {
             nombreRifa: datos.nombreRifa,
             precioBoleto: datos.precioBoleto,
             descripcion: datos.descripcion,
+            fechaInicio: fechaInicioUtc,
+            fechaFin: fechaFinUtc,
+            ventaTotal: 0,
             idSede: datos.idSede,
             estado: datos.estado !== undefined ? datos.estado : 1 
         };
@@ -158,6 +176,18 @@ module.exports = {
 
         if (datos.descripcion !== undefined) {
             camposActualizados.descripcion = datos.descripcion;
+        }
+
+        if (datos.fechaInicio !== undefined) {
+            camposActualizados.fechaInicio = datos.fechaInicio;
+        }
+        
+        if (datos.fechaFin !== undefined) {
+                camposActualizados.fechaFin = datos.fechaFin;
+        }
+
+        if (datos.ventaTotal !== undefined) {
+            camposActualizados.ventaTotal = datos.ventaTotal;
         }
 
         if (datos.idSede !== undefined) {
