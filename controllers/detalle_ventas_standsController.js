@@ -10,7 +10,7 @@ const VENTAS = db.ventas;
 const PRODUCTOS = db.productos;
 const STANDS =db.stands;
 const DETALLE_STANDS = db.detalle_stands;
-
+const VOLUNTARIOS = db.voluntarios;
 
 // Función para validar los datos del detalle de venta
 function validateDetalleVentaData(datos) {
@@ -47,9 +47,12 @@ function validateDetalleVentaData(datos) {
     // Verificar que al menos un campo esté presente para actualizaciones
     if (
         datos.cantidad === undefined &&
+        datos.subTotal === undefined &&
+        datos.donacion === undefined &&
         datos.idVenta === undefined &&
         datos.idProducto === undefined &&
         datos.idStand === undefined &&
+        datos.idVoluntario === undefined &&
         datos.estado === undefined
     ) {
         return { error: 'Debe proporcionar al menos un campo para actualizar.' };
@@ -301,7 +304,9 @@ module.exports = {
             estado: datos.estado || 1,
             idVenta: datos.idVenta,
             idProducto: datos.idProducto,
-            idStand: datos.idStand
+            idStand: datos.idStand,
+            // idVoluntario puede ser nulo
+            idVoluntario: datos.idVoluntario || null
         };
 
         try {
@@ -333,6 +338,7 @@ module.exports = {
         if (datos.idVenta !== undefined) camposActualizados.idVenta = datos.idVenta;
         if (datos.idProducto !== undefined) camposActualizados.idProducto = datos.idProducto;
         if (datos.idStand !== undefined) camposActualizados.idStand = datos.idStand;
+        if (datos.idVoluntario !== undefined) camposActualizados.idVoluntario = datos.idVoluntario;
 
         try {
             const [rowsUpdated] = await DETALLE_VENTAS_STANDS.update(camposActualizados, {
