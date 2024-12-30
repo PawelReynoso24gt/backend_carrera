@@ -27,6 +27,10 @@ module.exports = (sequelize, DataTypes) => {
       voluntarios.hasMany(models.detalle_productos_voluntarios, {
         foreignKey: 'idVoluntario'
       });
+
+      voluntarios.hasMany(models.detalle_ventas_stands, {
+        foreignKey: 'idVoluntario'
+      });
     }
   }
 

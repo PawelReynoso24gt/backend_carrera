@@ -16,6 +16,9 @@ module.exports = (sequelize, DataTypes) => {
             detalle_ventas_stands.hasMany(models.detalle_pago_ventas_stands, {
                 foreignKey: 'idDetalleVentaStand'
             });
+            detalle_ventas_stands.belongsTo(models.voluntarios, {
+                foreignKey: 'idVoluntario'
+            });
         }
     }
 
@@ -54,6 +57,10 @@ module.exports = (sequelize, DataTypes) => {
         idStand: {
             type: DataTypes.INTEGER,
             allowNull: false
+        },
+        idVoluntario: {
+            type: DataTypes.INTEGER,
+            allowNull: true
         },
         createdAt: {
             type: DataTypes.DATE,

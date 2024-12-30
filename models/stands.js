@@ -17,6 +17,12 @@ module.exports = (sequelize, DataTypes) => {
       this.hasMany(models.detalle_ventas_stands, {
         foreignKey: 'idStand'
       });
+      this.belongsTo(models.tipo_stands, {
+        foreignKey: 'idTipoStands'
+      });
+      this.belongsTo(models.sedes, { 
+        foreignKey: 'idSede' 
+      });
     }
   }
   stands.init({
