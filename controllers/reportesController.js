@@ -24,7 +24,7 @@ module.exports = {
 
             if (isNaN(Date.parse(fechaInicioFormato)) || isNaN(Date.parse(fechaFinFormato))) {
                 return res.status(400).json({ message: "Las fechas no son válidas." });
-            }           
+            }
 
             // Obtener rifas activas en el rango de fechas
             const rifas = await RIFAS.findAll({
