@@ -82,9 +82,10 @@ module.exports = (app) => {
       router.get('/departamentos', departamentosController.find);
       router.get('/aspirantes', aspirantesController.findAll);  
       router.post('/aspirantes', aspirantesController.create);
+      router.post('/personas/create', personasController.create);
 
     // ! Todas las rutas a continuación requieren autenticación
-    router.use(authenticateToken); // Middleware para proteger las rutas con autenticación
+   router.use(authenticateToken); // Middleware para proteger las rutas con autenticación
 
     // * USUARIOS
     router.get('/usuarios/activos', checkPermissions('Ver usuarios'), usuariosController.find);
@@ -241,6 +242,7 @@ module.exports = (app) => {
     router.get('/rifas', checkPermissions('Ver rifas'), rifasController.find);
     router.get('/rifas/activos', checkPermissions('Ver rifas'), rifasController.findActive);
     router.get('/rifas/inactivos', checkPermissions('Ver rifas'), rifasController.findInactive);
+    router.get('/rifas/talonarios/:idRifa', rifasController.findTalonariosVoluntarios);
     router.get('/rifas/:id', rifasController.findById);
     router.post('/rifas', rifasController.create);
     router.put('/rifas/:id', rifasController.update);
@@ -261,6 +263,8 @@ module.exports = (app) => {
     router.get('/stand/activas', checkPermissions('Ver stands'), standsController.findActivateStand);
     router.get('/stand/inactivas', checkPermissions('Ver stands'), standsController.findaInactivateStand);
     router.get('/stands/virtual/products', checkPermissions('Ver stand virtual'), standsController.findVirtualStandProducts);
+    router.get('/stands/detalles', standsController.findStandDetalles);
+    router.get('/stands/voluntarios/:idStand', standsController.getVoluntariosEnStands);
     router.post('/stand/create', standsController.createStand);
     router.put('/stand/update/:id', standsController.updateStand);
     router.delete('/stand/:id', standsController.deleteStand);
@@ -296,8 +300,8 @@ module.exports = (app) => {
     router.get('/personas/activos', checkPermissions('Ver personas activas'), personasController.findActive);
     router.get('/personas/inactivos', checkPermissions('Ver personas inactivas'), personasController.findInactive);
     router.get('/personas/:id', personasController.findById);
-    router.post('/personas/create', checkPermissions('Crear persona'), personasController.create);
-    router.put('/personas/update/:id', checkPermissions('Editar persona'), personasController.update);
+    router.post('/personas/create', personasController.create);
+    router.put('/personas/update/:id', personasController.update);
     router.delete('/personas/delete/:id', personasController.delete);
 
     // * RUTAS DE CATEGORIAS (productos)
@@ -404,6 +408,15 @@ module.exports = (app) => {
     router.post('/talonarios/create', talonariosController.createTalo);
     router.put('/talonarios/update/:id', talonariosController.updateTalo); 
     router.delete('/talonarios/delete/:id', talonariosController.deleteTalo); 
+
+    // * RUTAS DE VOLUNTARIOS
+    router.get('/voluntarios', voluntariosController.find);
+    router.get('/voluntarios/activos', voluntariosController.findActivateVol); 
+    router.get('/voluntarios/inactivos', voluntariosController.findaInactivateVol);
+    router.get('/voluntarios/conProductos', voluntariosController.findWithAssignedProducts);
+    router.post('/voluntarios/create', voluntariosController.createVol);
+    router.put('/voluntarios/update/:id', voluntariosController.updateVol); 
+    router.delete('/voluntarios/delete/:id', voluntariosController.deleteVol); 
 
     // * RUTAS DE PERMISOS
     router.get('/permisos', permisosController.findAll); 
@@ -540,19 +553,32 @@ module.exports = (app) => {
     router.get('/recaudaciones/activas', checkPermissions('Ver recaudación de rifas'), recaudacionRifasController.findActive);
     router.get('/recaudaciones/inactivas', checkPermissions('Ver recaudación de rifas'), recaudacionRifasController.findInactive);
     router.get('/recaudaciones/fecha/:fecha', recaudacionRifasController.getByDate);
+    router.get('/recaudaciones/detalle/:idRecaudacionRifa', recaudacionRifasController.getRecaudacionCompleta);
+    router.get('/recaudaciones/todas', recaudacionRifasController.getTodasRecaudaciones)
+    router.get('/recaudaciones/todas/inactivas', recaudacionRifasController.getTodasRecaudacionesInactive);
     router.post('/recaudaciones',  recaudacionRifasController.create);
+    router.post('/recaudaciones/rifa/completa', recaudacionRifasController.createRecaudacionRifa);
     router.put('/recaudaciones/:idRecaudacionRifa',  recaudacionRifasController.update);
     router.delete('/recaudaciones/:idRecaudacionRifa', recaudacionRifasController.delete);
 
     // * RUTAS DE VENTAS
     router.get('/ventas', checkPermissions('Ver ventas'), ventasController.findAll);
+    router.get('/ventas/voluntarios', ventasController.findAllVoluntarios);
+    router.get('/ventas/stands', ventasController.findAllVentasStands);
     router.get('/ventas/activas', checkPermissions('Ver ventas'), ventasController.findActive);
+    router.get('/ventas/voluntarios/activas', ventasController.findActiveVoluntarios);
+    router.get('/ventas/stands/activas', ventasController.findActiveVentasStands);
     router.get('/ventas/inactivas', checkPermissions('Ver ventas'), ventasController.findInactive);
+    router.get('/ventas/voluntarios/inactivas', ventasController.findInactiveVoluntarios);
+    router.get('/ventas/stands/inactivas', ventasController.findInactiveVentasStands);
     router.get('/detalle_ventas_voluntarios/ventaCompleta/:idVenta', ventasController.findByVentaId);
+    router.get('/detalle_ventas_stands/ventaCompleta/:idVenta', ventasController.findByVentaIdStand);
     router.get('/ventas/:id', ventasController.findById);
     router.post('/ventas/create', ventasController.create);
-    router.post('/ventas/create/completa',  ventasController.createFullVenta);
+    router.post('/ventas/create/completa', ventasController.createFullVenta);
+    router.post('/ventas/create/stands/completa', ventasController.createFullVentaStand);
     router.put('/ventas/update/:id', ventasController.update);
+    router.put('/ventas/update/completa/:id', ventasController.updateFullVenta);
     
     //* RUTAS DETALLE PAGO RIFAS
     router.get('/detallespago', checkPermissions('Ver detalles de pago de rifas'), detallePagoRifasController.findAll);
@@ -575,6 +601,8 @@ module.exports = (app) => {
 
     // * RUTAS RECAUDACION EVENTOS
     router.get('/recaudacion_evento', checkPermissions('Ver recaudación de eventos'), recaudacion_eventosController.find);
+    router.get('/recaudacion_evento/activos', recaudacion_eventosController.findActive);
+    router.get('/recaudacion_evento/inactivos', recaudacion_eventosController.findInactive);
     router.get('/recaudacion_evento/:id',  recaudacion_eventosController.findById);
     router.post('/recaudacion_evento/create', checkPermissions('Crear recaudación de evento'), recaudacion_eventosController.createRecaudacionEvento);
     router.put('/recaudacion_evento/update/:id', checkPermissions('Editar recaudación de evento'), recaudacion_eventosController.updateRecaudacionEvento);

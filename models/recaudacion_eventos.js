@@ -35,29 +35,22 @@ module.exports = (sequelize, DataTypes) => {
         allowNull: false,
         defaultValue: 1,
       },
+      numeroPersonas: {
+        type: DataTypes.INTEGER,
+        allowNull: false,
+        defaultValue: 0,
+      },
       fechaRegistro: {
         type: DataTypes.DATE,
         allowNull: false,
       },
       idEvento: {
         type: DataTypes.INTEGER,
-        allowNull: false,
-        references: {
-          model: 'eventos',
-          key: 'idEvento',
-        },
-        onUpdate: 'CASCADE',
-        onDelete: 'CASCADE',
+        allowNull: false
       },
       idEmpleado: {
         type: DataTypes.INTEGER,
-        allowNull: false,
-        references: {
-          model: 'empleados',
-          key: 'idEmpleado',
-        },
-        onUpdate: 'CASCADE',
-        onDelete: 'CASCADE',
+        allowNull: false
       },
       createdAt: {
         type: DataTypes.DATE,
