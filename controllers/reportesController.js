@@ -29,8 +29,10 @@ module.exports = {
             // Obtener rifas activas en el rango de fechas
             const rifas = await RIFAS.findAll({
                 where: {
-                    createdAt: {
+                    fechaInicio: {
                         [Op.gte]: fechaInicioFormato,
+                    },
+                    fechaFin: {
                         [Op.lte]: fechaFinFormato,
                     },
                     estado: 1,
