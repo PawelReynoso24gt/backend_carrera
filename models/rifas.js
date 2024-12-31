@@ -37,13 +37,26 @@ module.exports = (sequelize, DataTypes) => {
             type: DataTypes.STRING,
             allowNull: false,
         },
-        idSede: {
-            type: DataTypes.INTEGER,
-            allowNull: false,
-        },
         estado: {
             type: DataTypes.INTEGER,
             allowNull: false
+        },
+        fechaInicio: {
+            type: DataTypes.DATE,
+            allowNull: false
+        },
+        fechaFin: {
+            type: DataTypes.DATE,
+            allowNull: false
+        },
+        ventaTotal: {
+            type: DataTypes.DECIMAL(10, 2),
+            allowNull: false,
+            defaultValue: 0.00
+        },
+        idSede: {
+            type: DataTypes.INTEGER,
+            allowNull: false,
         },
     }, {
         sequelize,

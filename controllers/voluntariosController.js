@@ -4,10 +4,7 @@ const { v4: uuidv4 } = require('uuid'); // Sirve para generar identificadores ú
 const db = require("../models");
 const voluntarios = require("../models/voluntarios");
 const VOLUNTARIOS = db.voluntarios;
-const PERSONAS = db.personas; 
-
-
-
+const PERSONAS = db.personas;
 
 // Método para generar un código QR numérico
 function generateQRCode() {
@@ -55,6 +52,11 @@ module.exports = {
             const voluntarios = await VOLUNTARIOS.findAll({
                 where: {
                     estado: 1
+                },
+                include: {
+                    model: PERSONAS,
+                    as: 'persona',
+                    attributes: ['idPersona', 'nombre'],
                 }
             });
             
@@ -208,5 +210,41 @@ module.exports = {
         }
     },
 
+    // Controlador de voluntarios
+    async findWithAssignedProducts(req, res) {
+        try {
+        const voluntariosConProductos = await db.voluntarios.findAll({
+            include: [
+            {
+                model: db.detalle_productos_voluntarios,
+                as: 'detalle_productos_voluntarios',
+                required: true, // Solo trae voluntarios que tienen productos asignados
+                attributes: ['idProducto', 'cantidad'], // Datos necesarios
+                include: [
+                {
+                    model: db.productos,
+                    as: 'producto',
+                    attributes: ['idProducto', 'nombreProducto', 'precio'], // Información del producto
+                },
+                ],
+            },
+            {
+                model: db.personas,
+                as: 'persona',
+                attributes: ['idPersona', 'nombre', 'telefono', 'domicilio'], // Información del voluntario
+            },
+            ],
+            where: { estado: 1 }
+        });
     
+        if (!voluntariosConProductos || voluntariosConProductos.length === 0) {
+            return res.status(404).json({ message: 'No se encontraron voluntarios con productos asignados.' });
+        }
+    
+        return res.status(200).json(voluntariosConProductos);
+        } catch (error) {
+        console.error('Error al buscar voluntarios con productos asignados:', error);
+        return res.status(500).json({ message: 'Ocurrió un error al buscar voluntarios con productos asignados.' });
+        }
+    },  
 };

@@ -5,6 +5,10 @@ const sedes = require("../models/sedes");
 const STANDS = db.stands;
 const Sede = db.sedes;
 const TipoStands = db.tipo_stands;
+const DetalleStands = db.detalle_stands;
+const AsignacionStands = db.asignacion_stands;
+const TipoPagos = db.tipo_pagos;
+
 
 // Métodos CRUD
 module.exports = {
@@ -14,7 +18,57 @@ module.exports = {
             const stands = await STANDS.findAll({
                 where: {
                     estado: 1
-                }
+                },
+                include: [
+                    {
+                        model: TipoStands,
+                        as: 'tipo_stand',
+                        attributes: ['idTipoStands', 'tipo']
+                    },
+                    {
+                        model: DetalleStands,
+                        as: 'detallesStands',
+                        attributes: ['idDetalleStands', 'cantidad', 'idProducto', 'idStand'],
+                        include: [
+                            {
+                                model: db.productos,
+                                as: 'producto',
+                                attributes: ['idProducto', 'nombreProducto', 'precio', 'foto', 'talla', 'descripcion']
+                            }
+                        ]
+                    },
+                    {
+                        model: AsignacionStands,
+                        as: 'asignaciones',
+                        attributes: ['idAsignacionStands', 'idInscripcionEvento', 'idStand', 'idDetalleHorario'],
+                        include: [
+                            {
+                                model: db.inscripcion_eventos,
+                                as: 'inscripcionEvento',
+                                attributes: ['idInscripcionEvento', 'idVoluntario', 'idEvento'],
+                                include: [
+                                    {
+                                        model: db.eventos,
+                                        as: 'evento',
+                                        attributes: ['idEvento', 'nombreEvento', 'fechaHoraInicio', 'fechaHoraFin', 'descripcion']
+                                    },
+                                    {
+                                        model: db.voluntarios,
+                                        as: 'voluntario',
+                                        attributes: ['idVoluntario', 'idPersona', 'codigoQR'],
+                                        include: [
+                                            {
+                                                model: db.personas,
+                                                as: 'persona',
+                                                attributes: ['idPersona', 'nombre', 'telefono', 'domicilio']
+                                            }
+                                        ]
+                                    }
+                                ]
+                            }
+                        ]
+                    }
+                ]
             });
             
             return res.status(200).json(stands);
@@ -23,6 +77,109 @@ module.exports = {
             return res.status(500).json({
                 message: 'Ocurrió un error al recuperar los datos.'
             });
+        }
+    },
+
+    // * buscar todos los detalles de un stand para ventas
+    async findStandDetalles(req, res) {
+        try {
+            const stands = await STANDS.findAll({
+                where: { estado: 1 },
+                include: [
+                    {
+                        model: TipoStands,
+                        as: 'tipo_stand',
+                        attributes: ['idTipoStands', 'tipo']
+                    },
+                    {
+                        model: DetalleStands,
+                        as: 'detallesStands',
+                        attributes: ['idDetalleStands', 'cantidad', 'idProducto', 'idStand'],
+                        include: [
+                            {
+                                model: db.productos,
+                                as: 'producto',
+                                attributes: ['idProducto', 'nombreProducto', 'precio', 'foto', 'talla', 'descripcion']
+                            }
+                        ]
+                    },
+                    {
+                        model: AsignacionStands,
+                        as: 'asignaciones',
+                        attributes: ['idAsignacionStands', 'idInscripcionEvento', 'idStand', 'idDetalleHorario'],
+                        include: [
+                            {
+                                model: db.inscripcion_eventos,
+                                as: 'inscripcionEvento',
+                                attributes: ['idInscripcionEvento', 'idVoluntario', 'idEvento'],
+                                include: [
+                                    {
+                                        model: db.eventos,
+                                        as: 'evento',
+                                        attributes: ['idEvento', 'nombreEvento', 'fechaHoraInicio', 'fechaHoraFin', 'descripcion']
+                                    },
+                                    {
+                                        model: db.voluntarios,
+                                        as: 'voluntario',
+                                        attributes: ['idVoluntario', 'idPersona', 'codigoQR'],
+                                        include: [
+                                            {
+                                                model: db.personas,
+                                                as: 'persona',
+                                                attributes: ['idPersona', 'nombre', 'telefono', 'domicilio']
+                                            }
+                                        ]
+                                    }
+                                ]
+                            }
+                        ]
+                    }
+                ]
+            });
+            
+            return res.status(200).json(stands);
+        } catch (error) {
+            console.error('Error al recuperar los stands:', error);
+            return res.status(500).json({
+                message: 'Ocurrió un error al recuperar los datos.'
+            });
+        }
+    },
+
+    // * voluntarios metidos en stands
+    async getVoluntariosEnStands(req, res) {
+        const { idStand } = req.params; // Supone que el id del stand se pasa como parámetro
+        try {
+            const voluntarios = await AsignacionStands.findAll({
+                where: { idStand: idStand, estado: 1 }, // Solo asignaciones activas
+                include: [
+                    {
+                        model: db.inscripcion_eventos,
+                        as: 'inscripcionEvento', // Alias definido en la relación
+                        include: [
+                            {
+                                model: db.voluntarios, // Modelo del voluntario
+                                as: 'voluntario', // Alias definido en la relación
+                                include: [
+                                    {
+                                        model: db.personas, // Si tienes un modelo de Persona
+                                        as: 'persona', // Alias definido
+                                    },
+                                ],
+                            },
+                        ],
+                    },
+                ],
+            });
+    
+            if (!voluntarios || voluntarios.length === 0) {
+                return res.status(404).json({ message: 'No se encontraron voluntarios asignados a este stand.' });
+            }
+    
+            res.status(200).json(voluntarios);
+        } catch (error) {
+            console.error('Error al obtener voluntarios asignados:', error);
+            res.status(500).json({ error: 'Error al obtener los voluntarios asignados.' });
         }
     },
     

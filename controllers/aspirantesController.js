@@ -84,6 +84,8 @@ module.exports = {
         });
     },
 
+
+
     // * Listar todos los aspirantes activos
     async findActive(req, res) {
         return ASPIRANTES.findAll({

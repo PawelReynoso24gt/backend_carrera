@@ -26,6 +26,8 @@ module.exports = {
             });
         }
     },
+
+
     
     async findActivateMunicipios(req, res) {
         return Municipios.findAll({

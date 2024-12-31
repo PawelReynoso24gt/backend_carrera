@@ -22,6 +22,7 @@ module.exports = {
             });
         }
     },
+   
     
     async findActivateDepto(req, res) {
         return DEPARTAMENTOS.findAll({
