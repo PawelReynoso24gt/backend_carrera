@@ -350,130 +350,136 @@ module.exports = {
         }
     },
 
-    async obtenerReportePlayeras(req, res) {
+    async obtenerReporteProductos(req, res) {
         try {
           const { fechaInicio, fechaFin } = req.query;
-    
+      
           // Verificar que las fechas se proporcionen
           if (!fechaInicio || !fechaFin) {
             return res.status(400).json({ message: 'Se requieren las fechas de inicio y fin.' });
           }
-    
+      
           // Convertir las fechas de formato DD-MM-YYYY a YYYY-MM-DD
           const fechaInicioFormato = fechaInicio.split("-").reverse().join("-");
           const fechaFinFormato = fechaFin.split("-").reverse().join("-");
-    
+      
           // Validar que las fechas sean válidas
           const fechaInicioValida = moment(fechaInicioFormato, 'YYYY-MM-DD', true).isValid();
           const fechaFinValida = moment(fechaFinFormato, 'YYYY-MM-DD', true).isValid();
-    
+      
           if (!fechaInicioValida || !fechaFinValida) {
             return res.status(400).json({ message: 'Las fechas no son válidas. Formato esperado: DD-MM-YYYY' });
           }
-    
+      
           // Realizar la consulta para obtener los stands con los detalles de las ventas y las asignaciones de productos
           const standsConReporte = await STANDS.findAll({
+            where: {
+              idStand: {
+                [Op.ne]: 1, // Excluir stand con ID 1
+              },
+              nombreStand: {
+                [Op.ne]: "Virtual", // Excluir stand con nombre "Virtual"
+              },
+            },
             include: [
               {
-                model: DETALLE_VENTAS_STANDS,  // Incluir detalles de ventas de stands
+                model: DETALLE_VENTAS_STANDS, // Incluir detalles de ventas de stands
                 include: [
                   {
                     model: PRODUCTOS,
-                    where: {
-                      idCategoria: 1  // Solo seleccionamos los productos de tipo 'Playera'
-                    },
-                    attributes: ['idProducto', 'nombreProducto', 'talla']
-                  }
+                    attributes: ['idProducto', 'nombreProducto', 'talla'], // Incluir detalles de productos
+                  },
                 ],
                 where: {
                   estado: 1, // Solo activos
                   createdAt: {
-                    [Op.gte]: fechaInicioFormato,  // Rango de fechas
-                    [Op.lte]: fechaFinFormato
-                  }
-                }
+                    [Op.gte]: fechaInicioFormato, // Rango de fechas
+                    [Op.lte]: fechaFinFormato,
+                  },
+                },
               },
               {
                 model: DETALLE_STANDS, // Incluir detalles de asignaciones de productos a stands
-                as: 'detallesStands', 
+                as: 'detallesStands',
                 include: [
                   {
                     model: PRODUCTOS,
                     as: 'producto',
-                    where: {
-                      idCategoria: 1 // Solo productos de tipo 'Playera'
-                    },
-                    attributes: ['idProducto', 'nombreProducto', 'talla']
-                  }
+                    attributes: ['idProducto', 'nombreProducto', 'talla'], // Incluir detalles de productos
+                  },
                 ],
                 where: {
                   estado: 1, // Solo activos
-                }
-              }
-            ]
+                },
+              },
+            ],
           });
-    
+      
           // Verificación si se encontró algún stand
           if (standsConReporte.length === 0) {
             return res.status(404).json({ message: 'No se encontraron stands con las condiciones especificadas.' });
           }
-    
+      
           // Preparar los resultados
           const resultados = [];
-    
+      
           for (const stand of standsConReporte) {
-            const playerasAsignadas = {};
-            const playerasVendidas = {};
-            const subtotalesVendidos = {}; // Para almacenar subtotales por talla
+            const productosAsignados = {};
+            const productosVendidos = {};
+            const subtotalesVendidos = {}; // Para almacenar subtotales por producto
             let totalRecaudado = 0; // Inicializar el total recaudado por stand
-    
-            // Asignación de playeras por talla (detalle_stands)
-          // Asignación de playeras por talla (detalle_stands)
+      
+            // Asignación de productos por talla (detalle_stands)
             if (stand.detallesStands && Array.isArray(stand.detallesStands)) {
                 stand.detallesStands.forEach((detalle) => {
-                    if (detalle.producto) {
-                        const talla = detalle.producto.talla;
-                        playerasAsignadas[talla] = (playerasAsignadas[talla] || 0) + detalle.cantidad;
+                  if (detalle.producto) {
+                    const producto = detalle.producto.nombreProducto;
+                    const talla = detalle.producto.talla || "N/A"; // Agrega la talla como un campo separado
+                    if (!productosAsignados[producto]) {
+                      productosAsignados[producto] = {};
                     }
+                    productosAsignados[producto][talla] =
+                      (productosAsignados[producto][talla] || 0) + detalle.cantidad;
+                  }
                 });
-            }
-
-            // Ventas de playeras por talla (detalle_ventas_stands)
-            if (stand.detalle_ventas_stands && Array.isArray(stand.detalle_ventas_stands)) {
+              }
+              
+              if (stand.detalle_ventas_stands && Array.isArray(stand.detalle_ventas_stands)) {
                 stand.detalle_ventas_stands.forEach((detalleVenta) => {
-                    if (detalleVenta.producto) {
-                        const talla = detalleVenta.producto.talla;
-                        playerasVendidas[talla] = (playerasVendidas[talla] || 0) + detalleVenta.cantidad;
-            
-                        // Calcular el subtotal para cada venta
-                        const subTotal = parseFloat(detalleVenta.subTotal) || 0;
-                        subtotalesVendidos[talla] = (subtotalesVendidos[talla] || 0) + subTotal;
-                        totalRecaudado += subTotal; // Sumar al total recaudado
+                  if (detalleVenta.producto) {
+                    const producto = detalleVenta.producto.nombreProducto;
+                    const talla = detalleVenta.producto.talla || "N/A"; // Agrega la talla como un campo separado
+                    if (!productosVendidos[producto]) {
+                      productosVendidos[producto] = {};
                     }
+                    if (!productosVendidos[producto][talla]) {
+                      productosVendidos[producto][talla] = { cantidad: 0, subTotal: 0 };
+                    }
+                    productosVendidos[producto][talla].cantidad += detalleVenta.cantidad;
+                    productosVendidos[producto][talla].subTotal += parseFloat(detalleVenta.subTotal) || 0;
+                  }
                 });
-            }
-            
-
-    
-            // Agregar el reporte del stand, incluyendo los subtotales de cada talla y el total recaudado
+              }
+              
+              
+              
+      
+            // Agregar el reporte del stand, incluyendo los subtotales de cada producto y el total recaudado
             resultados.push({
-                nombreStand: stand.nombreStand,
-                playerasAsignadas,
-                playerasVendidas,
-                subtotalesVendidos,
-                totalRecaudado: parseInt(totalRecaudado) // Convertir a entero
+              nombreStand: stand.nombreStand,
+              productosAsignados,
+              productosVendidos,
+              subtotalesVendidos,
+              totalRecaudado: parseInt(totalRecaudado), // Convertir a entero
             });
           }
-    
-          
+      
           // Enviar el reporte como respuesta
-         // console.log('Datos recuperados:', JSON.stringify(standsConReporte, null, 2));
           return res.status(200).json({ reporte: resultados });
-    
         } catch (error) {
-          console.error('Error al obtener el reporte de playeras:', error);
-          return res.status(500).json({ message: 'Error al obtener el reporte de playeras.' });
-    }
-    }
+          console.error('Error al obtener el reporte de productos:', error);
+          return res.status(500).json({ message: 'Error al obtener el reporte de productos.' });
+        }
+      }      
 
 };

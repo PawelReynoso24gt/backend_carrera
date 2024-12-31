@@ -67,6 +67,7 @@ const tipoNotificacionesController = require('../controllers/tipoNotificacionCon
 const tipo_situacionesController = require('../controllers/tipo_situacionesController');
 const situacionesController = require('../controllers/situacionesController');
 const obtenerPermisosController = require('../controllers/obtenerPermisosController');
+const voluntarioDelMesController = require('../controllers/voluntarioDelMes');
 
 module.exports = (app) => {
 
@@ -75,6 +76,12 @@ module.exports = (app) => {
 
         // * QR (lo puse aqui porque no me dejaba usarlo a pesar de tener el token)
         router.get('/generateQR', checkPermissions('Generar QR'), voluntariosController.generateQR);
+
+      // * RUTAS DE MUNICIPIOS Y DEPARTAMENTOS PARA REGISTRO ASPIRANTES
+      router.get('/municipios', municipiosController.find);
+      router.get('/departamentos', departamentosController.find);
+      router.get('/aspirantes', aspirantesController.findAll);  
+      router.post('/aspirantes', aspirantesController.create);
 
     // ! Todas las rutas a continuación requieren autenticación
     router.use(authenticateToken); // Middleware para proteger las rutas con autenticación
@@ -109,6 +116,20 @@ module.exports = (app) => {
     router.put('/tipo_stands/:id', tipoStandsController.update);
     router.delete('/tipo_stands/:id', tipoStandsController.delete);
 
+
+     // * RUTAS DE MUNICIPIOS
+      router.get('/municipios/activas', municipiosController.findActivateMunicipios);
+      router.get('/municipios/inactivas', municipiosController.findInactiveMunicipios);
+      router.post('/municipios/create', municipiosController.createMunicipio);
+      router.put('/municipios/update/:id', municipiosController.updateMunicipio);
+      router.delete('/municipios/:id', municipiosController.deleteMunicipio);
+
+      // * RUTAS DE DEPARTAMENTOS
+      router.get('/departamentos/activas', departamentosController.findActivateDepto);
+      router.get('/departamentos/inactivas', departamentosController.findaInactivateDepto);
+      router.post('/departamentos/create', departamentosController.createDepto);
+      router.put('/departamentos/:id', departamentosController.updateDepto);
+      router.delete('/departamentos/delete/:id', departamentosController.deleteDepto);
     // * RUTAS DE SEDES
     router.get('/sedes', checkPermissions('Ver sedes'), sedesController.findAll);
     router.get('/sedes/activas', checkPermissions('Ver sedes'), sedesController.findActive);
@@ -290,6 +311,7 @@ module.exports = (app) => {
     
     // * RUTAS DE COMISIONES
     router.get('/comisiones', checkPermissions('Ver comisiones'), comisionesController.find);
+    router.get('/comisiones/porevento', comisionesController.findByEvento);
     router.get('/comisiones/activos', checkPermissions('Ver comisiones'), comisionesController.findActive); 
     router.get('/comisiones/inactivos', checkPermissions('Ver comisiones'), comisionesController.findInactive);
     router.get('/comisiones/:id', comisionesController.findById);
@@ -323,6 +345,7 @@ module.exports = (app) => {
 
     // * RUTAS DE VOLUNTARIOS
     router.get('/voluntarios', checkPermissions('Ver voluntarios'), voluntariosController.find);
+    router.get('/voluntarios/:id', voluntariosController.findById);
     router.get('/voluntarios/activos', checkPermissions('Ver voluntarios'), voluntariosController.findActivateVol); 
     router.get('/voluntarios/inactivos', checkPermissions('Ver voluntarios'), voluntariosController.findaInactivateVol);
     router.post('/voluntarios/create', voluntariosController.createVol);
@@ -420,6 +443,7 @@ module.exports = (app) => {
     router.get('/inscripcion_eventos/activos', inscripcionEventosController.findActive);
     router.get('/inscripcion_eventos/inactivos', inscripcionEventosController.findInactive);
     router.get('/inscripcion_eventos/:id', inscripcionEventosController.findById);
+    router.get( "/inscripciones/voluntario/:idVoluntario", inscripcionEventosController.obtenerInscripcionesPorVoluntario);
     router.post('/inscripcion_eventos/create', inscripcionEventosController.create); 
     router.put('/inscripcion_eventos/update/:id', inscripcionEventosController.update);
     router.delete('/inscripcion_eventos/delete/:id', inscripcionEventosController.delete); 
@@ -457,22 +481,22 @@ module.exports = (app) => {
     // * RUTAS DE DETALLE TRASLADOS
     router.get('/detalle_traslados', checkPermissions('Ver detalles de traslados'), detalle_trasladosController.find);
     router.get('/detalle_traslados/:id', detalle_trasladosController.findById);
-    router.post('/detalle_traslados/create', checkPermissions('Crear detalle de traslado'), detalle_trasladosController.createDetalleTraslado);
-    router.put('/detalle_traslados/update/:id', checkPermissions('Editar detalle de traslado'), detalle_trasladosController.updateDetalleTraslado);
+    router.post('/detalle_traslados/create', detalle_trasladosController.createDetalleTraslado);
+    router.put('/detalle_traslados/update/:id', detalle_trasladosController.updateDetalleTraslado);
     router.delete('/detalle_traslados/delete/:id', detalle_trasladosController.deleteDetalleTraslado);
 
     // * RUTAS DETALLE PEDIDOS
     router.get('/detalle_pedido', checkPermissions('Ver detalles de pedidos'), detalle_pedidosController.find);
     router.get('/detalle_pedido/:id', detalle_pedidosController.findById);
-    router.post('/detalle_pedido/create', checkPermissions('Crear detalle de pedido'), detalle_pedidosController.createDetallePedido);
-    router.put('/detalle_pedido/update/:id', checkPermissions('Editar detalle de pedido'), detalle_pedidosController.updateDetallePedido);
+    router.post('/detalle_pedido/create', detalle_pedidosController.createDetallePedido);
+    router.put('/detalle_pedido/update/:id', detalle_pedidosController.updateDetallePedido);
     router.delete('/detalle_pedido/delete/:id', detalle_pedidosController.deleteDetallePedido);
 
     // * RUTAS DETALLE PRODUCTOS
     router.get('/detalle_productos', checkPermissions('Ver detalles de productos'), detalle_productosController.find);
     router.get('/detalle_productos/:id', detalle_productosController.findById);
-    router.post('/detalle_productos/create', checkPermissions('Crear detalle de producto'), detalle_productosController.createDetalleProducto);
-    router.put('/detalle_productos/update/:id', checkPermissions('Editar detalle de producto'), detalle_productosController.updateDetalleProducto);
+    router.post('/detalle_productos/create',  detalle_productosController.createDetalleProducto);
+    router.put('/detalle_productos/update/:id',  detalle_productosController.updateDetalleProducto);
     router.delete('/detalle_productos/delete/:id', detalle_productosController.deleteDetalleProducto);
     
     // * RuUTAS DE DETALLE DE INSCRIPCION DE ACTIVIDADES
@@ -498,17 +522,17 @@ module.exports = (app) => {
     router.get('/empleados/activos', checkPermissions('Ver empleados activos'), empleadosController.findActive);
     router.get('/empleados/inactivos', checkPermissions('Ver empleados inactivos'), empleadosController.findInactive);
     router.get('/empleados/:id', empleadosController.findById);
-    router.post('/empleados/create', checkPermissions('Crear empleado'), empleadosController.create);
-    router.put('/empleados/update/:id', checkPermissions('Editar empleado'), empleadosController.update);
-    router.delete('/empleados/delete/:id', checkPermissions('Eliminar empleado'), empleadosController.delete);
+    router.post('/empleados/create',  empleadosController.create);
+    router.put('/empleados/update/:id',  empleadosController.update);
+    router.delete('/empleados/delete/:id',  empleadosController.delete);
 
     // * RUTAS DE ASISTENCIA A EVENTOS
     router.get('/asistencia_eventos', checkPermissions('Ver asistencia a eventos'), asistenciaEventosController.find); 
     router.get('/asistencia_eventos/activos', checkPermissions('Ver asistencia a eventos'), asistenciaEventosController.findActive); 
     router.get('/asistencia_eventos/inactivos', checkPermissions('Ver asistencia a eventos'), asistenciaEventosController.findInactive); 
     router.get('/asistencia_eventos/:id', asistenciaEventosController.findById); 
-    router.post('/asistencia_eventos/create', checkPermissions('Crear asistencia a evento'), asistenciaEventosController.create); 
-    router.put('/asistencia_eventos/update/:id', checkPermissions('Editar asistencia a evento'), asistenciaEventosController.update);
+    router.post('/asistencia_eventos/create', asistenciaEventosController.create); 
+    router.put('/asistencia_eventos/update/:id', asistenciaEventosController.update);
     router.delete('/asistencia_eventos/delete/:id', asistenciaEventosController.delete);
 
     //* RUTAS DE RECAUDACION DE RIFAS
@@ -516,8 +540,8 @@ module.exports = (app) => {
     router.get('/recaudaciones/activas', checkPermissions('Ver recaudación de rifas'), recaudacionRifasController.findActive);
     router.get('/recaudaciones/inactivas', checkPermissions('Ver recaudación de rifas'), recaudacionRifasController.findInactive);
     router.get('/recaudaciones/fecha/:fecha', recaudacionRifasController.getByDate);
-    router.post('/recaudaciones', checkPermissions('Crear recaudación de rifa'), recaudacionRifasController.create);
-    router.put('/recaudaciones/:idRecaudacionRifa', checkPermissions('Editar recaudación de rifa'), recaudacionRifasController.update);
+    router.post('/recaudaciones',  recaudacionRifasController.create);
+    router.put('/recaudaciones/:idRecaudacionRifa',  recaudacionRifasController.update);
     router.delete('/recaudaciones/:idRecaudacionRifa', recaudacionRifasController.delete);
 
     // * RUTAS DE VENTAS
@@ -526,8 +550,8 @@ module.exports = (app) => {
     router.get('/ventas/inactivas', checkPermissions('Ver ventas'), ventasController.findInactive);
     router.get('/detalle_ventas_voluntarios/ventaCompleta/:idVenta', ventasController.findByVentaId);
     router.get('/ventas/:id', ventasController.findById);
-    router.post('/ventas/create', checkPermissions('Crear venta'), ventasController.create);
-    router.post('/ventas/create/completa', checkPermissions('Editar venta'), ventasController.createFullVenta);
+    router.post('/ventas/create', ventasController.create);
+    router.post('/ventas/create/completa',  ventasController.createFullVenta);
     router.put('/ventas/update/:id', ventasController.update);
     
     //* RUTAS DETALLE PAGO RIFAS
@@ -542,9 +566,11 @@ module.exports = (app) => {
     router.get('/aspirantes', checkPermissions('Ver aspirantes'), aspirantesController.findAll);
     router.get('/aspirantes/activos', checkPermissions('Ver aspirantes'), aspirantesController.findActive);
     router.get('/aspirantes/inactivos', checkPermissions('Ver aspirantes'), aspirantesController.findInactive);
+    router.get('/aspirantes/estado/:idAspirante', aspirantesController.verifyStatus); 
     router.post('/aspirantes', aspirantesController.create);
     router.put('/aspirantes/:idAspirante', aspirantesController.update);
-    router.get('/aspirantes/:idAspirante', aspirantesController.findById);
+    router.get('/aspirantes', aspirantesController.findAll);
+    router.put('/aspirantes/aceptar/:idAspirante', aspirantesController.acceptAspirante);
     router.delete('/aspirantes/:idAspirante', aspirantesController.delete);
 
     // * RUTAS RECAUDACION EVENTOS
@@ -569,7 +595,7 @@ module.exports = (app) => {
     router.get('/detalle_ventas_stands', detalle_ventas_standsController.findAll);
     router.get('/detalle_ventas_stands/activos', detalle_ventas_standsController.findActive),
     router.get('/detalle_ventas_stands/inactivos', detalle_ventas_standsController.findInactive),
-    router.get('/reporte/playeras', checkPermissions('Generar reporte stands'), detalle_ventas_standsController.obtenerReportePlayeras),
+    router.get('/reporte/playeras', checkPermissions('Generar reporte stands'), detalle_ventas_standsController.obtenerReporteProductos),
     router.get('/detalle_ventas_stands/:id', detalle_ventas_standsController.findById);
     router.post('/detalle_ventas_stands/create', detalle_ventas_standsController.create);
     router.put('/detalle_ventas_stands/update/:id', detalle_ventas_standsController.update);
@@ -618,6 +644,7 @@ module.exports = (app) => {
 
     // * RUTAS DE SITUACIONES
     router.get('/situaciones', checkPermissions('Ver situaciones'), situacionesController.findAll);
+    router.get('/situaciones/reporte', checkPermissions('Generar reporte situaciones'), situacionesController.findGroupedByEstadoWithDates);
     router.get('/situaciones/reportadas', checkPermissions('Ver situaciones reportadas'), situacionesController.findReportadas);
     router.get('/situaciones/en_revision', checkPermissions('Ver situaciones en revisión'), situacionesController.findEnRevision);
     router.get('/situaciones/en_proceso', checkPermissions('Ver situaciones en proceso'), situacionesController.findEnProceso);
@@ -626,9 +653,9 @@ module.exports = (app) => {
     router.get('/situaciones/resueltas', checkPermissions('Ver situaciones resueltas'), situacionesController.findResueltas);
     router.get('/situaciones/sin_solucion', checkPermissions('Ver situaciones sin solución'), situacionesController.findSinSolucion);
     router.get('/situaciones/:id', situacionesController.findById);
-    router.post('/situaciones/create', checkPermissions('Crear situación'), situacionesController.create);
-    router.put('/situaciones/update/reporte/:id', checkPermissions('Actualizar reporte de situación'), situacionesController.updateReporte);
-    router.put('/situaciones/update/respuesta/:id', checkPermissions('Responder situación'), situacionesController.updateRespuesta);
+    router.post('/situaciones/create', situacionesController.create);
+    router.put('/situaciones/update/reporte/:id', situacionesController.updateReporte);
+    router.put('/situaciones/update/respuesta/:id', situacionesController.updateRespuesta);
 
     // * RUTAS DE NOTIFICACIONES
     router.get('/notificaciones', notificacionesController.find);
@@ -639,6 +666,9 @@ module.exports = (app) => {
 
     // * ENDPOINT DE PERMISOS 
     router.get('/usuarios/permisos', obtenerPermisosController.getPermissionsForRole);
+
+    // * RUTA DE VOLUNTARIOS DE MES
+    router.get('/voluntarioDelMes', voluntarioDelMesController.getVoluntarioDelMes);
 
     app.use('/', router);
 

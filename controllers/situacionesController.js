@@ -5,8 +5,11 @@ const { format } = require('date-fns'); // Asegúrate de importar 'format'
 const SITUACIONES = db.situaciones;
 const TIPO_SITUACIONES = db.tipo_situaciones;
 const USUARIOS = db.usuarios;
+const moment = require('moment'); // Asegúrate de tener instalada esta dependencia
+const { Op } = require('sequelize');
 
 module.exports = {
+    
     // Obtener todas las situaciones
     async findAll(req, res) {
         try {
@@ -292,6 +295,84 @@ module.exports = {
         } catch (error) {
             console.error('Error al actualizar la respuesta:', error);
             return res.status(500).json({ message: 'Ocurrió un error al actualizar la respuesta.' });
+        }
+    },
+
+    // Obtener todas las situaciones agrupadas por estado
+    async findGroupedByEstadoWithDates(req, res) {
+        try {
+            const { fechaInicio, fechaFin } = req.query;
+    
+            // Verificar que las fechas se proporcionen
+            if (!fechaInicio || !fechaFin) {
+                return res.status(400).json({ message: 'Se requieren las fechas de inicio y fin.' });
+            }
+    
+            // Convertir las fechas de formato DD-MM-YYYY a YYYY-MM-DD
+            const fechaInicioFormato = fechaInicio.split("-").reverse().join("-");
+            const fechaFinFormato = fechaFin.split("-").reverse().join("-");
+    
+            // Validar que las fechas sean válidas
+            const fechaInicioValida = moment(fechaInicioFormato, 'YYYY-MM-DD', true).isValid();
+            const fechaFinValida = moment(fechaFinFormato, 'YYYY-MM-DD', true).isValid();
+    
+            if (!fechaInicioValida || !fechaFinValida) {
+                return res.status(400).json({ message: 'Las fechas no son válidas. Formato esperado: DD-MM-YYYY' });
+            }
+    
+            // Consultar situaciones en el rango de fechas
+            const situaciones = await SITUACIONES.findAll({
+                where: {
+                    fechaOcurrencia: {
+                        [Op.gte]: fechaInicioFormato,
+                        [Op.lte]: fechaFinFormato,
+                    },
+                },
+                include: [
+                    {
+                        model: TIPO_SITUACIONES,
+                        attributes: ['tipoSituacion'],
+                    },
+                    {
+                        model: USUARIOS,
+                        attributes: ['idUsuario', 'usuario', 'idPersona'],
+                        as: 'usuario',
+                        include: [
+                            {
+                                model: db.personas,
+                                attributes: ['idPersona', 'nombre'],
+                                as: 'persona',
+                            },
+                        ],
+                    },
+                ],
+            });
+    
+            // Verificar si se encontraron situaciones
+            if (situaciones.length === 0) {
+                return res.status(404).json({ message: 'No se encontraron situaciones en el rango de fechas especificado.' });
+            }
+    
+            // Agrupar y formatear los resultados
+            const agrupadasPorEstado = situaciones.reduce((agrupado, situacion) => {
+                const estado = situacion.estado || 'Sin Estado';
+    
+                // Convertir la situación a JSON y formatear la fecha
+                const situacionJSON = situacion.toJSON();
+                situacionJSON.fechaOcurrencia = moment(situacion.fechaOcurrencia).format('DD/MM/YYYY h:mm a');
+    
+                if (!agrupado[estado]) {
+                    agrupado[estado] = [];
+                }
+                agrupado[estado].push(situacionJSON);
+                return agrupado;
+            }, {});
+    
+            // Retornar las situaciones agrupadas por estado
+            return res.status(200).json({ reporte: agrupadasPorEstado });
+        } catch (error) {
+            console.error('Error al obtener el reporte de situaciones:', error);
+            return res.status(500).json({ message: 'Error al obtener el reporte de situaciones.' });
         }
     }
 };
