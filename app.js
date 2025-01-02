@@ -1,4 +1,5 @@
 require('dotenv').config();
+const path = require('path');
 const express       = require('express');
 const cors          = require('cors');
 const logger        = require('morgan');
@@ -37,6 +38,8 @@ require("./routes")(app);
 
  app.use(express.static('./public'));
 
+ // Middleware para servir imágenes de publicaciones
+app.use('/publicaciones', express.static(path.join(__dirname, 'src/publicaciones')));
 
 app.get('*', (req, res) => res.status(200).send({
      message: 'Index.',

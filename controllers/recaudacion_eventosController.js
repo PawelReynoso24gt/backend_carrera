@@ -95,18 +95,18 @@ module.exports = {
               {
                 model: db.sedes,
                 as: 'sede',
-                include: [
-                  {
-                    model: Personas,
-                    as: 'persona',
-                  }
-                ]
               }
             ]
           },
           {
             model: Empleados,
             as: 'empleado',
+            include: [
+              {
+                model: Personas,
+                as: 'persona',
+              }
+            ]
           }
         ]
       });
@@ -228,6 +228,8 @@ module.exports = {
   async updateRecaudacionEvento(req, res) {
     const id = req.params.id;
     const datos = req.body;
+
+    console.log("Datos recibidos del frontend:", datos); // Verifica los datos recibido
   
     const camposActualizados = {};
   
@@ -237,7 +239,10 @@ module.exports = {
     if (datos.fechaRegistro !== undefined) {
       // Convertir la fecha al formato deseado
       const fechaRegistro = parse(datos.fechaRegistro, "yyyy-MM-dd", new Date());
-      camposActualizados.fechaRegistro = fechaRegistro; // Guardar directamente la fecha parseada
+      if (isNaN(fechaRegistro)) {
+          return res.status(400).json({ error: "Fecha de registro no válida." });
+      }
+      camposActualizados.fechaRegistro = fechaRegistro;
     }
     if (datos.numeroPersonas !== undefined) camposActualizados.numeroPersonas = datos.numeroPersonas;
     if (datos.idEvento !== undefined) camposActualizados.idEvento = datos.idEvento;

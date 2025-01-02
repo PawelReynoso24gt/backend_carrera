@@ -1,6 +1,7 @@
 const { Router } = require('express');
 const router = Router();
 const authenticateToken = require('../middlewares/authenticateToken');
+const upload = require('../middlewares/multerConfig'); // para las fotos
 
 // Aqui van los imports
 //RUTAS
@@ -82,7 +83,7 @@ module.exports = (app) => {
       router.post('/personas/create', personasController.create);
 
     // ! Todas las rutas a continuación requieren autenticación
-   router.use(authenticateToken); // Middleware para proteger las rutas con autenticación
+    //router.use(authenticateToken); // Middleware para proteger las rutas con autenticación
 
     // * USUARIOS
     router.get('/usuarios/activos', usuariosController.find);
@@ -352,11 +353,15 @@ module.exports = (app) => {
 
     // * RUTAS DE PUBLICACIONES
     router.get('/publicaciones', publicacionesController.find);
+    router.get('/publicaciones/completas', publicacionesController.findCompleto);
     router.get('/publicaciones/activos', publicacionesController.findActive); 
     router.get('/publicaciones/inactivos', publicacionesController.findInactive);
+    router.get('/publicaciones/detalles/:id', publicacionesController.getPublicacionDetalles);
     router.get('/publicaciones/:id', publicacionesController.findById);
     router.post('/publicaciones/create', publicacionesController.create);
-    router.put('/publicaciones/update/:id', publicacionesController.update); 
+    router.post('/publicaciones/completa/create', upload.array('fotos', 30), publicacionesController.createCompleto);
+    router.put('/publicaciones/update/:id', publicacionesController.update);
+    router.put('/publicaciones/completa/update/:id', upload.array('fotos', 30), publicacionesController.updateCompleto); 
     router.delete('/publicaciones/delete/:id', publicacionesController.delete);
 
     // * RUTAS DE PUBLICACIONES DE EVENTOS
@@ -592,8 +597,8 @@ module.exports = (app) => {
 
     // * RUTAS RECAUDACION EVENTOS
     router.get('/recaudacion_evento', recaudacion_eventosController.find);
-    router.get('/recaudacion_evento/activos', recaudacion_eventosController.findActive);
-    router.get('/recaudacion_evento/inactivos', recaudacion_eventosController.findInactive);
+    router.get('/recaudacion_evento/activas', recaudacion_eventosController.findActive);
+    router.get('/recaudacion_evento/inactivas', recaudacion_eventosController.findInactive);
     router.get('/recaudacion_evento/:id', recaudacion_eventosController.findById);
     router.post('/recaudacion_evento/create', recaudacion_eventosController.createRecaudacionEvento);
     router.put('/recaudacion_evento/update/:id', recaudacion_eventosController.updateRecaudacionEvento);
