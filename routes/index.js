@@ -83,7 +83,7 @@ module.exports = (app) => {
       router.post('/personas/create', personasController.create);
 
     // ! Todas las rutas a continuación requieren autenticación
-    //router.use(authenticateToken); // Middleware para proteger las rutas con autenticación
+    router.use(authenticateToken); // Middleware para proteger las rutas con autenticación
 
     // * USUARIOS
     router.get('/usuarios/activos', usuariosController.find);
