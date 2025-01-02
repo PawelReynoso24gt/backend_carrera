@@ -65,6 +65,7 @@ const notificacionesController = require('../controllers/notificacionesControlle
 const tipoNotificacionesController = require('../controllers/tipoNotificacionController');
 const tipo_situacionesController = require('../controllers/tipo_situacionesController');
 const situacionesController = require('../controllers/situacionesController');
+const reportesController = require('../controllers/reportesController');
 
 module.exports = (app) => {
 
@@ -82,7 +83,7 @@ module.exports = (app) => {
       router.post('/personas/create', personasController.create);
 
     // ! Todas las rutas a continuación requieren autenticación
-   router.use(authenticateToken); // Middleware para proteger las rutas con autenticación
+    router.use(authenticateToken); // Middleware para proteger las rutas con autenticación
 
     // * USUARIOS
     router.get('/usuarios/activos', usuariosController.find);
@@ -618,6 +619,7 @@ module.exports = (app) => {
     router.get('/detalle_ventas_stands/inactivos', detalle_ventas_standsController.findInactive),
     router.get('/reporte/playeras', detalle_ventas_standsController.obtenerReportePlayeras),
     router.get('/detalle_ventas_stands/:id', detalle_ventas_standsController.findById);
+    router.get('/reporteVoluntarios/getReporte', detalle_ventas_standsController.obtenerReporteMercanciaVoluntarios);
     router.post('/detalle_ventas_stands/create', detalle_ventas_standsController.create);
     router.put('/detalle_ventas_stands/update/:id', detalle_ventas_standsController.update);
     
@@ -683,6 +685,10 @@ module.exports = (app) => {
 
     // * RUTAS DE TIPOS DE NOTIFICACIONES
     router.get('/tipoNotificaciones', tipoNotificacionesController.find);
+
+    // * RUTAS DE REPORTES
+    router.post('/reportesAspirantes', aspirantesController.reporteAspirantes);
+    router.post("/reportesRifas", reportesController.reporteRifas);
 
     app.use('/', router);
 
