@@ -1,10 +1,12 @@
 'use strict';
 const db = require('../models');
 const DETALLE_INSCRIPCION_MATERIALES = db.detalle_inscripcion_materiales;
+const DETALLE_INSCRIPCION_ACTIVIDADES = db.detalle_inscripcion_actividades;
 const INSCRIPCION_EVENTOS = db.inscripcion_eventos;
 const INSCRIPCION_COMISIONES = db.inscripcion_comisiones;
 const COMISIONES = db.comisiones;
 const MATERIALES = db.materiales;
+const ACTIVIDADES = db.actividades;
 
 module.exports = {
     // Obtener todos los detalles de inscripción de materiales
