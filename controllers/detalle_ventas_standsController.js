@@ -1,7 +1,7 @@
 'use strict';
 
 const db = require('../models');
-const { Op } = require('sequelize');
+const { Op, where } = require('sequelize');
 const moment = require('moment');
 
 const detalle_ventas_stands = require('../models/detalle_ventas_stands');
@@ -480,6 +480,120 @@ module.exports = {
           console.error('Error al obtener el reporte de playeras:', error);
           return res.status(500).json({ message: 'Error al obtener el reporte de playeras.' });
     }
-    }
+    },
 
+    async obtenerReporteMercanciaVoluntarios(req, res) {
+        try {
+            const { fechaInicio, fechaFin } = req.query;
+    
+            // Verificar que las fechas se proporcionen
+            if (!fechaInicio || !fechaFin) {
+                return res.status(400).json({ message: 'Se requieren las fechas de inicio y fin.' });
+            }
+    
+            // Convertir las fechas de formato DD-MM-YYYY a YYYY-MM-DD
+            const fechaInicioFormato = fechaInicio.split("-").reverse().join("-");
+            const fechaFinFormato = fechaFin.split("-").reverse().join("-");
+    
+            // Validar que las fechas sean válidas
+            const fechaInicioValida = moment(fechaInicioFormato, 'YYYY-MM-DD', true).isValid();
+            const fechaFinValida = moment(fechaFinFormato, 'YYYY-MM-DD', true).isValid();
+    
+            if (!fechaInicioValida || !fechaFinValida) {
+                return res.status(400).json({ message: 'Las fechas no son válidas. Formato esperado: DD-MM-YYYY' });
+            }
+    
+            // Realizar la consulta para obtener los datos
+            const reporteVoluntarios = await DETALLE_STANDS.findAll({
+                where: {
+                    idStand: 1, // Solo stands de voluntarios
+                    estado: 1,
+                    createdAt: {
+                        [Op.gte]: fechaInicioFormato,
+                        [Op.lte]: fechaFinFormato,
+                    },
+                },
+                include: [
+                    {
+                        model: STANDS,
+                        as: 'stand',
+                        where: {
+                            idStand: 1, // Solo ventas de stands de voluntarios
+                            estado: 1,
+                        },
+                        include: [
+                            {
+                                model: DETALLE_VENTAS_STANDS,
+                                where: {
+                                    idStand: 1,
+                                    estado: 1,
+                                },
+                                attributes: ['idProducto', 'cantidad', 'subTotal', 'donacion'],
+                                include: [
+                                    {
+                                        model: PRODUCTOS,
+                                        attributes: ['idProducto', 'nombreProducto', 'talla', 'precio'],
+                                    },
+                                ],
+                            },
+                        ],
+                    },
+                ],
+            });
+    
+            if (!reporteVoluntarios || reporteVoluntarios.length === 0) {
+                return res.status(404).json({ message: 'No se encontraron datos para voluntarios en el rango de fechas especificado.' });
+            }
+    
+            // Preparar el reporte
+            let totalSubTotal = 0;
+            let totalDonaciones = 0;
+    
+            const resultados = reporteVoluntarios.map((detalle) => {
+                const ventas = [];
+    
+                // Procesar las ventas asociadas al stand
+                if (
+                    detalle.stand &&
+                    detalle.stand.detalle_ventas_stands &&
+                    Array.isArray(detalle.stand.detalle_ventas_stands)
+                ) {
+                    detalle.stand.detalle_ventas_stands.forEach((venta) => {
+                        const subTotal = parseFloat(venta.subTotal) || 0;
+                        const donacion = parseFloat(venta.donacion) || 0;
+    
+                        totalSubTotal += subTotal;
+                        totalDonaciones += donacion;
+    
+                        ventas.push({
+                            idProducto: venta.idProducto,
+                            nombreProducto: venta.producto ? venta.producto.nombreProducto : null,
+                            talla: venta.producto ? venta.producto.talla : null,
+                            precio: venta.producto ? venta.producto.precio : null,
+                            cantidadVendida: venta.cantidad,
+                            subTotal,
+                            donacion,
+                        });
+                    });
+                }
+    
+                return {
+                    nombreStand: detalle.stand ? detalle.stand.nombreStand : 'Stand desconocido',
+                    ventas,
+                };
+            });
+    
+            // Agregar totales al reporte
+            const totales = {
+                totalSubTotal: parseFloat(totalSubTotal.toFixed(2)),
+                totalDonaciones: parseFloat(totalDonaciones.toFixed(2)),
+            };
+    
+            // Enviar el reporte como respuesta
+            return res.status(200).json({ reporte: resultados, totales });
+        } catch (error) {
+            console.error('Error al obtener el reporte de voluntarios:', error);
+            return res.status(500).json({ message: 'Error al obtener el reporte de voluntarios.' });
+        }
+    }    
 };
