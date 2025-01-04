@@ -335,9 +335,10 @@ module.exports = (app) => {
 
     // * RUTAS DE VOLUNTARIOS
     router.get('/voluntarios', voluntariosController.find);
-    router.get('/voluntarios/:id', voluntariosController.findById);
+    router.get('/voluntarios/conProductos', voluntariosController.findWithAssignedProducts);
     router.get('/voluntarios/activos', voluntariosController.findActivateVol); 
     router.get('/voluntarios/inactivos', voluntariosController.findaInactivateVol);
+    router.get('/voluntarios/:id', voluntariosController.findById);
     router.post('/voluntarios/create', voluntariosController.createVol);
     router.put('/voluntarios/update/:id', voluntariosController.updateVol); 
     router.delete('/voluntarios/delete/:id', voluntariosController.deleteVol);
@@ -411,7 +412,6 @@ module.exports = (app) => {
     router.get('/voluntarios', voluntariosController.find);
     router.get('/voluntarios/activos', voluntariosController.findActivateVol); 
     router.get('/voluntarios/inactivos', voluntariosController.findaInactivateVol);
-    router.get('/voluntarios/conProductos', voluntariosController.findWithAssignedProducts);
     router.post('/voluntarios/create', voluntariosController.createVol);
     router.put('/voluntarios/update/:id', voluntariosController.updateVol); 
     router.delete('/voluntarios/delete/:id', voluntariosController.deleteVol); 
