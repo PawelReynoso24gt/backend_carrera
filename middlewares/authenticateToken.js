@@ -4,6 +4,12 @@ const { usuarios: Usuarios } = require('../models');
 const Sequelize = require('sequelize');
 
 function authenticateToken(req, res, next) {
+
+    // Excluir la ruta `/publicaciones` del middleware (esto para que se vean las fotos que trae)
+    if (req.path.startsWith('/publicaciones')) {
+        return next();
+    }
+
     const authHeader = req.headers['authorization'];
     const token = authHeader && authHeader.split(' ')[1]; // Extraer el token del encabezado Authorization
 
