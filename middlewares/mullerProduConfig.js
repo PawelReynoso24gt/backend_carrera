@@ -11,7 +11,7 @@ const ensureDirectoryExistence = (folder) => {
 
 const storage = multer.diskStorage({
   destination: (req, file, cb) => {
-      const folder = path.join(__dirname, '../productos'); // Carpeta para productos
+      const folder = path.join(__dirname, '../src/productos'); // Carpeta para productos
       if (!fs.existsSync(folder)) {
           fs.mkdirSync(folder, { recursive: true });
       }

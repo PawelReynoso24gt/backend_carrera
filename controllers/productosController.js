@@ -138,9 +138,9 @@ module.exports = {
         }
 
 
-        let fotoRuta = '/productos/sin-foto.png'; // Valor predeterminado
+        let fotoRuta = 'productos/sin-foto.png'; // Valor predeterminado
         if (req.file) {
-            fotoRuta = `/productos/${req.file.filename}`; // Guardar la ruta relativa
+            fotoRuta = `productos/${req.file.filename}`; // Guardar la ruta relativa
         }
 
 
