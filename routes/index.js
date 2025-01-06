@@ -472,9 +472,9 @@ module.exports = (app) => {
     router.delete('/inscripcion_comisiones/delete/:id', inscripcionComisionController.delete);
 
     // * RUTAS DE DETALLES DE STANDS
-    router.get('/detalle_stands', checkPermissions('Ver detalles de stands'), detalleStandsController.find); 
-    router.get('/detalle_stands/activos', checkPermissions('Ver detalles de stands'), detalleStandsController.findActive);
-    router.get('/detalle_stands/inactivos', checkPermissions('Ver detalles de stands'), detalleStandsController.findInactive); 
+    router.get('/detalle_stands', detalleStandsController.find); 
+    router.get('/detalle_stands/activos', detalleStandsController.findActive);
+    router.get('/detalle_stands/inactivos', detalleStandsController.findInactive); 
     router.get('detalle_stands/:id', detalleStandsController.findById); 
     router.post('/detalle_stands/create', detalleStandsController.create);
     router.put('/detalle_stands/update/:id', detalleStandsController.update);
