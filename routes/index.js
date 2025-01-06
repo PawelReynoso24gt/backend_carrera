@@ -2,6 +2,7 @@ const { Router } = require('express');
 const router = Router();
 const { checkPermissions } = require('../middlewares/permissionToken');
 const authenticateToken = require('../middlewares/authenticateToken');
+const upload = require('../middlewares/multerConfig'); // para las fotos
 
 // Aqui van los imports
 //RUTAS
@@ -146,6 +147,7 @@ module.exports = (app) => {
     router.get('/eventos/reporte', checkPermissions('Generar reporte eventos'), eventosController.obtenerReporteEventos);
     router.get('/eventos/activas', checkPermissions('Ver eventos'), eventosController.findActive);
     router.get('/eventos/inactivas', checkPermissions('Ver eventos'), eventosController.findInactive);
+    router.get('/eventos/activo', eventosController.findActiveById);
     router.get('/eventos/:idEvento', eventosController.findById);
     router.post('/eventos', eventosController.create);
     router.put('/eventos/:idEvento', eventosController.update);
@@ -319,6 +321,7 @@ module.exports = (app) => {
     router.get('/comisiones/porevento', comisionesController.findByEvento);
     router.get('/comisiones/activos', checkPermissions('Ver comisiones'), comisionesController.findActive); 
     router.get('/comisiones/inactivos', checkPermissions('Ver comisiones'), comisionesController.findInactive);
+    router.get('/comisiones/active', comisionesController.findActiveComiById);
     router.get('/comisiones/:id', comisionesController.findById);
     router.post('/comisiones/create', comisionesController.create);
     router.put('/comisiones/update/:id', comisionesController.update); 
@@ -350,9 +353,10 @@ module.exports = (app) => {
 
     // * RUTAS DE VOLUNTARIOS
     router.get('/voluntarios', checkPermissions('Ver voluntarios'), voluntariosController.find);
-    router.get('/voluntarios/:id', voluntariosController.findById);
+    router.get('/voluntarios/conProductos', voluntariosController.findWithAssignedProducts);
     router.get('/voluntarios/activos', checkPermissions('Ver voluntarios'), voluntariosController.findActivateVol); 
     router.get('/voluntarios/inactivos', checkPermissions('Ver voluntarios'), voluntariosController.findaInactivateVol);
+    router.get('/voluntarios/:id', voluntariosController.findById);
     router.post('/voluntarios/create', voluntariosController.createVol);
     router.put('/voluntarios/update/:id', voluntariosController.updateVol); 
     router.delete('/voluntarios/delete/:id', voluntariosController.deleteVol);
@@ -368,11 +372,15 @@ module.exports = (app) => {
 
     // * RUTAS DE PUBLICACIONES
     router.get('/publicaciones', checkPermissions('Ver publicaciones'), publicacionesController.find);
+    router.get('/publicaciones/completas', publicacionesController.findCompleto);
     router.get('/publicaciones/activos', checkPermissions('Ver publicaciones'), publicacionesController.findActive); 
     router.get('/publicaciones/inactivos', checkPermissions('Ver publicaciones'), publicacionesController.findInactive);
+    router.get('/publicaciones/detalles/:id', publicacionesController.getPublicacionDetalles);
     router.get('/publicaciones/:id', publicacionesController.findById);
     router.post('/publicaciones/create', publicacionesController.create);
-    router.put('/publicaciones/update/:id', publicacionesController.update); 
+    router.post('/publicaciones/completa/create', upload.array('fotos', 30), publicacionesController.createCompleto);
+    router.put('/publicaciones/update/:id', publicacionesController.update);
+    router.put('/publicaciones/completa/update/:id', upload.array('fotos', 30), publicacionesController.updateCompleto); 
     router.delete('/publicaciones/delete/:id', publicacionesController.delete);
 
     // * RUTAS DE PUBLICACIONES DE EVENTOS
@@ -414,7 +422,6 @@ module.exports = (app) => {
     router.get('/voluntarios', voluntariosController.find);
     router.get('/voluntarios/activos', voluntariosController.findActivateVol); 
     router.get('/voluntarios/inactivos', voluntariosController.findaInactivateVol);
-    router.get('/voluntarios/conProductos', voluntariosController.findWithAssignedProducts);
     router.post('/voluntarios/create', voluntariosController.createVol);
     router.put('/voluntarios/update/:id', voluntariosController.updateVol); 
     router.delete('/voluntarios/delete/:id', voluntariosController.deleteVol); 
@@ -602,8 +609,8 @@ module.exports = (app) => {
 
     // * RUTAS RECAUDACION EVENTOS
     router.get('/recaudacion_evento', checkPermissions('Ver recaudación de eventos'), recaudacion_eventosController.find);
-    router.get('/recaudacion_evento/activos', recaudacion_eventosController.findActive);
-    router.get('/recaudacion_evento/inactivos', recaudacion_eventosController.findInactive);
+    router.get('/recaudacion_evento/activas', recaudacion_eventosController.findActive);
+    router.get('/recaudacion_evento/inactivas', recaudacion_eventosController.findInactive);
     router.get('/recaudacion_evento/:id',  recaudacion_eventosController.findById);
     router.post('/recaudacion_evento/create', checkPermissions('Crear recaudación de evento'), recaudacion_eventosController.createRecaudacionEvento);
     router.put('/recaudacion_evento/update/:id', checkPermissions('Editar recaudación de evento'), recaudacion_eventosController.updateRecaudacionEvento);

@@ -24,8 +24,23 @@ function validateUserData(datos, esCreacion = false) {
     }
 
     if (esCreacion || datos.contrasenia !== undefined) {
-        if (!datos.contrasenia || datos.contrasenia.length < 8) {
+        if (!datos.contrasenia) {
+            return 'La contraseña no puede estar vacía';
+        }
+        if (datos.contrasenia.length < 8) {
             return 'La contraseña debe tener al menos 8 caracteres';
+        }
+        if (!/[A-Z]/.test(datos.contrasenia)) {
+            return 'La contraseña debe contener al menos una letra mayúscula';
+        }
+        if (!/[a-z]/.test(datos.contrasenia)) {
+            return 'La contraseña debe contener al menos una letra minúscula';
+        }
+        if (!/\d/.test(datos.contrasenia)) {
+            return 'La contraseña debe contener al menos un número';
+        }
+        if (!/[@$!%*?&#]/.test(datos.contrasenia)) {
+            return 'La contraseña debe contener al menos un carácter especial (@, $, !, %, *, ?, &, #)';
         }
     }
 
