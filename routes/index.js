@@ -2,6 +2,7 @@ const { Router } = require('express');
 const router = Router();
 const authenticateToken = require('../middlewares/authenticateToken');
 const upload = require('../middlewares/multerConfig'); // para las fotos
+const uploadP = require('../middlewares/mullerProduConfig');
 
 // Aqui van los imports
 //RUTAS
@@ -227,9 +228,9 @@ module.exports = (app) => {
     router.get('/productos', productosController.find); 
     router.get('/productos/activos', productosController.findActive);
     router.get('/productos/inactivos', productosController.findInactive);
-    router.get('/productos/:id', productosController.findById); 
-    router.post('/productos', productosController.create); 
-    router.put('/productos/:id', productosController.update);
+    //router.get('/productos/:id', productosController.findById); 
+    router.post('/productos', uploadP.single('foto'), productosController.create); 
+    router.put('/productos/:id',  uploadP.single('foto'), productosController.update);
     router.delete('/productos/:id', productosController.delete); 
 
     // * RIFAS

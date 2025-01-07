@@ -10,7 +10,7 @@ module.exports = (sequelize, DataTypes) => {
             });
 
             // Relación con detalleStands
-            this.hasMany(models.detalle_stands, {
+            productos.hasMany(models.detalle_stands, {
                 foreignKey: 'idProducto',
                 as: 'detallesStands'
             });
