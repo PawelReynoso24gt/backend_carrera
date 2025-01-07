@@ -224,6 +224,24 @@ module.exports = {
             camposActualizados.estado = datos.estado;
         }
 
+         // Manejar actualización de la foto
+        let nuevaFotoRuta;
+        if (req.file) {
+            nuevaFotoRuta = `productos/${req.file.filename}`;
+
+            // Buscar el producto actual para eliminar la foto anterior si existe
+            const productoActual = await PRODUCTOS.findByPk(id);
+            if (productoActual && productoActual.foto && productoActual.foto !== 'productos/sin-foto.png') {
+                const fotoPath = path.join(__dirname, '../src', productoActual.foto);
+                if (fs.existsSync(fotoPath)) {
+                    fs.unlinkSync(fotoPath); // Eliminar la foto anterior
+                }
+            }
+
+            // Actualizar la ruta de la foto
+            camposActualizados.foto = nuevaFotoRuta;
+        }
+            
         try {
             const [rowsUpdated] = await PRODUCTOS.update(
                 camposActualizados,
