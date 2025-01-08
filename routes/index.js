@@ -68,6 +68,7 @@ const tipoNotificacionesController = require('../controllers/tipoNotificacionCon
 const tipo_situacionesController = require('../controllers/tipo_situacionesController');
 const situacionesController = require('../controllers/situacionesController');
 const reportesController = require('../controllers/reportesController');
+const uploadPerson = require('../middlewares/uploadPerson');
 
 module.exports = (app) => {
 
@@ -289,7 +290,7 @@ module.exports = (app) => {
     router.get('/personas/activos', personasController.findActive);
     router.get('/personas/inactivos', personasController.findInactive);
     router.get('/personas/:id', personasController.findById);
-    
+    router.put('/personasFoto/:id/foto', uploadPerson.single('foto'), personasController.updateFoto);
     router.put('/personas/update/:id', personasController.update);
     router.delete('/personas/delete/:id', personasController.delete);
 

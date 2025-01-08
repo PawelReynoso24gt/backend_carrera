@@ -4,7 +4,8 @@ const db = require("../models");
 const PERSONAS = db.personas;
 const MUNICIPIOS = db.municipios;
 const ASPIRANTES = db.aspirantes;
-
+const uploadPerson = require('../middlewares/uploadPerson');
+const path = require('path');
 
 // Métodos CRUD
 module.exports = {
@@ -100,19 +101,19 @@ module.exports = {
     // Crear una nueva persona
     async create(req, res) {
         const datos = req.body;
-    
+
         // Verificar campos requeridos
         if (!datos.nombre || !datos.fechaNacimiento || !datos.telefono || !datos.domicilio || !datos.CUI || !datos.correo || !datos.estado || !datos.idMunicipio) {
             return res.status(400).json({ message: 'Faltan campos requeridos.' });
         }
-    
+
         // Expresiones regulares para validaciones
         const regexNombre = /^[A-Za-záéíóúÁÉÍÓÚÑñ\s]+$/; // Solo letras y espacios
         const regexTelefono = /^\d{8}$/; // 8 dígitos
-        const regexDomicilio = /^[A-Za-záéíóúÁÉÍÓÚÑñ0-9\s\.\-]+$/; // Letras, dígitos, espacios, puntos y guiones
+        const regexDomicilio = /^[A-Za-záéíóúÁÉÍÓÚÑñ0-9\s\.\-,]+$/; // Letras, dígitos, espacios, puntos, comas y guiones
         const regexCUI = /^\d{13}$/; // 13 dígitos
         const regexCorreo = /^[^\s@]+@[^\s@]+\.[^\s@]+$/; // Formato de correo electrónico
-    
+
         // Validaciones
         if (!regexNombre.test(datos.nombre)) {
             return res.status(400).json({ message: 'El nombre solo puede contener letras y espacios.' });
@@ -129,8 +130,8 @@ module.exports = {
         if (!regexCorreo.test(datos.correo)) {
             return res.status(400).json({ message: 'El correo electrónico no es válido.' });
         }
-    
-        const nuevaPersona = { 
+
+        const nuevaPersona = {
             nombre: datos.nombre,
             fechaNacimiento: datos.fechaNacimiento,
             telefono: datos.telefono,
@@ -141,11 +142,11 @@ module.exports = {
             estado: datos.estado !== undefined ? datos.estado : 1,
             idMunicipio: datos.idMunicipio
         };
-    
+
         try {
             // Crear registro en la tabla personas
             const persona = await PERSONAS.create(nuevaPersona);
-    
+
             // Crear registro en la tabla aspirantes
             const nuevoAspirante = {
                 idPersona: persona.idPersona, // Usamos el ID generado de la persona
@@ -153,7 +154,7 @@ module.exports = {
                 estado: 1, // Estado por defecto
             };
             const aspirante = await ASPIRANTES.create(nuevoAspirante);
-    
+
             return res.status(201).json({
                 message: 'Persona y aspirante creados correctamente.',
                 persona,
@@ -164,7 +165,7 @@ module.exports = {
             return res.status(500).json({ error: 'Error al insertar la persona o el aspirante' });
         }
     },
-    
+
 
     // Actualizar una persona existente
     async update(req, res) {
@@ -176,7 +177,7 @@ module.exports = {
         // Expresiones regulares para validaciones
         const regexNombre = /^[A-Za-záéíóúÁÉÍÓÚÑñ\s]+$/; // Solo letras y espacios
         const regexTelefono = /^\d{8}$/; // 8 dígitos
-        const regexDomicilio = /^[A-Za-záéíóúÁÉÍÓÚÑñ0-9\s\.\-]+$/; // Letras, dígitos, espacios, puntos y guiones
+        const regexDomicilio = /^[A-Za-záéíóúÁÉÍÓÚÑñ0-9\s\.\-,]+$/; // Letras, dígitos, espacios, puntos y guiones
         const regexCUI = /^\d{13}$/; // 13 dígitos
         const regexCorreo = /^[^\s@]+@[^\s@]+\.[^\s@]+$/; // Formato de correo electrónico
 
@@ -211,7 +212,7 @@ module.exports = {
             const [rowsUpdated] = await PERSONAS.update(
                 camposActualizados,
                 {
-                    where: { idPersona: id } 
+                    where: { idPersona: id }
                 }
             );
             if (rowsUpdated === 0) {
@@ -222,19 +223,44 @@ module.exports = {
             console.error(`Error al actualizar la persona con ID ${id}:`, error);
             return res.status(500).json({ error: 'Error al actualizar la persona' });
         }
-    },  
+    },
+
+    // Actualizar solo la foto de una persona
+    async updateFoto(req, res) {
+        const id = req.params.id;
+
+        try {
+            const persona = await PERSONAS.findByPk(id);
+            if (!persona) {
+                return res.status(404).json({ message: 'Persona no encontrada' });
+            }
+
+            const foto = req.file ? req.file.filename : null;
+            if (foto) {
+                const fotoPath = path.join('src/personas', foto); // Ruta relativa de la foto
+                persona.foto = fotoPath;
+                await persona.save();
+                return res.status(200).json({ message: 'Foto actualizada correctamente', persona });
+            } else {
+                return res.status(400).json({ message: 'No se proporcionó una foto válida.' });
+            }
+        } catch (error) {
+            console.error(`Error al actualizar la foto de la persona con ID ${id}:`, error);
+            return res.status(500).json({ error: 'Error al actualizar la foto' });
+        }
+    },
 
     // Eliminar una persona
     async delete(req, res) {
-        const id = req.params.id; 
-    
+        const id = req.params.id;
+
         try {
             const persona = await PERSONAS.findByPk(id);
-    
+
             if (!persona) {
                 return res.status(404).json({ error: 'Persona no encontrada' });
             }
-    
+
             await persona.destroy();
             return res.status(200).json({ message: 'Persona eliminada correctamente' });
         } catch (error) {
