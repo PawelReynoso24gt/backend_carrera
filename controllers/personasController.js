@@ -235,15 +235,14 @@ module.exports = {
                 return res.status(404).json({ message: 'Persona no encontrada' });
             }
 
-            const foto = req.file ? req.file.filename : null;
-            if (foto) {
-                const fotoPath = path.join('src/personas', foto); // Ruta relativa de la foto
-                persona.foto = fotoPath;
-                await persona.save();
-                return res.status(200).json({ message: 'Foto actualizada correctamente', persona });
-            } else {
-                return res.status(400).json({ message: 'No se proporcionó una foto válida.' });
+            let fotoRuta = 'personas_image/sin-foto.png'; // Valor predeterminado
+            if (req.file) {
+                fotoRuta = `personas_image/${req.file.filename}`; // Guardar la ruta relativa
             }
+
+            persona.foto = fotoRuta;
+            await persona.save();
+            return res.status(200).json({ message: 'Foto actualizada correctamente', persona });
         } catch (error) {
             console.error(`Error al actualizar la foto de la persona con ID ${id}:`, error);
             return res.status(500).json({ error: 'Error al actualizar la foto' });

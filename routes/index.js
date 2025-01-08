@@ -1,8 +1,11 @@
 const { Router } = require('express');
+const express = require('express');
+const path = require('path');
 const router = Router();
 const authenticateToken = require('../middlewares/authenticateToken');
 const upload = require('../middlewares/multerConfig'); // para las fotos
 const uploadP = require('../middlewares/mullerProduConfig');
+const uploadPerson = require('../middlewares/uploadPerson');
 
 // Aqui van los imports
 //RUTAS
@@ -68,7 +71,6 @@ const tipoNotificacionesController = require('../controllers/tipoNotificacionCon
 const tipo_situacionesController = require('../controllers/tipo_situacionesController');
 const situacionesController = require('../controllers/situacionesController');
 const reportesController = require('../controllers/reportesController');
-const uploadPerson = require('../middlewares/uploadPerson');
 
 module.exports = (app) => {
 
@@ -696,6 +698,9 @@ module.exports = (app) => {
     // * RUTAS DE REPORTES
     router.post('/reportesAspirantes', aspirantesController.reporteAspirantes);
     router.post("/reportesRifas", reportesController.reporteRifas);
+
+    // Ruta para servir fotos de personas
+    app.use('/personas_image', express.static(path.join(__dirname, 'src/personas')));
 
     app.use('/', router);
 
