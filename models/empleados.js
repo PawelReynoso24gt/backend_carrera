@@ -28,12 +28,12 @@ module.exports = (sequelize, DataTypes) => {
         primaryKey: true
     },
     fechaRegistro: {
-        type: DataTypes.DATE,
+        type: DataTypes.STRING,
         allowNull: false
     },
     fechaSalida: {
-        type: DataTypes.DATE,
-        allowNull: false
+        type: DataTypes.STRING,
+        allowNull: true
     },
     estado: {
         type: DataTypes.INTEGER,
