@@ -82,7 +82,7 @@ module.exports = (app) => {
     router.post('/usuarios/login', usuariosController.login); // Ruta para iniciar sesión, no requiere autenticación
 
         // * QR (lo puse aqui porque no me dejaba usarlo a pesar de tener el token)
-        router.get('/generateQR', checkPermissions('Generar QR'), voluntariosController.generateQR);
+        router.get('/generateQR', voluntariosController.generateQR);
 
       // * RUTAS DE MUNICIPIOS Y DEPARTAMENTOS PARA REGISTRO ASPIRANTES
       router.get('/municipios', municipiosController.find);
