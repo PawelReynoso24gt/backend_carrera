@@ -14,11 +14,13 @@ function validarDatosFotoSede(datos) {
         }
     }
     if (datos.idSede !== undefined) {
+        datos.idSede = Number(datos.idSede); // Convertir idSede a número
         if (isNaN(datos.idSede)) {
             return { error: 'El campo idSede debe ser un número válido.' };
         }
     }
     if (datos.estado !== undefined) {
+        datos.estado = Number(datos.estado); // Convertir estado a número
         if (datos.estado !== 0 && datos.estado !== 1) {
             return { error: 'El campo estado debe ser 0 o 1.' };
         }
@@ -86,6 +88,7 @@ module.exports = {
     // * Crear foto de sede
     async create(req, res) {
         const datos = req.body;
+        console.log('Datos recibidos:', datos); // Agregar este log
 
         const error = validarDatosFotoSede(datos);
         if (error) {
