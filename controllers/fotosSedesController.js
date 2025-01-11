@@ -3,6 +3,7 @@
 const Sequelize = require('sequelize');
 const db = require('../models');
 const FotosSedes = db.fotos_sedes;
+const path = require('path');
 
 // Función para validar los datos de la foto de la sede
 function validarDatosFotoSede(datos) {
@@ -91,8 +92,13 @@ module.exports = {
             return res.status(400).json(error);
         }
 
+        let fotoRuta = 'fotos_sedes_image/sin-foto.png'; // Valor predeterminado
+        if (req.file) {
+            fotoRuta = `fotos_sedes_image/${req.file.filename}`; // Guardar la ruta relativa
+        }
+
         const datos_ingreso = {
-            foto: datos.foto,
+            foto: fotoRuta,
             estado: 1,
             idSede: datos.idSede
         };
@@ -118,7 +124,9 @@ module.exports = {
 
         const camposActualizados = {};
 
-        if (datos.foto !== undefined) camposActualizados.foto = datos.foto;
+        if (req.file) {
+            camposActualizados.foto = `fotos_sedes_image/${req.file.filename}`; // Guardar la ruta relativa
+        }
         if (datos.estado !== undefined) camposActualizados.estado = datos.estado;
         if (datos.idSede !== undefined) camposActualizados.idSede = datos.idSede;
 

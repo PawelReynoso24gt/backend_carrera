@@ -6,6 +6,7 @@ const authenticateToken = require('../middlewares/authenticateToken');
 const upload = require('../middlewares/multerConfig'); // para las fotos
 const uploadP = require('../middlewares/mullerProduConfig');
 const uploadPerson = require('../middlewares/uploadPerson');
+const uploadLocation = require('../middlewares/uploadLocation');
 
 // Aqui van los imports
 //RUTAS
@@ -283,8 +284,8 @@ module.exports = (app) => {
     router.get('/fotos_sedes/activos', fotosSedesController.find);
     router.get('/fotos_sedes', fotosSedesController.find_all);
     router.get('/fotos_sedes/:id', fotosSedesController.findById);
-    router.post('/fotos_sedes', fotosSedesController.create);
-    router.put('/fotos_sedes/:id', fotosSedesController.update);
+    router.post('/fotos_sedes', uploadLocation.single('foto'), fotosSedesController.create);
+    router.put('/fotos_sedes/:id', uploadLocation.single('foto'), fotosSedesController.update);
     router.delete('/fotos_sedes/:id', fotosSedesController.delete);
 
     // * RUTAS PARA PERSONAS
@@ -701,6 +702,7 @@ module.exports = (app) => {
 
     // Ruta para servir fotos de personas
     app.use('/personas_image', express.static(path.join(__dirname, 'src/personas')));
+    app.use('/fotos_sedes_image', express.static(path.join(__dirname, 'src/fotos_sedes')));
 
     app.use('/', router);
 
