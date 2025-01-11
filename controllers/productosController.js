@@ -3,6 +3,8 @@ const { where } = require("sequelize");
 const db = require("../models");
 const PRODUCTOS = db.productos;
 const CATEGORIAS = db.categorias;
+const path = require('path');
+const fs = require('fs');
 
 // Métodos CRUD
 module.exports = {
@@ -61,7 +63,7 @@ module.exports = {
                     },
                     {
                         model: db.detalle_stands,
-                        as: 'detallesStands',
+                        as: "detallesStands",
                         attributes: ["idDetalleStands", "cantidad", "estado", "idStand"],
                         include: {
                             model: db.stands,
@@ -109,7 +111,7 @@ module.exports = {
         }
 
         // Validar precio
-        if (typeof datos.precio !== 'number' || datos.precio < 0) {
+        if (isNaN(datos.precio)|| datos.precio < 0) {
             return res.status(400).json({ message: 'El precio debe ser un número positivo.' });
         }
 
@@ -120,12 +122,12 @@ module.exports = {
         }
 
         // Validar cantidad mínima
-        if (typeof datos.cantidadMinima !== 'number' || datos.cantidadMinima < 0) {
+        if (isNaN(datos.cantidadMinima) || datos.cantidadMinima < 0) {
             return res.status(400).json({ message: 'La cantidad mínima debe ser un número no negativo.' });
         }
 
         // Validar cantidad máxima
-        if (typeof datos.cantidadMaxima !== 'number' || datos.cantidadMaxima < 0) {
+        if (isNaN(datos.cantidadMaxima) || datos.cantidadMaxima < 0) {
             return res.status(400).json({ message: 'La cantidad máxima debe ser un número no negativo.' });
         }
 
@@ -134,6 +136,13 @@ module.exports = {
         if (!categoria) {
             return res.status(400).json({ message: 'La categoría especificada no existe.' });
         }
+
+
+        let fotoRuta = 'productos/sin-foto.png'; // Valor predeterminado
+        if (req.file) {
+            fotoRuta = `productos/${req.file.filename}`; // Guardar la ruta relativa
+        }
+
 
         // Crear el nuevo producto
         const nuevoProducto = { 
@@ -144,6 +153,7 @@ module.exports = {
             cantidadMinima: datos.cantidadMinima,
             cantidadMaxima: datos.cantidadMaxima,
             idCategoria: datos.idCategoria,
+            foto: fotoRuta,
             estado: datos.estado !== undefined ? datos.estado : 1
         };
 
@@ -158,7 +168,14 @@ module.exports = {
 
     // Actualizar un producto existente
     async update(req, res) {
-        const datos = req.body;
+        const datos = {
+            ...req.body,
+            precio: parseFloat(req.body.precio),
+            cantidadMinima: parseInt(req.body.cantidadMinima, 10),
+            cantidadMaxima: parseInt(req.body.cantidadMaxima, 10),
+            idCategoria: parseInt(req.body.idCategoria, 10),
+            estado: parseInt(req.body.estado, 10),
+        };
         const id = req.params.id;
 
         const camposActualizados = {};
@@ -214,6 +231,24 @@ module.exports = {
             camposActualizados.estado = datos.estado;
         }
 
+         // Manejar actualización de la foto
+        let nuevaFotoRuta;
+        if (req.file) {
+            nuevaFotoRuta = `productos/${req.file.filename}`;
+
+            // Buscar el producto actual para eliminar la foto anterior si existe
+            const productoActual = await PRODUCTOS.findByPk(id);
+            if (productoActual && productoActual.foto && productoActual.foto !== 'productos/sin-foto.png') {
+                const fotoPath = path.join(__dirname, '../src', productoActual.foto);
+                if (fs.existsSync(fotoPath)) {
+                    fs.unlinkSync(fotoPath); // Eliminar la foto anterior
+                }
+            }
+
+            // Actualizar la ruta de la foto
+            camposActualizados.foto = nuevaFotoRuta;
+        }
+            
         try {
             const [rowsUpdated] = await PRODUCTOS.update(
                 camposActualizados,

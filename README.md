@@ -38,7 +38,7 @@ npx jest
 
 # DESARROLLADORES
 
-- **Angely Esmeralda Thomas Cortéz** - 202108048
+- **Angely Esmeralda Thomas Cortéz** - 202108047
 - **Pablo Daniel Vásquez Monzón** - 202108025
 - **Alejandra González Monterrosa** - 20108048 
 - **Pawel Alessandro Reynoso Marquez** - 202108006

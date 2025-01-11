@@ -10,6 +10,14 @@ function authenticateToken(req, res, next) {
         return next();
     }
 
+    if (req.path.startsWith('/productos')) {
+        return next();
+    }
+
+    if (req.path.startsWith('/personas_image')) {
+        return next();
+    }
+
     const authHeader = req.headers['authorization'];
     const token = authHeader && authHeader.split(' ')[1]; // Extraer el token del encabezado Authorization
 

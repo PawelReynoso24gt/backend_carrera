@@ -40,6 +40,8 @@ require("./routes")(app);
 
  // Middleware para servir imágenes de publicaciones
 app.use('/publicaciones', express.static(path.join(__dirname, 'src/publicaciones')));
+app.use('/productos', express.static(path.join(__dirname, 'src/productos')));
+app.use('/personas_image', express.static(path.join(__dirname, 'src/personas')));
 
 app.get('*', (req, res) => res.status(200).send({
      message: 'Index.',

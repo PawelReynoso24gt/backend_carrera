@@ -1,8 +1,12 @@
 const { Router } = require('express');
+const express = require('express');
+const path = require('path');
 const router = Router();
 const { checkPermissions } = require('../middlewares/permissionToken');
 const authenticateToken = require('../middlewares/authenticateToken');
 const upload = require('../middlewares/multerConfig'); // para las fotos
+const uploadP = require('../middlewares/mullerProduConfig');
+const uploadPerson = require('../middlewares/uploadPerson');
 
 // Aqui van los imports
 //RUTAS
@@ -88,7 +92,7 @@ module.exports = (app) => {
       router.post('/personas/create', personasController.create);
 
     // ! Todas las rutas a continuación requieren autenticación
-    // router.use(authenticateToken); // Middleware para proteger las rutas con autenticación
+     router.use(authenticateToken); // Middleware para proteger las rutas con autenticación
 
     // * USUARIOS
     router.get('/usuarios/activos', checkPermissions('Ver usuarios'), usuariosController.find);
@@ -237,9 +241,9 @@ module.exports = (app) => {
     router.get('/productos', checkPermissions('Ver productos'), productosController.find); 
     router.get('/productos/activos', checkPermissions('Ver productos'), productosController.findActive);
     router.get('/productos/inactivos', checkPermissions('Ver productos'), productosController.findInactive);
-    router.get('/productos/:id', productosController.findById); 
-    router.post('/productos', productosController.create); 
-    router.put('/productos/:id', productosController.update);
+    //router.get('/productos/:id', productosController.findById); 
+    router.post('/productos', uploadP.single('foto'), productosController.create); 
+    router.put('/productos/:id',  uploadP.single('foto'), productosController.update);
     router.delete('/productos/:id', productosController.delete); 
 
     // * RIFAS
@@ -306,6 +310,7 @@ module.exports = (app) => {
     router.get('/personas/inactivos', checkPermissions('Ver personas inactivas'), personasController.findInactive);
     router.get('/personas/:id', personasController.findById);
     router.post('/personas/create', personasController.create);
+    router.put('/personasFoto/:id/foto', uploadPerson.single('foto'), personasController.updateFoto);
     router.put('/personas/update/:id', personasController.update);
     router.delete('/personas/delete/:id', personasController.delete);
 
@@ -721,6 +726,9 @@ module.exports = (app) => {
     router.get('/trasladosCompletos/:id', trasladosCompletosController.getDetalleTrasladoById);
     router.post('/trasladosCompletos', trasladosCompletosController.createTrasladoConDetalle);
     router.put('/trasladosCompletos/:id', trasladosCompletosController.updateTrasladoConDetalle);
+
+    // Ruta para servir fotos de personas
+    app.use('/personas_image', express.static(path.join(__dirname, 'src/personas')));
 
     app.use('/', router);
 
