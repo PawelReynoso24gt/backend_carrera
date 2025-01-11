@@ -70,6 +70,7 @@ const situacionesController = require('../controllers/situacionesController');
 const reportesController = require('../controllers/reportesController');
 const obtenerPermisosController = require('../controllers/obtenerPermisosController');
 const voluntarioDelMesController = require('../controllers/voluntarioDelMes');
+const trasladosCompletosController = require('../controllers/TrasladosCompletosController');
 
 module.exports = (app) => {
 
@@ -87,7 +88,7 @@ module.exports = (app) => {
       router.post('/personas/create', personasController.create);
 
     // ! Todas las rutas a continuación requieren autenticación
-    router.use(authenticateToken); // Middleware para proteger las rutas con autenticación
+    // router.use(authenticateToken); // Middleware para proteger las rutas con autenticación
 
     // * USUARIOS
     router.get('/usuarios/activos', checkPermissions('Ver usuarios'), usuariosController.find);
@@ -209,8 +210,8 @@ module.exports = (app) => {
     router.get('/categorias/inactivas', checkPermissions('Ver categorias'), categoriasController.findInactive);
     router.get('/categorias/:nombreCategoria', categoriasController.findCategoria);
     router.get('/categorias/:id', categoriasController.findById);
-    router.post('/categorias', checkPermissions('Crear categoria'), categoriasController.create);
-    router.put('/categorias/:id', checkPermissions('Editar categoria'), categoriasController.update);
+    router.post('/categorias', categoriasController.create);
+    router.put('/categorias/:id', categoriasController.update);
     router.delete('/categorias/:idCategoria', categoriasController.delete);
 
     // * RUTAS DE TIPO TRASLADOS
@@ -260,6 +261,7 @@ module.exports = (app) => {
     router.post('/pedidos', pedidosController.create);
     router.put('/pedidos/:id', pedidosController.update);
     router.delete('/pedidos/:idPedido', pedidosController.delete);
+
 
     // * RUTAS DE STAND
     router.get('/stand', checkPermissions('Ver stands'), standsController.find);
@@ -372,7 +374,7 @@ module.exports = (app) => {
 
     // * RUTAS DE PUBLICACIONES
     router.get('/publicaciones', checkPermissions('Ver publicaciones'), publicacionesController.find);
-    router.get('/publicaciones/completas', publicacionesController.findCompleto);
+    router.get('/publicaciones/completas', checkPermissions('Ver publicaciones'), publicacionesController.findCompleto);
     router.get('/publicaciones/activos', checkPermissions('Ver publicaciones'), publicacionesController.findActive); 
     router.get('/publicaciones/inactivos', checkPermissions('Ver publicaciones'), publicacionesController.findInactive);
     router.get('/publicaciones/detalles/:id', publicacionesController.getPublicacionDetalles);
@@ -507,11 +509,15 @@ module.exports = (app) => {
     router.delete('/detalle_traslados/delete/:id', detalle_trasladosController.deleteDetalleTraslado);
 
     // * RUTAS DETALLE PEDIDOS
-    router.get('/detalle_pedido', checkPermissions('Ver detalles de pedidos'), detalle_pedidosController.find);
-    router.get('/detalle_pedido/:id', detalle_pedidosController.findById);
+    router.get('/detalle_pedido', detalle_pedidosController.find);
+    router.get('/detalle_pedido/:id', detalle_pedidosController.getPedidoConDetalle);
+    //router.get('/detalle_pedido/:id', detalle_pedidosController.findById);
     router.post('/detalle_pedido/create', detalle_pedidosController.createDetallePedido);
+    router.post('/pedidosCompletos', detalle_pedidosController.createPedidoConDetalle);
+    router.put('/pedidosCompletos/:id', detalle_pedidosController.updatePedidoConDetalle);
     router.put('/detalle_pedido/update/:id', detalle_pedidosController.updateDetallePedido);
     router.delete('/detalle_pedido/delete/:id', detalle_pedidosController.deleteDetallePedido);
+    
 
     // * RUTAS DETALLE PRODUCTOS
     router.get('/detalle_productos', checkPermissions('Ver detalles de productos'), detalle_productosController.find);
@@ -570,13 +576,13 @@ module.exports = (app) => {
     router.delete('/recaudaciones/:idRecaudacionRifa', recaudacionRifasController.delete);
 
     // * RUTAS DE VENTAS
-    router.get('/ventas', checkPermissions('Ver ventas'), ventasController.findAll);
-    router.get('/ventas/voluntarios', ventasController.findAllVoluntarios);
-    router.get('/ventas/stands', ventasController.findAllVentasStands);
-    router.get('/ventas/activas', checkPermissions('Ver ventas'), ventasController.findActive);
+    router.get('/ventas', ventasController.findAll);
+    router.get('/ventas/voluntarios', checkPermissions('Ver ventas voluntarios'), ventasController.findAllVoluntarios);
+    router.get('/ventas/stands', checkPermissions('Ver ventas stands'), ventasController.findAllVentasStands);
+    router.get('/ventas/activas', ventasController.findActive);
     router.get('/ventas/voluntarios/activas', ventasController.findActiveVoluntarios);
     router.get('/ventas/stands/activas', ventasController.findActiveVentasStands);
-    router.get('/ventas/inactivas', checkPermissions('Ver ventas'), ventasController.findInactive);
+    router.get('/ventas/inactivas', ventasController.findInactive);
     router.get('/ventas/voluntarios/inactivas', ventasController.findInactiveVoluntarios);
     router.get('/ventas/stands/inactivas', ventasController.findInactiveVentasStands);
     router.get('/detalle_ventas_voluntarios/ventaCompleta/:idVenta', ventasController.findByVentaId);
@@ -592,8 +598,8 @@ module.exports = (app) => {
     router.get('/detallespago', checkPermissions('Ver detalles de pago de rifas'), detallePagoRifasController.findAll);
     router.get('/detallespago/activos', checkPermissions('Ver detalles de pago de rifas'), detallePagoRifasController.findActive);
     router.get('/detallespago/inactivos', checkPermissions('Ver detalles de pago de rifas'), detallePagoRifasController.findInactive);
-    router.post('/detallespago', checkPermissions('Crear detalle de pago de rifa'), detallePagoRifasController.create);
-    router.put('/detallespago/:idDetallePagoRecaudacionRifa', checkPermissions('Editar detalle de pago de rifa'), detallePagoRifasController.update);
+    router.post('/detallespago', detallePagoRifasController.create);
+    router.put('/detallespago/:idDetallePagoRecaudacionRifa', detallePagoRifasController.update);
     router.delete('/detallespago/:idDetallePagoRecaudacionRifa', detallePagoRifasController.delete);
 
     //* RUTAS ASPIRANTES 
@@ -612,8 +618,8 @@ module.exports = (app) => {
     router.get('/recaudacion_evento/activas', recaudacion_eventosController.findActive);
     router.get('/recaudacion_evento/inactivas', recaudacion_eventosController.findInactive);
     router.get('/recaudacion_evento/:id',  recaudacion_eventosController.findById);
-    router.post('/recaudacion_evento/create', checkPermissions('Crear recaudación de evento'), recaudacion_eventosController.createRecaudacionEvento);
-    router.put('/recaudacion_evento/update/:id', checkPermissions('Editar recaudación de evento'), recaudacion_eventosController.updateRecaudacionEvento);
+    router.post('/recaudacion_evento/create', recaudacion_eventosController.createRecaudacionEvento);
+    router.put('/recaudacion_evento/update/:id', recaudacion_eventosController.updateRecaudacionEvento);
     router.delete('/recaudacion_evento/delete/:id', recaudacion_eventosController.deleteRecaudacionEvento);
 
     // * RUTAS BITACORAS
@@ -680,15 +686,15 @@ module.exports = (app) => {
     router.delete('/tipo_situaciones/delete/:id', tipo_situacionesController.delete);
 
     // * RUTAS DE SITUACIONES
-    router.get('/situaciones', checkPermissions('Ver situaciones'), situacionesController.findAll);
-    router.get('/situaciones/reporte', checkPermissions('Generar reporte situaciones'), situacionesController.findGroupedByEstadoWithDates);
-    router.get('/situaciones/reportadas', checkPermissions('Ver situaciones reportadas'), situacionesController.findReportadas);
-    router.get('/situaciones/en_revision', checkPermissions('Ver situaciones en revisión'), situacionesController.findEnRevision);
-    router.get('/situaciones/en_proceso', checkPermissions('Ver situaciones en proceso'), situacionesController.findEnProceso);
-    router.get('/situaciones/proximo_a_solucionarse', checkPermissions('Ver situaciones próximas a solucionarse'), situacionesController.findProximoASolucionarse);
-    router.get('/situaciones/en_reparacion', checkPermissions('Ver situaciones en reparación'), situacionesController.findEnReparacion);
-    router.get('/situaciones/resueltas', checkPermissions('Ver situaciones resueltas'), situacionesController.findResueltas);
-    router.get('/situaciones/sin_solucion', checkPermissions('Ver situaciones sin solución'), situacionesController.findSinSolucion);
+    router.get('/situaciones', situacionesController.findAll);
+    router.get('/situaciones/reporte', situacionesController.findGroupedByEstadoWithDates);
+    router.get('/situaciones/reportadas', checkPermissions('Ver situaciones'), situacionesController.findReportadas);
+    router.get('/situaciones/en_revision', checkPermissions('Ver situaciones'), situacionesController.findEnRevision);
+    router.get('/situaciones/en_proceso', checkPermissions('Ver situaciones'), situacionesController.findEnProceso);
+    router.get('/situaciones/proximo_a_solucionarse', checkPermissions('Ver situaciones'), situacionesController.findProximoASolucionarse);
+    router.get('/situaciones/en_reparacion', checkPermissions('Ver situaciones'), situacionesController.findEnReparacion);
+    router.get('/situaciones/resueltas', checkPermissions('Ver situaciones'), situacionesController.findResueltas);
+    router.get('/situaciones/sin_solucion', checkPermissions('Ver situaciones'), situacionesController.findSinSolucion);
     router.get('/situaciones/:id', situacionesController.findById);
     router.post('/situaciones/create', situacionesController.create);
     router.put('/situaciones/update/reporte/:id', situacionesController.updateReporte);
@@ -710,6 +716,11 @@ module.exports = (app) => {
 
     // * RUTA DE VOLUNTARIOS DE MES
     router.get('/voluntarioDelMes', voluntarioDelMesController.getVoluntarioDelMes);
+
+    // * TRASLADOS COMPLETOS 
+    router.get('/trasladosCompletos/:id', trasladosCompletosController.getDetalleTrasladoById);
+    router.post('/trasladosCompletos', trasladosCompletosController.createTrasladoConDetalle);
+    router.put('/trasladosCompletos/:id', trasladosCompletosController.updateTrasladoConDetalle);
 
     app.use('/', router);
 

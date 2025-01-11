@@ -36,7 +36,7 @@ module.exports = {
             });
 
             // Formatear la fecha antes de enviar la respuesta
-            const situacionesFormateadas = situaciones.map((situacion) => {
+            const situacionesFormateadas = currentSituaciones.map((situacion) => {
                 const situacionJSON = situacion.toJSON();
                 situacionJSON.fechaOcurrencia = format(new Date(situacion.fechaOcurrencia), 'yyyy-MM-dd HH:mm:ss');
                 return situacionJSON;
@@ -86,7 +86,25 @@ module.exports = {
     async findReportadas(req, res) {
         try {
             const situaciones = await SITUACIONES.findAll({
-                where: { estado: 'Reportado' },
+                where: { estado: 'Reportada' },
+                include: [
+                    {
+                        model: TIPO_SITUACIONES,
+                        attributes: ['idTipoSituacion', 'tipoSituacion']
+                    },
+                    {
+                        model: db.usuarios,
+                        attributes: ['idUsuario', 'usuario', 'idPersona'],
+                        as: 'usuario',
+                        include: [
+                            {
+                                model: db.personas,
+                                attributes: ['idPersona', 'nombre'],
+                                as: 'persona',
+                            },
+                        ],
+                    },]
+                
             });
             return res.status(200).json(situaciones);
         } catch (error) {
@@ -100,6 +118,23 @@ module.exports = {
         try {
             const situaciones = await SITUACIONES.findAll({
                 where: { estado: 'En Revisión' },
+                include: [
+                    {
+                        model: TIPO_SITUACIONES,
+                        attributes: ['idTipoSituacion', 'tipoSituacion']
+                    },
+                    {
+                        model: db.usuarios,
+                        attributes: ['idUsuario', 'usuario', 'idPersona'],
+                        as: 'usuario',
+                        include: [
+                            {
+                                model: db.personas,
+                                attributes: ['idPersona', 'nombre'],
+                                as: 'persona',
+                            },
+                        ],
+                    },]
             });
             return res.status(200).json(situaciones);
         } catch (error) {
@@ -113,6 +148,23 @@ module.exports = {
         try {
             const situaciones = await SITUACIONES.findAll({
                 where: { estado: 'En Proceso' },
+                include: [
+                    {
+                        model: TIPO_SITUACIONES,
+                        attributes: ['idTipoSituacion', 'tipoSituacion']
+                    },
+                    {
+                        model: db.usuarios,
+                        attributes: ['idUsuario', 'usuario', 'idPersona'],
+                        as: 'usuario',
+                        include: [
+                            {
+                                model: db.personas,
+                                attributes: ['idPersona', 'nombre'],
+                                as: 'persona',
+                            },
+                        ],
+                    },]
             });
             return res.status(200).json(situaciones);
         } catch (error) {
@@ -126,6 +178,23 @@ module.exports = {
         try {
             const situaciones = await SITUACIONES.findAll({
                 where: { estado: 'Próximo a Solucionarse' },
+                include: [
+                    {
+                        model: TIPO_SITUACIONES,
+                        attributes: ['idTipoSituacion', 'tipoSituacion']
+                    },
+                    {
+                        model: db.usuarios,
+                        attributes: ['idUsuario', 'usuario', 'idPersona'],
+                        as: 'usuario',
+                        include: [
+                            {
+                                model: db.personas,
+                                attributes: ['idPersona', 'nombre'],
+                                as: 'persona',
+                            },
+                        ],
+                    },]
             });
             return res.status(200).json(situaciones);
         } catch (error) {
@@ -139,6 +208,23 @@ module.exports = {
         try {
             const situaciones = await SITUACIONES.findAll({
                 where: { estado: 'En Reparación' },
+                include: [
+                    {
+                        model: TIPO_SITUACIONES,
+                        attributes: ['idTipoSituacion', 'tipoSituacion']
+                    },
+                    {
+                        model: db.usuarios,
+                        attributes: ['idUsuario', 'usuario', 'idPersona'],
+                        as: 'usuario',
+                        include: [
+                            {
+                                model: db.personas,
+                                attributes: ['idPersona', 'nombre'],
+                                as: 'persona',
+                            },
+                        ],
+                    },]
             });
             return res.status(200).json(situaciones);
         } catch (error) {
@@ -152,6 +238,23 @@ module.exports = {
         try {
             const situaciones = await SITUACIONES.findAll({
                 where: { estado: 'Resuelta' },
+                include: [
+                    {
+                        model: TIPO_SITUACIONES,
+                        attributes: ['idTipoSituacion', 'tipoSituacion']
+                    },
+                    {
+                        model: db.usuarios,
+                        attributes: ['idUsuario', 'usuario', 'idPersona'],
+                        as: 'usuario',
+                        include: [
+                            {
+                                model: db.personas,
+                                attributes: ['idPersona', 'nombre'],
+                                as: 'persona',
+                            },
+                        ],
+                    },]
             });
             return res.status(200).json(situaciones);
         } catch (error) {
@@ -165,6 +268,23 @@ module.exports = {
         try {
             const situaciones = await SITUACIONES.findAll({
                 where: { estado: 'Sin Solución' },
+                include: [
+                    {
+                        model: TIPO_SITUACIONES,
+                        attributes: ['idTipoSituacion', 'tipoSituacion']
+                    },
+                    {
+                        model: db.usuarios,
+                        attributes: ['idUsuario', 'usuario', 'idPersona'],
+                        as: 'usuario',
+                        include: [
+                            {
+                                model: db.personas,
+                                attributes: ['idPersona', 'nombre'],
+                                as: 'persona',
+                            },
+                        ],
+                    },]
             });
             return res.status(200).json(situaciones);
         } catch (error) {
