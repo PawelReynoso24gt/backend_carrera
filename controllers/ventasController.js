@@ -387,99 +387,6 @@ module.exports = {
             return res.status(500).json({ message: 'Error al recuperar la venta.' });
         }
     },
-
-    // * Crear una nueva venta
-    async create(req, res) {
-        const datos = req.body;
-
-        // Validar datos
-        const validationErrors = validateVentaData(datos);
-        if (validationErrors) {
-            return res.status(400).json({ errors: validationErrors });
-        }
-        try {
-            const nuevaVenta = await VENTAS.create({
-                totalVenta: datos.totalVenta || 0.0,
-                fechaVenta: new Date(),
-                estado: datos.estado !== undefined ? datos.estado : 1,
-                idTipoPublico: datos.idTipoPublico,
-            });
-
-            // Convertir fecha al formato UTC-6 para la respuesta
-            const ventaConFormato = {
-                ...nuevaVenta.toJSON(),
-                fechaVenta: format(new Date(nuevaVenta.fechaVenta), "yyyy-MM-dd HH:mm:ss", {
-                    timeZone: "America/Guatemala",
-                }),
-            };
-    
-                return res.status(201).json({
-                message: "Venta creada con éxito",
-                createdVenta: ventaConFormato,
-            });
-        } catch (error) {
-            console.error('Error al crear la venta:', error);
-            return res.status(500).json({ message: 'Error al crear la venta.' });
-        }
-    },
-
-    // * Actualizar una venta
-    async update(req, res) {
-        const { totalVenta, fechaVenta, estado, idTipoPublico } = req.body;
-        const id = req.params.id;
-    
-        const camposActualizados = {};
-    
-        // Validar y asignar campos actualizados
-        if (totalVenta !== undefined) camposActualizados.totalVenta = totalVenta;
-        if (fechaVenta !== undefined) camposActualizados.fechaVenta = fechaVenta;
-        if (estado !== undefined) camposActualizados.estado = estado;
-    
-        if (idTipoPublico !== undefined) {
-            const tipoPublicoExistente = await TIPO_PUBLICOS.findByPk(idTipoPublico);
-            if (!tipoPublicoExistente) {
-                return res.status(400).json({ message: 'El tipo de público especificado no existe.' });
-            }
-            camposActualizados.idTipoPublico = idTipoPublico;
-        }
-    
-        try {
-            // Actualizar los campos en la base de datos
-            const [rowsUpdated] = await VENTAS.update(camposActualizados, {
-                where: { idVenta: id },
-            });
-    
-            if (rowsUpdated === 0) {
-                return res.status(404).json({ message: 'Venta no encontrada.' });
-            }
-    
-            // Recuperar la venta actualizada
-            const ventaActualizada = await VENTAS.findByPk(id, {
-                include: [
-                    {
-                        model: TIPO_PUBLICOS,
-                        attributes: ['idTipoPublico', 'nombreTipo'],
-                    },
-                ],
-            });
-    
-            // Formatear la fecha para la respuesta
-            const ventaConFormato = {
-                ...ventaActualizada.toJSON(),
-                fechaVenta: format(new Date(ventaActualizada.fechaVenta), "yyyy-MM-dd HH:mm:ss", {
-                    timeZone: "America/Guatemala",
-                }),
-            };
-    
-            return res.status(200).json({
-                message: `La venta con ID: ${id} ha sido actualizada`,
-                updatedVenta: ventaConFormato,
-            });
-        } catch (error) {
-            console.error(`Error al actualizar la venta con ID ${id}:`, error);
-            return res.status(500).json({ error: 'Error al actualizar la venta.' });
-        }
-    }, 
     
     // * VENTA COMPLETA POR VOLUNTARIOS
     async createFullVenta(req, res) {
@@ -646,7 +553,7 @@ module.exports = {
                     {
                         model: db.detalle_pago_ventas_voluntarios, // Relación con pagos
                         as: 'detalle_pago_ventas_voluntarios',
-                        attributes: ['idTipoPago', 'pago', 'correlativo', 'imagenTransferencia', 'estado'],
+                        attributes: ['idDetallePagoVentaVoluntario', 'idTipoPago', 'pago', 'correlativo', 'imagenTransferencia', 'estado', 'idDetalleVentaVoluntario'],
                         include: [
                             {
                                 model: db.tipo_pagos,
@@ -746,7 +653,7 @@ module.exports = {
                     {
                         model: db.detalle_pago_ventas_stands,
                         as: 'detalle_pago_ventas_stands',
-                        attributes: ['idTipoPago', 'pago', 'correlativo', 'imagenTransferencia', 'estado'],
+                        attributes: ['idTipoPago', 'pago', 'correlativo', 'imagenTransferencia', 'estado', 'idDetalleVentaStand'],
                         include: [
                             {
                                 model: db.tipo_pagos,
@@ -1081,97 +988,124 @@ module.exports = {
                 { transaction }
             );
         }
-    },
+    }, 
     
-    // * ACTUALIZAR VENTA COMPLETA POR VOLUNTARIOS
+    // * actualizar las ventas de voluntarios 
     async updateFullVenta(req, res) {
+        const { idVenta } = req.params;
         const { venta, detalles, pagos } = req.body;
-
-        // Validar datos
-        if (!venta || !detalles || !pagos) {
+    
+        console.log("Datos recibidos para actualizar:", req.body);
+    
+        if (!idVenta || !venta || !detalles || !pagos) {
             return res.status(400).json({ message: "Faltan datos para actualizar la venta." });
         }
-
-        for (const detalle of detalles) {
-            if (!detalle.idProducto || detalle.cantidad < 0 || !detalle.subTotal) {
-                return res.status(400).json({ message: `El detalle de venta es inválido: ${JSON.stringify(detalle)}` });
-            }
-            if (!detalle.idVoluntario) {
-                return res.status(400).json({ message: `El detalle debe incluir un idVoluntario: ${JSON.stringify(detalle)}` });
-            }
-        }
-
+    
         const transaction = await db.sequelize.transaction();
-
+    
         try {
-            // Verificar si la venta existe
-            const ventaExistente = await VENTAS.findByPk(venta.idVenta, { transaction });
-            if (!ventaExistente) {
-                throw new Error(`La venta con ID ${venta.idVenta} no existe.`);
+            // Validar que el totalVenta coincida con los detalles
+            const totalCalculado = detalles.reduce((sum, detalle) => {
+                return sum + parseFloat(detalle.subTotal || 0) + parseFloat(detalle.donacion || 0);
+            }, 0);
+    
+            if (parseFloat(venta.totalVenta) !== totalCalculado) {
+                throw new Error(
+                    `El total de la venta (${venta.totalVenta}) no coincide con el total calculado (${totalCalculado}).`
+                );
             }
-
-            // Actualizar datos de la venta principal
+    
+            // Validar que los pagos coincidan con el totalVenta
+            const totalPagos = pagos.reduce((sum, pago) => sum + parseFloat(pago.monto || 0), 0);
+            if (totalPagos !== parseFloat(venta.totalVenta)) {
+                throw new Error(
+                    `La suma de los pagos (${totalPagos}) no coincide con el total de la venta (${venta.totalVenta}).`
+                );
+            }
+    
+            // Actualizar la venta principal
+            const ventaExistente = await VENTAS.findByPk(idVenta);
+            if (!ventaExistente) {
+                throw new Error(`No se encontró la venta con ID ${idVenta}.`);
+            }
+    
             await ventaExistente.update(
                 {
                     totalVenta: venta.totalVenta,
-                    estado: venta.estado || 1,
-                    idTipoPublico: venta.idTipoPublico,
+                    estado: venta.estado,
+                    idTipoPublico: venta.idTipoPublico || 2,
+                    updatedAt: new Date(),
                 },
                 { transaction }
             );
-
+    
             // Manejar los detalles de la venta
-            for (const detalle of detalles) {
-                const detalleExistente = detalle.idDetalleVentaVoluntario
-                    ? await DETALLE_VENTAS_VOLUNTARIOS.findOne({
-                        where: { idDetalleVentaVoluntario: detalle.idDetalleVentaVoluntario },
-                        transaction,
-                    })
-                    : null;
-
-                const producto = await DETALLE_PRODUCTOS_VOLUNTARIOS.findOne({
-                    where: { idProducto: detalle.idProducto },
-                    transaction,
-                });
-
-                if (!producto) {
-                    throw new Error(`El producto con ID ${detalle.idProducto} no existe.`);
+            const detallesExistentes = await DETALLE_VENTAS_VOLUNTARIOS.findAll({ where: { idVenta } });
+            const idsDetallesEnviados = detalles.map((detalle) => detalle.idDetalleVentaVoluntario);
+            const detallesEliminados = detallesExistentes.filter(
+                (detalle) => !idsDetallesEnviados.includes(detalle.idDetalleVentaVoluntario)
+            );
+    
+            // Eliminar detalles no enviados
+            for (const detalle of detallesEliminados) {
+                const producto = await DETALLE_PRODUCTOS_VOLUNTARIOS.findOne({ where: { idProducto: detalle.idProducto } });
+                if (producto) {
+                    await producto.update(
+                        { cantidad: producto.cantidad + detalle.cantidad },
+                        { transaction }
+                    );
                 }
+                await detalle.destroy({ transaction });
+            }
+    
+            // Crear o actualizar detalles enviados
+            for (const detalle of detalles) {
+                if (detalle.idDetalleVentaVoluntario) {
+                    const detalleExistente = await DETALLE_VENTAS_VOLUNTARIOS.findByPk(detalle.idDetalleVentaVoluntario);
 
-                if (detalleExistente) {
-                    // Revertir la cantidad anterior al inventario
-                    await producto.update(
-                        { cantidad: producto.cantidad + detalleExistente.cantidad },
-                        { transaction }
-                    );
+                    if (detalleExistente) {
+                        // Comparar cantidades para ajustar el inventario
+                        const cantidadDiferencia = detalle.cantidad - detalleExistente.cantidad;
 
-                    // Verificar inventario para nueva cantidad
-                    if (producto.cantidad < detalle.cantidad) {
-                        throw new Error(`El producto con ID ${detalle.idProducto} no tiene suficiente inventario.`);
+                        if (cantidadDiferencia !== 0) {
+                            // Ajustar el inventario del producto actual
+                            const producto = await DETALLE_PRODUCTOS_VOLUNTARIOS.findOne({ where: { idProducto: detalleExistente.idProducto } });
+                            if (!producto) {
+                                throw new Error(`El producto con ID ${detalleExistente.idProducto} no existe en el inventario.`);
+                            }
+
+                            // Validar si hay suficiente inventario si se necesita más
+                            if (cantidadDiferencia > 0 && producto.cantidad < cantidadDiferencia) {
+                                throw new Error(`El producto con ID ${detalle.idProducto} no tiene suficiente inventario para la actualización.`);
+                            }
+
+                            // Actualizar inventario
+                            await producto.update(
+                                { cantidad: producto.cantidad - cantidadDiferencia },
+                                { transaction }
+                            );
+                        }
+
+                        // Actualizar el detalle existente
+                        await detalleExistente.update(
+                            {
+                                idProducto: detalle.idProducto,
+                                cantidad: detalle.cantidad,
+                                subTotal: detalle.subTotal,
+                                donacion: detalle.donacion,
+                                estado: detalle.estado,
+                                idVoluntario: detalle.idVoluntario,
+                                updatedAt: new Date(),
+                            },
+                            { transaction }
+                        );
                     }
-
-                    // Actualizar inventario con la nueva cantidad
-                    await producto.update(
-                        { cantidad: producto.cantidad - detalle.cantidad },
-                        { transaction }
-                    );
-
-                    // Actualizar detalle
-                    await detalleExistente.update(
-                        {
-                            cantidad: detalle.cantidad,
-                            subTotal: detalle.subTotal,
-                            donacion: detalle.donacion || 0,
-                            estado: detalle.estado || 1,
-                        },
-                        { transaction }
-                    );
                 } else {
                     // Crear un nuevo detalle si no existe
-                    if (producto.cantidad < detalle.cantidad) {
+                    const producto = await DETALLE_PRODUCTOS_VOLUNTARIOS.findOne({ where: { idProducto: detalle.idProducto } });
+                    if (!producto || producto.cantidad < detalle.cantidad) {
                         throw new Error(`El producto con ID ${detalle.idProducto} no tiene suficiente inventario.`);
                     }
-
                     await producto.update(
                         { cantidad: producto.cantidad - detalle.cantidad },
                         { transaction }
@@ -1179,64 +1113,71 @@ module.exports = {
 
                     await DETALLE_VENTAS_VOLUNTARIOS.create(
                         {
-                            idVenta: venta.idVenta,
+                            idVenta,
                             idProducto: detalle.idProducto,
                             cantidad: detalle.cantidad,
                             subTotal: detalle.subTotal,
-                            donacion: detalle.donacion || 0,
-                            estado: detalle.estado || 1,
+                            donacion: detalle.donacion,
+                            estado: detalle.estado,
                             idVoluntario: detalle.idVoluntario,
                         },
                         { transaction }
                     );
                 }
             }
-
+    
             // Manejar los pagos
+            const pagosExistentes = await DETALLE_PAGO_VENTAS_VOLUNTARIOS.findAll({
+                where: { idDetalleVentaVoluntario: detalles.map((d) => d.idDetalleVentaVoluntario) },
+            });
+
+            // Obtener los IDs de los pagos enviados y existentes
+            const idsPagosEnviados = pagos.map((pago) => pago.idDetallePagoVentaVoluntario);
+            const pagosEliminados = pagosExistentes.filter((pago) => !idsPagosEnviados.includes(pago.idDetallePagoVentaVoluntario));
+
+            // Eliminar los pagos no enviados
+            for (const pago of pagosEliminados) {
+                await pago.destroy({ transaction });
+            }
+
+            // Crear o actualizar los pagos enviados
             for (const pago of pagos) {
-                if (!pago.idDetalleVentaVoluntario) {
-                    throw new Error(
-                        `El pago debe incluir un idDetalleVentaVoluntario válido: ${JSON.stringify(pago)}`
-                    );
-                }
-
-                const pagoExistente = pago.idPago
-                    ? await DETALLE_PAGO_VENTAS_VOLUNTARIOS.findOne({
-                        where: { idPago: pago.idPago },
-                        transaction,
-                    })
-                    : null;
-
-                if (pagoExistente) {
+                const monto = pago.monto; // Usar `monto` como alias para `pago` en el modelo
+                if (pago.idDetallePagoVentaVoluntario) {
                     // Actualizar el pago existente
-                    await pagoExistente.update(
-                        {
-                            idTipoPago: pago.idTipoPago,
-                            pago: pago.monto,
-                            correlativo: pago.correlativo || "NA",
-                            imagenTransferencia: pago.imagenTransferencia || "efectivo",
-                            estado: pago.estado || 1,
-                        },
-                        { transaction }
-                    );
+                    const pagoExistente = await DETALLE_PAGO_VENTAS_VOLUNTARIOS.findByPk(pago.idDetallePagoVentaVoluntario);
+                    if (pagoExistente) {
+                        await pagoExistente.update(
+                            {
+                                idDetalleVentaVoluntario: pago.idDetalleVentaVoluntario,
+                                idTipoPago: pago.idTipoPago,
+                                pago: monto, // Guardar el valor de `monto` como `pago`
+                                correlativo: pago.correlativo,
+                                imagenTransferencia: pago.imagenTransferencia,
+                                estado: pago.estado,
+                            },
+                            { transaction }
+                        );
+                    }
                 } else {
-                    // Crear un nuevo pago si no existe
+                    // Crear un nuevo pago
                     await DETALLE_PAGO_VENTAS_VOLUNTARIOS.create(
                         {
                             idDetalleVentaVoluntario: pago.idDetalleVentaVoluntario,
                             idTipoPago: pago.idTipoPago,
-                            pago: pago.monto,
-                            correlativo: pago.correlativo || "NA",
-                            imagenTransferencia: pago.imagenTransferencia || "efectivo",
-                            estado: pago.estado || 1,
+                            pago: monto, // Guardar el valor de `monto` como `pago`
+                            correlativo: pago.correlativo,
+                            imagenTransferencia: pago.imagenTransferencia,
+                            estado: pago.estado,
                         },
                         { transaction }
                     );
                 }
             }
-
+    
             await transaction.commit();
             return res.status(200).json({ message: "Venta actualizada con éxito." });
+    
         } catch (error) {
             await transaction.rollback();
             console.error("Error al actualizar la venta:", error);
