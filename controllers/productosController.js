@@ -168,7 +168,14 @@ module.exports = {
 
     // Actualizar un producto existente
     async update(req, res) {
-        const datos = req.body;
+        const datos = {
+            ...req.body,
+            precio: parseFloat(req.body.precio),
+            cantidadMinima: parseInt(req.body.cantidadMinima, 10),
+            cantidadMaxima: parseInt(req.body.cantidadMaxima, 10),
+            idCategoria: parseInt(req.body.idCategoria, 10),
+            estado: parseInt(req.body.estado, 10),
+        };
         const id = req.params.id;
 
         const camposActualizados = {};
@@ -289,6 +296,7 @@ module.exports = {
                     },
                     {
                         model: db.detalle_stands,
+                        as: "detallesStands",
                         attributes: ["idDetalleStands", "cantidad", "estado", "idStand"],
                         include: {
                             model: db.stands,
@@ -329,6 +337,7 @@ module.exports = {
                     },
                     {
                         model: db.detalle_stands,
+                        as: "detallesStands",
                         attributes: ["idDetalleStands", "cantidad", "estado", "idStand"],
                         include: {
                             model: db.stands,

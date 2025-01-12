@@ -231,7 +231,7 @@ module.exports = {
                         model: ROLES,
                         attributes: ['roles'],
                     },
-                    { model: PERSONAS, attributes: ['idPersona', 'nombre', 'fechaNacimiento', 'telefono', 'domicilio', 'correo', 'idMunicipio', 'createdAt'] }],
+                    { model: PERSONAS, attributes: ['idPersona', 'nombre', 'fechaNacimiento', 'telefono', 'domicilio', 'correo', 'foto', 'idMunicipio', 'createdAt'] }],
                 where: { estado: 1 }
             });
 

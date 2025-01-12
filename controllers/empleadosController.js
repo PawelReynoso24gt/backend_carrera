@@ -1,5 +1,5 @@
 'use strict';
-const { format } = require('date-fns-tz');
+const { format, utcToZonedTime } = require('date-fns-tz');
 const db = require('../models');
 const EMPLEADOS = db.empleados;
 const PERSONAS = db.personas;
@@ -100,9 +100,11 @@ module.exports = {
 
     // Crear un nuevo empleado
     async create(req, res) {
-        const { fechaRegistro, fechaSalida, idPersona } = req.body;
+        const { fechaRegistro, idPersona } = req.body;
         const estado = req.body.estado !== undefined ? req.body.estado : 1;
-        if (!fechaRegistro || !fechaSalida || !idPersona) {
+        const fechaSalida = req.body.fechaSalida || null; // Asignar null si no se envía
+
+        if (!fechaRegistro || !idPersona) {
             return res.status(400).json({ message: 'Faltan campos requeridos.' });
         }
 
@@ -117,12 +119,14 @@ module.exports = {
             // Convertir fechas al formato UTC-6 para la respuesta
             const empleadoConFormato = {
                 ...nuevoEmpleado.toJSON(),
-                fechaRegistro: format(new Date(nuevoEmpleado.fechaRegistro), "yyyy-MM-dd HH:mm:ss", {
+                fechaRegistro: format(new Date(nuevoEmpleado.fechaRegistro), "yyyy-MM-dd", {
                     timeZone: "America/Guatemala"
                 }),
-                fechaSalida: format(new Date(nuevoEmpleado.fechaSalida), "yyyy-MM-dd HH:mm:ss", {
-                    timeZone: "America/Guatemala"
-                })
+                fechaSalida: nuevoEmpleado.fechaSalida
+                    ? format(new Date(nuevoEmpleado.fechaSalida), "yyyy-MM-dd", {
+                        timeZone: "America/Guatemala"
+                    })
+                    : null // Retornar null si fechaSalida es null
             };
 
             return res.status(201).json({
@@ -168,10 +172,10 @@ module.exports = {
             // Convertir fechas al formato UTC-6 para la respuesta
             const empleadoConFormato = {
                 ...empleadoActualizado.toJSON(),
-                fechaRegistro: format(new Date(empleadoActualizado.fechaRegistro), "yyyy-MM-dd HH:mm:ss", {
+                fechaRegistro: format(new Date(empleadoActualizado.fechaRegistro), "yyyy-MM-dd", {
                     timeZone: "America/Guatemala"
                 }),
-                fechaSalida: format(new Date(empleadoActualizado.fechaSalida), "yyyy-MM-dd HH:mm:ss", {
+                fechaSalida: format(new Date(empleadoActualizado.fechaSalida), "yyyy-MM-dd", {
                     timeZone: "America/Guatemala"
                 })
             };

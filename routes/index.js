@@ -1,8 +1,11 @@
 const { Router } = require('express');
+const express = require('express');
+const path = require('path');
 const router = Router();
 const authenticateToken = require('../middlewares/authenticateToken');
 const upload = require('../middlewares/multerConfig'); // para las fotos
 const uploadP = require('../middlewares/mullerProduConfig');
+const uploadPerson = require('../middlewares/uploadPerson');
 
 // Aqui van los imports
 //RUTAS
@@ -289,7 +292,7 @@ module.exports = (app) => {
     router.get('/personas/activos', personasController.findActive);
     router.get('/personas/inactivos', personasController.findInactive);
     router.get('/personas/:id', personasController.findById);
-    
+    router.put('/personasFoto/:id/foto', uploadPerson.single('foto'), personasController.updateFoto);
     router.put('/personas/update/:id', personasController.update);
     router.delete('/personas/delete/:id', personasController.delete);
 
@@ -578,11 +581,9 @@ module.exports = (app) => {
     router.get('/detalle_ventas_voluntarios/ventaCompleta/:idVenta', ventasController.findByVentaId);
     router.get('/detalle_ventas_stands/ventaCompleta/:idVenta', ventasController.findByVentaIdStand);
     router.get('/ventas/:id', ventasController.findById);
-    router.post('/ventas/create', ventasController.create);
     router.post('/ventas/create/completa', ventasController.createFullVenta);
     router.post('/ventas/create/stands/completa', ventasController.createFullVentaStand);
-    router.put('/ventas/update/:id', ventasController.update);
-    router.put('/ventas/update/completa/:id', ventasController.updateFullVenta);
+    router.put('/ventas/update/completa/:idVenta', ventasController.updateFullVenta);
     
     //* RUTAS DETALLE PAGO RIFAS
     router.get('/detallespago', detallePagoRifasController.findAll);
@@ -697,6 +698,9 @@ module.exports = (app) => {
     // * RUTAS DE REPORTES
     router.post('/reportesAspirantes', aspirantesController.reporteAspirantes);
     router.post("/reportesRifas", reportesController.reporteRifas);
+
+    // Ruta para servir fotos de personas
+    app.use('/personas_image', express.static(path.join(__dirname, 'src/personas')));
 
     app.use('/', router);
 
