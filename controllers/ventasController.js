@@ -1099,16 +1099,18 @@ module.exports = {
                 { transaction }
             );
     
-            // Manejar los detalles de la venta
-            const detallesExistentes = await DETALLE_VENTAS_VOLUNTARIOS.findAll({ where: { idVenta } });
-            const idsDetallesEnviados = detalles.map((detalle) => detalle.idDetalleVentaVoluntario);
-            const detallesEliminados = detallesExistentes.filter(
-                (detalle) => !idsDetallesEnviados.includes(detalle.idDetalleVentaVoluntario)
-            );
+            // Manejar los detalles y pagos de la venta
+            const detallesExistentes = await DETALLE_VENTAS_VOLUNTARIOS.findAll({ where: { idVenta }, transaction });
     
-            // Eliminar detalles no enviados
-            for (const detalle of detallesEliminados) {
-                const producto = await DETALLE_PRODUCTOS_VOLUNTARIOS.findOne({ where: { idProducto: detalle.idProducto } });
+            // Eliminar todos los pagos asociados a los detalles de la venta
+            await DETALLE_PAGO_VENTAS_VOLUNTARIOS.destroy({
+                where: { idDetalleVentaVoluntario: detallesExistentes.map((d) => d.idDetalleVentaVoluntario) },
+                transaction,
+            });
+    
+            // Eliminar todos los detalles existentes
+            for (const detalle of detallesExistentes) {
+                const producto = await DETALLE_PRODUCTOS_VOLUNTARIOS.findOne({ where: { idProducto: detalle.idProducto }, transaction });
                 if (producto) {
                     await producto.update(
                         { cantidad: producto.cantidad + detalle.cantidad },
@@ -1118,121 +1120,79 @@ module.exports = {
                 await detalle.destroy({ transaction });
             }
     
-            // Crear o actualizar detalles enviados
+            // Crear nuevos detalles de venta y actualizar inventario de productos
+            const detallesVentaIds = [];
             for (const detalle of detalles) {
-                if (detalle.idDetalleVentaVoluntario) {
-                    const detalleExistente = await DETALLE_VENTAS_VOLUNTARIOS.findByPk(detalle.idDetalleVentaVoluntario);
-
-                    if (detalleExistente) {
-                        // Comparar cantidades para ajustar el inventario
-                        const cantidadDiferencia = detalle.cantidad - detalleExistente.cantidad;
-
-                        if (cantidadDiferencia !== 0) {
-                            // Ajustar el inventario del producto actual
-                            const producto = await DETALLE_PRODUCTOS_VOLUNTARIOS.findOne({ where: { idProducto: detalleExistente.idProducto } });
-                            if (!producto) {
-                                throw new Error(`El producto con ID ${detalleExistente.idProducto} no existe en el inventario.`);
-                            }
-
-                            // Validar si hay suficiente inventario si se necesita más
-                            if (cantidadDiferencia > 0 && producto.cantidad < cantidadDiferencia) {
-                                throw new Error(`El producto con ID ${detalle.idProducto} no tiene suficiente inventario para la actualización.`);
-                            }
-
-                            // Actualizar inventario
-                            await producto.update(
-                                { cantidad: producto.cantidad - cantidadDiferencia },
-                                { transaction }
-                            );
-                        }
-
-                        // Actualizar el detalle existente
-                        await detalleExistente.update(
-                            {
-                                idProducto: detalle.idProducto,
-                                cantidad: detalle.cantidad,
-                                subTotal: detalle.subTotal,
-                                donacion: detalle.donacion,
-                                estado: detalle.estado,
-                                idVoluntario: detalle.idVoluntario,
-                                updatedAt: new Date(),
-                            },
-                            { transaction }
-                        );
-                    }
-                } else {
-                    // Crear un nuevo detalle si no existe
-                    const producto = await DETALLE_PRODUCTOS_VOLUNTARIOS.findOne({ where: { idProducto: detalle.idProducto } });
-                    if (!producto || producto.cantidad < detalle.cantidad) {
-                        throw new Error(`El producto con ID ${detalle.idProducto} no tiene suficiente inventario.`);
-                    }
-                    await producto.update(
-                        { cantidad: producto.cantidad - detalle.cantidad },
-                        { transaction }
-                    );
-
-                    await DETALLE_VENTAS_VOLUNTARIOS.create(
-                        {
-                            idVenta,
-                            idProducto: detalle.idProducto,
-                            cantidad: detalle.cantidad,
-                            subTotal: detalle.subTotal,
-                            donacion: detalle.donacion,
-                            estado: detalle.estado,
-                            idVoluntario: detalle.idVoluntario,
-                        },
-                        { transaction }
+                const productoNuevo = await DETALLE_PRODUCTOS_VOLUNTARIOS.findOne({
+                    where: { idProducto: detalle.idProducto },
+                    transaction,
+                });
+    
+                if (!productoNuevo || productoNuevo.cantidad < detalle.cantidad) {
+                    throw new Error(
+                        `El producto con ID ${detalle.idProducto} no tiene suficiente inventario.`
                     );
                 }
+    
+                const nuevoDetalle = await DETALLE_VENTAS_VOLUNTARIOS.create(
+                    {
+                        idVenta,
+                        idProducto: detalle.idProducto,
+                        cantidad: detalle.cantidad,
+                        subTotal: detalle.subTotal,
+                        donacion: detalle.donacion || 0,
+                        idVoluntario: detalle.idVoluntario,
+                        estado: detalle.estado || 1,
+                    },
+                    { transaction }
+                );
+    
+                detallesVentaIds.push({
+                    idProducto: detalle.idProducto,
+                    idDetalleVentaVoluntario: nuevoDetalle.idDetalleVentaVoluntario,
+                });
+    
+                await productoNuevo.update(
+                    { cantidad: productoNuevo.cantidad - detalle.cantidad },
+                    { transaction }
+                );
             }
     
-            // Manejar los pagos
-            const pagosExistentes = await DETALLE_PAGO_VENTAS_VOLUNTARIOS.findAll({
-                where: { idDetalleVentaVoluntario: detalles.map((d) => d.idDetalleVentaVoluntario) },
-            });
-
-            // Obtener los IDs de los pagos enviados y existentes
-            const idsPagosEnviados = pagos.map((pago) => pago.idDetallePagoVentaVoluntario);
-            const pagosEliminados = pagosExistentes.filter((pago) => !idsPagosEnviados.includes(pago.idDetallePagoVentaVoluntario));
-
-            // Eliminar los pagos no enviados
-            for (const pago of pagosEliminados) {
-                await pago.destroy({ transaction });
-            }
-
-            // Crear o actualizar los pagos enviados
+            // Crear nuevos pagos asociados a los productos
             for (const pago of pagos) {
-                const monto = pago.monto; // Usar `monto` como alias para `pago` en el modelo
-                if (pago.idDetallePagoVentaVoluntario) {
-                    // Actualizar el pago existente
-                    const pagoExistente = await DETALLE_PAGO_VENTAS_VOLUNTARIOS.findByPk(pago.idDetallePagoVentaVoluntario);
-                    if (pagoExistente) {
-                        await pagoExistente.update(
-                            {
-                                idDetalleVentaVoluntario: pago.idDetalleVentaVoluntario,
-                                idTipoPago: pago.idTipoPago,
-                                pago: monto, // Guardar el valor de `monto` como `pago`
-                                correlativo: pago.correlativo,
-                                imagenTransferencia: pago.imagenTransferencia,
-                                estado: pago.estado,
-                            },
-                            { transaction }
-                        );
-                    }
-                } else {
-                    // Crear un nuevo pago
-                    await DETALLE_PAGO_VENTAS_VOLUNTARIOS.create(
-                        {
-                            idDetalleVentaVoluntario: pago.idDetalleVentaVoluntario,
-                            idTipoPago: pago.idTipoPago,
-                            pago: monto, // Guardar el valor de `monto` como `pago`
-                            correlativo: pago.correlativo,
-                            imagenTransferencia: pago.imagenTransferencia,
-                            estado: pago.estado,
-                        },
-                        { transaction }
-                    );
+                const detalleVenta = detallesVentaIds.find(
+                    (detalle) => detalle.idProducto === pago.idProducto
+                );
+    
+                if (!detalleVenta) {
+                    throw new Error(`No se encontró un detalle de venta para el producto con ID ${pago.idProducto}.`);
                 }
+    
+                let correlativo = pago.correlativo || "NA";
+                let imagenTransferencia = pago.imagenTransferencia || "efectivo";
+    
+                if ([1, 2, 4].includes(pago.idTipoPago)) {
+                    if (!pago.correlativo || !pago.imagenTransferencia) {
+                        throw new Error(`El tipo de pago ${pago.idTipoPago} requiere correlativo e imagen.`);
+                    }
+                    correlativo = pago.correlativo;
+                    imagenTransferencia = pago.imagenTransferencia;
+                } else if (pago.idTipoPago === 3) { // Efectivo
+                    correlativo = "NA";
+                    imagenTransferencia = "efectivo";
+                }
+    
+                await DETALLE_PAGO_VENTAS_VOLUNTARIOS.create(
+                    {
+                        idDetalleVentaVoluntario: detalleVenta.idDetalleVentaVoluntario,
+                        idTipoPago: pago.idTipoPago,
+                        pago: pago.monto,
+                        correlativo: correlativo,
+                        imagenTransferencia: imagenTransferencia,
+                        estado: pago.estado || 1,
+                    },
+                    { transaction }
+                );
             }
     
             await transaction.commit();
@@ -1245,33 +1205,33 @@ module.exports = {
         }
     },
 
-    // * Actualizar una venta completa para stands
+    // * update de ventas de stands
     async updateFullVentaStand(req, res) {
         const { idVenta } = req.params;
         const { venta, detalles, pagos } = req.body;
-
+    
         console.log("datos recibidos:", req.body);
-
+    
         if (!venta || !detalles || !pagos || !idVenta) {
             console.error('Datos recibidos son inválidos:', req.body);
             return res.status(400).json({ message: "Faltan datos para actualizar la venta." });
         }
-
+    
         const transaction = await db.sequelize.transaction();
-
+    
         try {
             // Validar datos básicos
             const totalPagado = pagos.reduce((sum, pago) => sum + parseFloat(pago.monto || 0), 0);
             if (totalPagado !== parseFloat(venta.totalVenta)) {
                 throw new Error(`La suma de los pagos (${totalPagado}) no coincide con el total de la venta (${venta.totalVenta}).`);
             }
-
+    
             // Actualizar la venta principal
             const ventaOriginal = await VENTAS.findByPk(idVenta, { transaction });
             if (!ventaOriginal) {
                 throw new Error(`La venta con ID ${idVenta} no existe.`);
             }
-
+    
             await ventaOriginal.update(
                 {
                     totalVenta: venta.totalVenta,
@@ -1280,203 +1240,118 @@ module.exports = {
                 },
                 { transaction }
             );
-
-            // Manejar detalles
+    
+            // Eliminar pagos existentes
+            await DETALLE_PAGO_VENTAS_STANDS.destroy({
+                where: { idDetalleVentaStand: detalles.map((d) => d.idDetalleVentaStand) },
+                transaction,
+            });
+    
+            // Eliminar detalles existentes
             const detallesActuales = await DETALLE_VENTAS_STANDS.findAll({
                 where: { idVenta },
                 transaction,
             });
-
-            const idsDetallesEnviados = detalles.map((d) => d.idDetalleVentaStand).filter(Boolean);
-            const detallesEliminar = detallesActuales.filter((d) => !idsDetallesEnviados.includes(d.idDetalleVentaStand));
-
-            // Eliminar detalles obsoletos
-            for (const detalle of detallesEliminar) {
+    
+            for (const detalle of detallesActuales) {
                 const producto = await DETALLE_STANDS.findOne({
                     where: { idProducto: detalle.idProducto, idStand: detalle.idStand },
                     transaction,
                 });
-
+    
                 if (producto) {
                     await producto.update(
                         { cantidad: producto.cantidad + detalle.cantidad },
                         { transaction }
                     );
                 }
-
+    
+                // Elimina pagos relacionados con este detalle
+                await DETALLE_PAGO_VENTAS_STANDS.destroy({
+                    where: { idDetalleVentaStand: detalle.idDetalleVentaStand },
+                    transaction,
+                });
+    
                 await detalle.destroy({ transaction });
             }
-
-            // Crear o actualizar detalles
+    
+            // Crear nuevos detalles de venta y actualizar inventario de productos
+            const detallesVentaIds = [];
+    
             for (const detalle of detalles) {
-                if (detalle.idDetalleVentaStand) {
-                    // Buscar el detalle existente
-                    const detalleExistente = await DETALLE_VENTAS_STANDS.findByPk(detalle.idDetalleVentaStand, { transaction });
-
-                    if (!detalleExistente) {
-                        throw new Error(`El detalle de venta con ID ${detalle.idDetalleVentaStand} no existe.`);
-                    }
-
-                    // Verificar si el producto o el stand cambió
-                    if (detalleExistente.idProducto !== detalle.idProducto || detalleExistente.idStand !== detalle.idStand) {
-                        // Devolver inventario del producto original
-                        const productoOriginal = await DETALLE_STANDS.findOne({
-                            where: { idProducto: detalleExistente.idProducto, idStand: detalleExistente.idStand },
-                            transaction,
-                        });
-
-                        if (productoOriginal) {
-                            await productoOriginal.update(
-                                { cantidad: productoOriginal.cantidad + detalleExistente.cantidad },
-                                { transaction }
-                            );
-                        }
-
-                        // Reducir inventario del nuevo producto
-                        const productoNuevo = await DETALLE_STANDS.findOne({
-                            where: { idProducto: detalle.idProducto, idStand: detalle.idStand },
-                            transaction,
-                        });
-
-                        if (!productoNuevo || productoNuevo.cantidad < detalle.cantidad) {
-                            throw new Error(
-                                `El producto con ID ${detalle.idProducto} no tiene suficiente inventario en el stand ${detalle.idStand}.`
-                            );
-                        }
-
-                        await productoNuevo.update(
-                            { cantidad: productoNuevo.cantidad - detalle.cantidad },
-                            { transaction }
-                        );
-
-                        // Actualizar el detalle existente con los nuevos datos
-                        await detalleExistente.update(
-                            {
-                                idProducto: detalle.idProducto,
-                                idStand: detalle.idStand,
-                                cantidad: detalle.cantidad,
-                                subTotal: detalle.subTotal,
-                                donacion: detalle.donacion || 0,
-                                idVoluntario: detalle.idVoluntario,
-                                estado: detalle.estado || 1,
-                            },
-                            { transaction }
-                        );
-                    } else {
-                        // Si el producto y el stand no cambiaron, ajustar solo la cantidad
-                        const diferenciaCantidad = detalle.cantidad - detalleExistente.cantidad;
-
-                        if (diferenciaCantidad !== 0) {
-                            const producto = await DETALLE_STANDS.findOne({
-                                where: { idProducto: detalle.idProducto, idStand: detalle.idStand },
-                                transaction,
-                            });
-
-                            if (!producto || producto.cantidad < diferenciaCantidad) {
-                                throw new Error(
-                                    `El producto con ID ${detalle.idProducto} no tiene suficiente inventario en el stand ${detalle.idStand}.`
-                                );
-                            }
-
-                            await producto.update(
-                                { cantidad: producto.cantidad - diferenciaCantidad },
-                                { transaction }
-                            );
-
-                            await detalleExistente.update(
-                                {
-                                    cantidad: detalle.cantidad,
-                                    subTotal: detalle.subTotal,
-                                    donacion: detalle.donacion || 0,
-                                    idVoluntario: detalle.idVoluntario,
-                                    estado: detalle.estado || 1,
-                                },
-                                { transaction }
-                            );
-                        }
-                    }
-                } else {
-                    // Crear un nuevo detalle
-                    const productoNuevo = await DETALLE_STANDS.findOne({
-                        where: { idProducto: detalle.idProducto, idStand: detalle.idStand },
-                        transaction,
-                    });
-
-                    if (!productoNuevo || productoNuevo.cantidad < detalle.cantidad) {
-                        throw new Error(
-                            `El producto con ID ${detalle.idProducto} no tiene suficiente inventario en el stand ${detalle.idStand}.`
-                        );
-                    }
-
-                    const nuevoDetalle = await DETALLE_VENTAS_STANDS.create(
-                        {
-                            idVenta,
-                            idProducto: detalle.idProducto,
-                            cantidad: detalle.cantidad,
-                            subTotal: detalle.subTotal,
-                            donacion: detalle.donacion || 0,
-                            idStand: detalle.idStand,
-                            idVoluntario: detalle.idVoluntario,
-                            estado: detalle.estado || 1,
-                        },
-                        { transaction }
-                    );
-
-                    detalle.idDetalleVentaStand = nuevoDetalle.idDetalleVentaStand;
-
-                    await productoNuevo.update(
-                        { cantidad: productoNuevo.cantidad - detalle.cantidad },
-                        { transaction }
+                const productoNuevo = await DETALLE_STANDS.findOne({
+                    where: { idProducto: detalle.idProducto, idStand: detalle.idStand },
+                    transaction,
+                });
+    
+                if (!productoNuevo || productoNuevo.cantidad < detalle.cantidad) {
+                    throw new Error(
+                        `El producto con ID ${detalle.idProducto} no tiene suficiente inventario en el stand ${detalle.idStand}.`
                     );
                 }
+    
+                const nuevoDetalle = await DETALLE_VENTAS_STANDS.create(
+                    {
+                        idVenta,
+                        idProducto: detalle.idProducto,
+                        cantidad: detalle.cantidad,
+                        subTotal: detalle.subTotal,
+                        donacion: detalle.donacion || 0,
+                        idStand: detalle.idStand,
+                        idVoluntario: detalle.idVoluntario,
+                        estado: detalle.estado || 1,
+                    },
+                    { transaction }
+                );
+    
+                detallesVentaIds.push({
+                    idProducto: detalle.idProducto,
+                    idDetalleVentaStand: nuevoDetalle.idDetalleVentaStand,
+                });
+    
+                await productoNuevo.update(
+                    { cantidad: productoNuevo.cantidad - detalle.cantidad },
+                    { transaction }
+                );
             }
-
-            // Manejar pagos
-            const pagosExistentes = await DETALLE_PAGO_VENTAS_STANDS.findAll({
-                where: { idDetalleVentaStand: detalles.map((d) => d.idDetalleVentaStand) },
-                transaction,
-            });
-
-            const idsPagosEnviados = pagos.map((p) => p.idDetallePagoVentaStand).filter(Boolean);
-            const pagosEliminar = pagosExistentes.filter((pago) => !idsPagosEnviados.includes(pago.idDetallePagoVentaStand));
-
-            for (const pago of pagosEliminar) {
-                await pago.destroy({ transaction });
-            }
-
+    
+            // Crear detalles de pagos
             for (const pago of pagos) {
-                if (pago.idDetallePagoVentaStand) {
-                    const pagoExistente = await DETALLE_PAGO_VENTAS_STANDS.findByPk(pago.idDetallePagoVentaStand, { transaction });
-                    if (pagoExistente) {
-                        console.log(`Actualizando pago existente: ID ${pago.idDetallePagoVentaStand}`);
-                        await pagoExistente.update(
-                            {
-                                idDetalleVentaStand: pago.idDetalleVentaStand,
-                                idTipoPago: pago.idTipoPago,
-                                pago: pago.monto,
-                                correlativo: pago.correlativo || "NA",
-                                imagenTransferencia: pago.imagenTransferencia || "efectivo",
-                                estado: pago.estado || 1,
-                            },
-                            { transaction }
-                        );
-                    }
-                } else {
-                    console.warn(`Pago con ID ${pago.idDetallePagoVentaStand} no encontrado para actualizar.`);
-                    await DETALLE_PAGO_VENTAS_STANDS.create(
-                        {
-                            idDetalleVentaStand: pago.idDetalleVentaStand,
-                            idTipoPago: pago.idTipoPago,
-                            pago: pago.monto,
-                            correlativo: pago.correlativo || "NA",
-                            imagenTransferencia: pago.imagenTransferencia || "efectivo",
-                            estado: pago.estado || 1,
-                        },
-                        { transaction }
-                    );
+                const detalleVenta = detallesVentaIds.find(
+                    (detalle) => detalle.idProducto === pago.idProducto
+                );
+    
+                if (!detalleVenta) {
+                    throw new Error(`No se encontró un detalle de venta para el producto con ID ${pago.idProducto}.`);
                 }
+    
+                let correlativo = pago.correlativo || "NA";
+                let imagenTransferencia = pago.imagenTransferencia || "efectivo";
+    
+                if ([1, 2, 4].includes(pago.idTipoPago)) {
+                    if (!pago.correlativo || !pago.imagenTransferencia) {
+                        throw new Error(`El tipo de pago ${pago.idTipoPago} requiere correlativo e imagen.`);
+                    }
+                    correlativo = pago.correlativo;
+                    imagenTransferencia = pago.imagenTransferencia;
+                } else if (pago.idTipoPago === 3) { // Efectivo
+                    correlativo = "NA";
+                    imagenTransferencia = "efectivo";
+                }
+    
+                await DETALLE_PAGO_VENTAS_STANDS.create(
+                    {
+                        idDetalleVentaStand: detalleVenta.idDetalleVentaStand,
+                        idTipoPago: pago.idTipoPago,
+                        pago: pago.monto,
+                        correlativo: correlativo,
+                        imagenTransferencia: imagenTransferencia,
+                        estado: pago.estado || 1,
+                    },
+                    { transaction }
+                );
             }
-
+    
             await transaction.commit();
             return res.status(200).json({ message: "Venta actualizada con éxito." });
         } catch (error) {
