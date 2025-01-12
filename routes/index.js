@@ -581,7 +581,9 @@ module.exports = (app) => {
     router.get('/ventas/:id', ventasController.findById);
     router.post('/ventas/create/completa', ventasController.createFullVenta);
     router.post('/ventas/create/stands/completa', ventasController.createFullVentaStand);
+    router.put('/ventas/update/:id', ventasController.update);
     router.put('/ventas/update/completa/:idVenta', ventasController.updateFullVenta);
+    router.put('/ventas/update/stands/completa/:idVenta', ventasController.updateFullVentaStand);
     
     //* RUTAS DETALLE PAGO RIFAS
     router.get('/detallespago', detallePagoRifasController.findAll);

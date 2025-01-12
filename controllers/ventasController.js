@@ -387,6 +387,64 @@ module.exports = {
             return res.status(500).json({ message: 'Error al recuperar la venta.' });
         }
     },
+
+    // * Actualizar una venta (para el estado)
+    async update(req, res) {
+        const { totalVenta, fechaVenta, estado, idTipoPublico } = req.body;
+        const id = req.params.id;
+    
+        const camposActualizados = {};
+    
+        // Validar y asignar campos actualizados
+        if (totalVenta !== undefined) camposActualizados.totalVenta = totalVenta;
+        if (fechaVenta !== undefined) camposActualizados.fechaVenta = fechaVenta;
+        if (estado !== undefined) camposActualizados.estado = estado;
+    
+        if (idTipoPublico !== undefined) {
+            const tipoPublicoExistente = await TIPO_PUBLICOS.findByPk(idTipoPublico);
+            if (!tipoPublicoExistente) {
+                return res.status(400).json({ message: 'El tipo de público especificado no existe.' });
+            }
+            camposActualizados.idTipoPublico = idTipoPublico;
+        }
+    
+        try {
+            // Actualizar los campos en la base de datos
+            const [rowsUpdated] = await VENTAS.update(camposActualizados, {
+                where: { idVenta: id },
+            });
+    
+            if (rowsUpdated === 0) {
+                return res.status(404).json({ message: 'Venta no encontrada.' });
+            }
+    
+            // Recuperar la venta actualizada
+            const ventaActualizada = await VENTAS.findByPk(id, {
+                include: [
+                    {
+                        model: TIPO_PUBLICOS,
+                        attributes: ['idTipoPublico', 'nombreTipo'],
+                    },
+                ],
+            });
+    
+            // Formatear la fecha para la respuesta
+            const ventaConFormato = {
+                ...ventaActualizada.toJSON(),
+                fechaVenta: format(new Date(ventaActualizada.fechaVenta), "yyyy-MM-dd HH:mm:ss", {
+                    timeZone: "America/Guatemala",
+                }),
+            };
+    
+            return res.status(200).json({
+                message: `La venta con ID: ${id} ha sido actualizada`,
+                updatedVenta: ventaConFormato,
+            });
+        } catch (error) {
+            console.error(`Error al actualizar la venta con ID ${id}:`, error);
+            return res.status(500).json({ error: 'Error al actualizar la venta.' });
+        }
+    },
     
     // * VENTA COMPLETA POR VOLUNTARIOS
     async createFullVenta(req, res) {
@@ -653,7 +711,7 @@ module.exports = {
                     {
                         model: db.detalle_pago_ventas_stands,
                         as: 'detalle_pago_ventas_stands',
-                        attributes: ['idTipoPago', 'pago', 'correlativo', 'imagenTransferencia', 'estado', 'idDetalleVentaStand'],
+                        attributes: ['idDetallePagoVentaStand', 'idTipoPago', 'pago', 'correlativo', 'imagenTransferencia', 'estado', 'idDetalleVentaStand'],
                         include: [
                             {
                                 model: db.tipo_pagos,
@@ -681,6 +739,8 @@ module.exports = {
     // * Crear una venta completa para stands
     async createFullVentaStand(req, res) {
         const { venta, detalles, pagos } = req.body;
+
+        console.log("Datos recibidos para actualizar:", req.body);
 
         // Validar datos generales
         if (!venta || !detalles || !pagos) {
@@ -1178,6 +1238,247 @@ module.exports = {
             await transaction.commit();
             return res.status(200).json({ message: "Venta actualizada con éxito." });
     
+        } catch (error) {
+            await transaction.rollback();
+            console.error("Error al actualizar la venta:", error);
+            return res.status(500).json({ message: "Error al actualizar la venta.", error: error.message });
+        }
+    },
+
+    // * Actualizar una venta completa para stands
+    async updateFullVentaStand(req, res) {
+        const { idVenta } = req.params;
+        const { venta, detalles, pagos } = req.body;
+
+        console.log("datos recibidos:", req.body);
+
+        if (!venta || !detalles || !pagos || !idVenta) {
+            console.error('Datos recibidos son inválidos:', req.body);
+            return res.status(400).json({ message: "Faltan datos para actualizar la venta." });
+        }
+
+        const transaction = await db.sequelize.transaction();
+
+        try {
+            // Validar datos básicos
+            const totalPagado = pagos.reduce((sum, pago) => sum + parseFloat(pago.monto || 0), 0);
+            if (totalPagado !== parseFloat(venta.totalVenta)) {
+                throw new Error(`La suma de los pagos (${totalPagado}) no coincide con el total de la venta (${venta.totalVenta}).`);
+            }
+
+            // Actualizar la venta principal
+            const ventaOriginal = await VENTAS.findByPk(idVenta, { transaction });
+            if (!ventaOriginal) {
+                throw new Error(`La venta con ID ${idVenta} no existe.`);
+            }
+
+            await ventaOriginal.update(
+                {
+                    totalVenta: venta.totalVenta,
+                    estado: venta.estado || 1,
+                    idTipoPublico: venta.idTipoPublico,
+                },
+                { transaction }
+            );
+
+            // Manejar detalles
+            const detallesActuales = await DETALLE_VENTAS_STANDS.findAll({
+                where: { idVenta },
+                transaction,
+            });
+
+            const idsDetallesEnviados = detalles.map((d) => d.idDetalleVentaStand).filter(Boolean);
+            const detallesEliminar = detallesActuales.filter((d) => !idsDetallesEnviados.includes(d.idDetalleVentaStand));
+
+            // Eliminar detalles obsoletos
+            for (const detalle of detallesEliminar) {
+                const producto = await DETALLE_STANDS.findOne({
+                    where: { idProducto: detalle.idProducto, idStand: detalle.idStand },
+                    transaction,
+                });
+
+                if (producto) {
+                    await producto.update(
+                        { cantidad: producto.cantidad + detalle.cantidad },
+                        { transaction }
+                    );
+                }
+
+                await detalle.destroy({ transaction });
+            }
+
+            // Crear o actualizar detalles
+            for (const detalle of detalles) {
+                if (detalle.idDetalleVentaStand) {
+                    // Buscar el detalle existente
+                    const detalleExistente = await DETALLE_VENTAS_STANDS.findByPk(detalle.idDetalleVentaStand, { transaction });
+
+                    if (!detalleExistente) {
+                        throw new Error(`El detalle de venta con ID ${detalle.idDetalleVentaStand} no existe.`);
+                    }
+
+                    // Verificar si el producto o el stand cambió
+                    if (detalleExistente.idProducto !== detalle.idProducto || detalleExistente.idStand !== detalle.idStand) {
+                        // Devolver inventario del producto original
+                        const productoOriginal = await DETALLE_STANDS.findOne({
+                            where: { idProducto: detalleExistente.idProducto, idStand: detalleExistente.idStand },
+                            transaction,
+                        });
+
+                        if (productoOriginal) {
+                            await productoOriginal.update(
+                                { cantidad: productoOriginal.cantidad + detalleExistente.cantidad },
+                                { transaction }
+                            );
+                        }
+
+                        // Reducir inventario del nuevo producto
+                        const productoNuevo = await DETALLE_STANDS.findOne({
+                            where: { idProducto: detalle.idProducto, idStand: detalle.idStand },
+                            transaction,
+                        });
+
+                        if (!productoNuevo || productoNuevo.cantidad < detalle.cantidad) {
+                            throw new Error(
+                                `El producto con ID ${detalle.idProducto} no tiene suficiente inventario en el stand ${detalle.idStand}.`
+                            );
+                        }
+
+                        await productoNuevo.update(
+                            { cantidad: productoNuevo.cantidad - detalle.cantidad },
+                            { transaction }
+                        );
+
+                        // Actualizar el detalle existente con los nuevos datos
+                        await detalleExistente.update(
+                            {
+                                idProducto: detalle.idProducto,
+                                idStand: detalle.idStand,
+                                cantidad: detalle.cantidad,
+                                subTotal: detalle.subTotal,
+                                donacion: detalle.donacion || 0,
+                                idVoluntario: detalle.idVoluntario,
+                                estado: detalle.estado || 1,
+                            },
+                            { transaction }
+                        );
+                    } else {
+                        // Si el producto y el stand no cambiaron, ajustar solo la cantidad
+                        const diferenciaCantidad = detalle.cantidad - detalleExistente.cantidad;
+
+                        if (diferenciaCantidad !== 0) {
+                            const producto = await DETALLE_STANDS.findOne({
+                                where: { idProducto: detalle.idProducto, idStand: detalle.idStand },
+                                transaction,
+                            });
+
+                            if (!producto || producto.cantidad < diferenciaCantidad) {
+                                throw new Error(
+                                    `El producto con ID ${detalle.idProducto} no tiene suficiente inventario en el stand ${detalle.idStand}.`
+                                );
+                            }
+
+                            await producto.update(
+                                { cantidad: producto.cantidad - diferenciaCantidad },
+                                { transaction }
+                            );
+
+                            await detalleExistente.update(
+                                {
+                                    cantidad: detalle.cantidad,
+                                    subTotal: detalle.subTotal,
+                                    donacion: detalle.donacion || 0,
+                                    idVoluntario: detalle.idVoluntario,
+                                    estado: detalle.estado || 1,
+                                },
+                                { transaction }
+                            );
+                        }
+                    }
+                } else {
+                    // Crear un nuevo detalle
+                    const productoNuevo = await DETALLE_STANDS.findOne({
+                        where: { idProducto: detalle.idProducto, idStand: detalle.idStand },
+                        transaction,
+                    });
+
+                    if (!productoNuevo || productoNuevo.cantidad < detalle.cantidad) {
+                        throw new Error(
+                            `El producto con ID ${detalle.idProducto} no tiene suficiente inventario en el stand ${detalle.idStand}.`
+                        );
+                    }
+
+                    const nuevoDetalle = await DETALLE_VENTAS_STANDS.create(
+                        {
+                            idVenta,
+                            idProducto: detalle.idProducto,
+                            cantidad: detalle.cantidad,
+                            subTotal: detalle.subTotal,
+                            donacion: detalle.donacion || 0,
+                            idStand: detalle.idStand,
+                            idVoluntario: detalle.idVoluntario,
+                            estado: detalle.estado || 1,
+                        },
+                        { transaction }
+                    );
+
+                    detalle.idDetalleVentaStand = nuevoDetalle.idDetalleVentaStand;
+
+                    await productoNuevo.update(
+                        { cantidad: productoNuevo.cantidad - detalle.cantidad },
+                        { transaction }
+                    );
+                }
+            }
+
+            // Manejar pagos
+            const pagosExistentes = await DETALLE_PAGO_VENTAS_STANDS.findAll({
+                where: { idDetalleVentaStand: detalles.map((d) => d.idDetalleVentaStand) },
+                transaction,
+            });
+
+            const idsPagosEnviados = pagos.map((p) => p.idDetallePagoVentaStand).filter(Boolean);
+            const pagosEliminar = pagosExistentes.filter((pago) => !idsPagosEnviados.includes(pago.idDetallePagoVentaStand));
+
+            for (const pago of pagosEliminar) {
+                await pago.destroy({ transaction });
+            }
+
+            for (const pago of pagos) {
+                if (pago.idDetallePagoVentaStand) {
+                    const pagoExistente = await DETALLE_PAGO_VENTAS_STANDS.findByPk(pago.idDetallePagoVentaStand, { transaction });
+                    if (pagoExistente) {
+                        console.log(`Actualizando pago existente: ID ${pago.idDetallePagoVentaStand}`);
+                        await pagoExistente.update(
+                            {
+                                idDetalleVentaStand: pago.idDetalleVentaStand,
+                                idTipoPago: pago.idTipoPago,
+                                pago: pago.monto,
+                                correlativo: pago.correlativo || "NA",
+                                imagenTransferencia: pago.imagenTransferencia || "efectivo",
+                                estado: pago.estado || 1,
+                            },
+                            { transaction }
+                        );
+                    }
+                } else {
+                    console.warn(`Pago con ID ${pago.idDetallePagoVentaStand} no encontrado para actualizar.`);
+                    await DETALLE_PAGO_VENTAS_STANDS.create(
+                        {
+                            idDetalleVentaStand: pago.idDetalleVentaStand,
+                            idTipoPago: pago.idTipoPago,
+                            pago: pago.monto,
+                            correlativo: pago.correlativo || "NA",
+                            imagenTransferencia: pago.imagenTransferencia || "efectivo",
+                            estado: pago.estado || 1,
+                        },
+                        { transaction }
+                    );
+                }
+            }
+
+            await transaction.commit();
+            return res.status(200).json({ message: "Venta actualizada con éxito." });
         } catch (error) {
             await transaction.rollback();
             console.error("Error al actualizar la venta:", error);
