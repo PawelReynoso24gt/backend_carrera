@@ -509,6 +509,8 @@ module.exports = (app) => {
 
     // * RUTAS DETALLE PRODUCTOS
     router.get('/detalle_productos', detalle_productosController.find);
+    router.get('/detalle_productos/activos', detalle_productosController.findActive);
+    router.get('/detalle_productos/inactivos', detalle_productosController.findInactive);
     router.get('/detalle_productos/:id', detalle_productosController.findById);
     router.post('/detalle_productos/create', detalle_productosController.createDetalleProducto);
     router.put('/detalle_productos/update/:id', detalle_productosController.updateDetalleProducto);
