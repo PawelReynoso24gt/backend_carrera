@@ -448,7 +448,6 @@ module.exports = {
     
     // * VENTA COMPLETA POR VOLUNTARIOS
     async createFullVenta(req, res) {
-        const { venta, detalles, pagos } = req.body;
 
         // Validar datos
         if (!venta || !detalles || !pagos) {

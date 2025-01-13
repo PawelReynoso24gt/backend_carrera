@@ -343,6 +343,7 @@ module.exports = (app) => {
     // * RUTAS DE VOLUNTARIOS
     router.get('/voluntarios', voluntariosController.find);
     router.get('/voluntarios/conProductos', voluntariosController.findWithAssignedProducts);
+    router.get('/voluntarios/conProductos/:idVoluntario', voluntariosController.findWithAssignedProductsById);
     router.get('/voluntarios/activos', voluntariosController.findActivateVol); 
     router.get('/voluntarios/inactivos', voluntariosController.findaInactivateVol);
     router.get('/voluntarios/:id', voluntariosController.findById);
