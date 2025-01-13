@@ -88,31 +88,6 @@ module.exports = {
         }
     },
 
-    // * Crear una nueva recaudación
-    async create(req, res) {
-        const { boletosVendidos, estado, subTotal, idSolicitudTalonario } = req.body;
-
-        if (!boletosVendidos || !idSolicitudTalonario || !subTotal) {
-            return res.status(400).json({ message: 'Faltan campos requeridos: boletosVendidos, subTotal o idSolicitudTalonario.' });
-        }
-
-        try {
-            const nuevaRecaudacion = await RECAUDACION_RIFAS.create({
-                boletosVendidos,
-                subTotal,
-                estado: estado !== undefined ? estado : 1,
-                idSolicitudTalonario
-            });
-
-            return res.status(201).json(nuevaRecaudacion);
-        } catch (error) {
-            console.error('Error al crear la recaudación:', error);
-            return res.status(500).json({
-                message: error.message || 'Error al crear la recaudación.'
-            });
-        }
-    },
-
     // * Actualizar una recaudación
     async update(req, res) {
         const { idRecaudacionRifa } = req.params;
@@ -342,6 +317,7 @@ module.exports = {
 
     // * Creación de recaudación completa
     async createRecaudacionRifa(req, res) {
+
         const { idTalonario, boletosVendidos, pagos } = req.body;
 
         const transaction = await db.sequelize.transaction();
@@ -389,11 +365,17 @@ module.exports = {
             // Calcular el subtotal
             const subtotal = boletosVendidos * parseFloat(talonario.rifa.precioBoleto);
 
-            // Validar que el monto total pagado sea igual al subtotal
+            // Calcular el total de los montos pagados
             const totalPagado = pagos.reduce((sum, pago) => sum + parseFloat(pago.monto || 0), 0);
-            if (totalPagado !== subtotal) {
+
+            // Calcular el total esperado
+            const precioBoleto = parseFloat(talonario.rifa.precioBoleto);
+            const totalEsperado = boletosVendidos * precioBoleto;
+
+            // Comparar ambos totales
+            if (totalPagado !== totalEsperado) {
                 return res.status(400).json({
-                    message: `El total recaudado (Q${subtotal.toFixed(2)}) no coincide con el monto total pagado (Q${totalPagado.toFixed(2)}).`,
+                    message: `El total pagado (Q${totalPagado.toFixed(2)}) no coincide con el total esperado (Q${totalEsperado.toFixed(2)}).`,
                 });
             }
 
@@ -473,20 +455,19 @@ module.exports = {
         }
     },
 
-    // * Actualización de recaudación completa
+    // * Actualizar una recaudación con todos sus datos
     async updateRecaudacionRifa(req, res) {
-        const { idRecaudacionRifa, boletosVendidos, pagos } = req.body;
-
+        const { idRecaudacionRifa, idTalonario, boletosVendidos, pagos } = req.body;
+    
         const transaction = await db.sequelize.transaction();
         try {
             // Validar parámetros básicos
-            if (!idRecaudacionRifa || !boletosVendidos || !pagos) {
+            if (!idRecaudacionRifa || !idTalonario || !boletosVendidos || !pagos) {
                 return res.status(400).json({ message: "Faltan datos para actualizar la recaudación." });
             }
-
-            // Obtener la recaudación actual
-            const recaudacion = await RECAUDACION_RIFAS.findOne({
-                where: { idRecaudacionRifa },
+    
+            // Buscar la recaudación existente
+            const recaudacion = await RECAUDACION_RIFAS.findByPk(idRecaudacionRifa, {
                 include: [
                     {
                         model: SOLICITUD_TALONARIOS,
@@ -494,92 +475,203 @@ module.exports = {
                             {
                                 model: TALONARIOS,
                                 include: [
-                                    { model: RIFAS, attributes: ['idRifa', 'precioBoleto', 'ventaTotal'] },
+                                    {
+                                        model: RIFAS,
+                                        attributes: ['idRifa', 'precioBoleto', 'ventaTotal'],
+                                    },
                                 ],
                             },
                         ],
                     },
+                    {
+                        model: DETALLE_PAGO_RECAUDACION_RIFAS,
+                    },
                 ],
+                transaction
             });
-
+    
             if (!recaudacion) {
+                await transaction.rollback();
                 return res.status(404).json({ message: "No se encontró la recaudación." });
             }
-
-            const talonario = recaudacion.solicitudTalonario.talonario;
-            const rifa = talonario.rifa;
-
-            // Calcular el nuevo subtotal
-            const nuevoSubtotal = boletosVendidos * parseFloat(rifa.precioBoleto);
-
-            // Ajustar la venta total de la rifa
-            const diferenciaSubtotal = nuevoSubtotal - recaudacion.subTotal;
-            const nuevaVentaTotal = parseFloat(rifa.ventaTotal) + diferenciaSubtotal;
-
-            await RIFAS.update(
-                { ventaTotal: nuevaVentaTotal },
-                { where: { idRifa: rifa.idRifa }, transaction }
-            );
-
-            // Ajustar el inventario del talonario
-            const diferenciaBoletos = boletosVendidos - recaudacion.boletosVendidos;
-            const nuevaCantidadBoletos = talonario.cantidadBoletos - diferenciaBoletos;
-
-            if (nuevaCantidadBoletos < 0) {
-                return res.status(400).json({ message: "No hay suficientes boletos disponibles en el talonario." });
+    
+            // Guardar el subtotal anterior
+            const subtotalAnterior = parseFloat(recaudacion.subTotal);
+    
+            // Validar disponibilidad de boletos en el talonario actual
+            const talonarioActual = recaudacion.solicitudTalonario.talonario;
+            const boletosDisponiblesActuales = talonarioActual.cantidadBoletos + recaudacion.boletosVendidos;
+    
+            // Verificar si hay cambios en los datos
+            const cambiosBoletos = boletosVendidos !== recaudacion.boletosVendidos;
+            const cambiosTalonario = idTalonario !== talonarioActual.idTalonario;
+            const cambiosPagos = JSON.stringify(pagos) !== JSON.stringify(recaudacion.detalle_pago_recaudacion_rifas.map(p => ({
+                idTipoPago: p.idTipoPago,
+                monto: parseFloat(p.pago),
+                correlativo: p.correlativo,
+                imagenTransferencia: p.imagenTransferencia
+            })));
+    
+            if (!cambiosBoletos && !cambiosTalonario && !cambiosPagos) {
+                await transaction.rollback();
+                return res.status(200).json({ message: "No hay cambios en los datos." });
             }
-
-            await TALONARIOS.update(
-                { cantidadBoletos: nuevaCantidadBoletos },
-                { where: { idTalonario: talonario.idTalonario }, transaction }
-            );
-
-            // Actualizar los detalles de pago
-            await DETALLE_PAGO_RECAUDACION_RIFAS.destroy({
-                where: { idRecaudacionRifa },
-                transaction,
-            });
-
-            for (const pago of pagos) {
-                if (!pago.idTipoPago || !pago.monto) {
-                    throw new Error("Cada pago debe tener un tipo y un monto válido.");
+    
+            // Si cambia de talonario, actualizar la rifa anterior
+            if (cambiosTalonario) {
+                const rifaAnterior = talonarioActual.rifa;
+                const nuevaVentaTotalRifaAnterior = parseFloat(rifaAnterior.ventaTotal) - subtotalAnterior;
+    
+                await RIFAS.update(
+                    { ventaTotal: nuevaVentaTotalRifaAnterior },
+                    { where: { idRifa: rifaAnterior.idRifa }, transaction }
+                );
+    
+                // Log para verificar el valor guardado
+                const rifaAnteriorActualizada = await RIFAS.findByPk(rifaAnterior.idRifa, { attributes: ['ventaTotal'], transaction });
+            }
+    
+            // Validar disponibilidad de boletos en el nuevo talonario (si es diferente)
+            let talonarioNuevo = null;
+            if (cambiosTalonario) {
+                talonarioNuevo = await TALONARIOS.findOne({
+                    where: { idTalonario },
+                    include: [
+                        {
+                            model: RIFAS,
+                            attributes: ['idRifa', 'precioBoleto', 'ventaTotal'],
+                        },
+                    ],
+                    transaction
+                });
+    
+                if (!talonarioNuevo) {
+                    await transaction.rollback();
+                    return res.status(404).json({ message: "No se encontró el talonario nuevo." });
                 }
-
-                let correlativo = pago.correlativo || "NA";
-                let imagenTransferencia = pago.imagenTransferencia || "efectivo";
-
-                if ([1, 2, 4].includes(pago.idTipoPago)) {
-                    if (!pago.correlativo || !pago.imagenTransferencia) {
-                        throw new Error(`El tipo de pago ${pago.idTipoPago} requiere correlativo e imagen.`);
-                    }
+    
+                const boletosDisponiblesNuevo = talonarioNuevo.cantidadBoletos;
+                if (boletosVendidos > boletosDisponiblesNuevo) {
+                    await transaction.rollback();
+                    return res.status(400).json({ message: "No hay suficientes boletos disponibles en el talonario nuevo." });
                 }
-
-                await DETALLE_PAGO_RECAUDACION_RIFAS.create(
+            } else {
+                talonarioNuevo = talonarioActual;
+            }
+    
+            // Calcular el nuevo subtotal
+            const nuevoSubtotal = boletosVendidos * parseFloat(talonarioNuevo.rifa.precioBoleto);
+    
+            // Calcular el total de los montos pagados
+            const totalPagado = pagos.reduce((sum, pago) => sum + parseFloat(pago.monto || 0), 0);
+    
+            // Calcular el total esperado
+            const precioBoleto = parseFloat(talonarioNuevo.rifa.precioBoleto);
+            const totalEsperado = boletosVendidos * precioBoleto;
+    
+            // Comparar ambos totales
+            if (totalPagado !== totalEsperado) {
+                await transaction.rollback();
+                return res.status(400).json({
+                    message: `El total pagado (Q${totalPagado.toFixed(2)}) no coincide con el total esperado (Q${totalEsperado.toFixed(2)}).`,
+                });
+            }
+    
+            // Validar el monto total pagado
+            if (totalPagado !== nuevoSubtotal) {
+                await transaction.rollback();
+                return res.status(400).json({
+                    message: `El total recaudado (Q${nuevoSubtotal.toFixed(2)}) no coincide con el monto total pagado (Q${totalPagado.toFixed(2)}).`,
+                });
+            }
+    
+            // Actualizar la cantidad de boletos en el talonario actual
+            if (cambiosBoletos || cambiosTalonario) {
+                await talonarioActual.update(
+                    { cantidadBoletos: boletosDisponiblesActuales - boletosVendidos },
+                    { transaction }
+                );
+    
+                // Si cambia de talonario, actualizar el nuevo talonario
+                if (cambiosTalonario) {
+                    await talonarioNuevo.update(
+                        { cantidadBoletos: talonarioNuevo.cantidadBoletos - boletosVendidos },
+                        { transaction }
+                    );
+                }
+            }
+    
+            // Actualizar la recaudación
+            if (cambiosBoletos || cambiosTalonario) {
+                await recaudacion.update(
                     {
-                        idRecaudacionRifa: recaudacion.idRecaudacionRifa,
-                        idTipoPago: pago.idTipoPago,
-                        pago: pago.monto,
-                        correlativo,
-                        imagenTransferencia,
-                        estado: pago.estado || 1,
+                        boletosVendidos,
+                        subTotal: nuevoSubtotal,
+                        idSolicitudTalonario: talonarioNuevo.idTalonario,
                     },
                     { transaction }
                 );
             }
-
-            // Actualizar los datos de la recaudación
-            await RECAUDACION_RIFAS.update(
-                {
-                    boletosVendidos,
-                    subTotal: nuevoSubtotal,
-                },
-                { where: { idRecaudacionRifa }, transaction }
+    
+            // Eliminar y crear los nuevos pagos si hay cambios
+            if (cambiosPagos) {
+                await DETALLE_PAGO_RECAUDACION_RIFAS.destroy({
+                    where: { idRecaudacionRifa },
+                    transaction,
+                });
+    
+                for (const pago of pagos) {
+                    if (!pago.idTipoPago || !pago.monto) {
+                        await transaction.rollback();
+                        throw new Error("Cada pago debe tener un tipo y un monto válido.");
+                    }
+    
+                    let correlativo = pago.correlativo || "NA";
+                    let imagenTransferencia = pago.imagenTransferencia || "efectivo";
+    
+                    // Validar correlativo e imagen para ciertos tipos de pago
+                    if ([1, 2, 4].includes(pago.idTipoPago)) { // Depósito, Transferencia, Cheque
+                        if (!pago.correlativo || !pago.imagenTransferencia) {
+                            await transaction.rollback();
+                            throw new Error(`El tipo de pago ${pago.idTipoPago} requiere correlativo e imagen.`);
+                        }
+                    }
+    
+                    await DETALLE_PAGO_RECAUDACION_RIFAS.create(
+                        {
+                            idRecaudacionRifa,
+                            idTipoPago: pago.idTipoPago,
+                            pago: pago.monto,
+                            correlativo,
+                            imagenTransferencia,
+                            estado: pago.estado || 1, // Activo por defecto
+                        },
+                        { transaction }
+                    );
+                }
+            }
+    
+            // Actualizar el total de venta de la rifa nueva con el nuevo subtotal
+            const rifaNueva = talonarioNuevo.rifa;
+    
+            // Calcular la nueva venta total para la rifa nueva
+            const nuevaVentaTotalRifaNueva = parseFloat(rifaNueva.ventaTotal) + nuevoSubtotal;
+    
+            await RIFAS.update(
+                { ventaTotal: nuevaVentaTotalRifaNueva },
+                { where: { idRifa: rifaNueva.idRifa }, transaction }
             );
-
+    
+            // Log para verificar el valor guardado
+            const rifaNuevaActualizada = await RIFAS.findByPk(rifaNueva.idRifa, { attributes: ['ventaTotal'], transaction });
+    
             // Confirmar la transacción
             await transaction.commit();
-
-            return res.status(200).json({ message: "Recaudación actualizada con éxito." });
+    
+            return res.status(200).json({
+                message: "Recaudación actualizada con éxito.",
+                recaudacion,
+            });
         } catch (error) {
             // Revertir la transacción en caso de error
             await transaction.rollback();
@@ -587,5 +679,4 @@ module.exports = {
             return res.status(500).json({ message: "Error al actualizar la recaudación.", error: error.message });
         }
     },
-
 };

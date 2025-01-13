@@ -563,9 +563,9 @@ module.exports = (app) => {
     router.get('/recaudaciones/detalle/:idRecaudacionRifa', recaudacionRifasController.getRecaudacionCompleta);
     router.get('/recaudaciones/todas', recaudacionRifasController.getTodasRecaudaciones)
     router.get('/recaudaciones/todas/inactivas', recaudacionRifasController.getTodasRecaudacionesInactive);
-    router.post('/recaudaciones', recaudacionRifasController.create);
     router.post('/recaudaciones/rifa/completa', recaudacionRifasController.createRecaudacionRifa);
     router.put('/recaudaciones/:idRecaudacionRifa', recaudacionRifasController.update);
+    router.put('/recaudaciones/rifa/completa/update/:idRecaudacionRifa', recaudacionRifasController.updateRecaudacionRifa);
     router.delete('/recaudaciones/:idRecaudacionRifa', recaudacionRifasController.delete);
 
     // * RUTAS DE VENTAS
