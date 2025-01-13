@@ -263,6 +263,7 @@ module.exports = (app) => {
     router.get('/stands/virtual/products', standsController.findVirtualStandProducts);
     router.get('/stands/detalles', standsController.findStandDetalles);
     router.get('/stands/voluntarios/:idStand', standsController.getVoluntariosEnStands);
+    router.get('/stands/voluntarios/inscritos/:idVoluntario', standsController.getStandsDeVoluntario);
     router.post('/stand/create', standsController.createStand);
     router.put('/stand/update/:id', standsController.updateStand);
     router.delete('/stand/:id', standsController.deleteStand);

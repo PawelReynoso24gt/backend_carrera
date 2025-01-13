@@ -182,6 +182,67 @@ module.exports = {
             res.status(500).json({ error: 'Error al obtener los voluntarios asignados.' });
         }
     },
+
+    // Método para obtener los stands a los que está inscrito un voluntario
+    async getStandsDeVoluntario(req, res) {
+        const { idVoluntario } = req.params; // Supone que el id del voluntario se pasa como parámetro
+        try {
+            const asignaciones = await AsignacionStands.findAll({
+                where: { estado: 1 }, // Solo asignaciones activas
+                include: [
+                    {
+                        model: db.inscripcion_eventos,
+                        as: 'inscripcionEvento', // Alias definido en la relación
+                        where: { idVoluntario: idVoluntario }, // Filtrar por el id del voluntario
+                        include: [
+                            {
+                                model: db.voluntarios, // Modelo del voluntario
+                                as: 'voluntario', // Alias definido en la relación
+                                include: [
+                                    {
+                                        model: db.personas, // Si tienes un modelo de Persona
+                                        as: 'persona', // Alias definido
+                                    },
+                                ],
+                            },
+                        ],
+                    },
+                    {
+                        model: db.stands, // Modelo del stand
+                        as: 'stand', // Alias definido en la relación
+                        include: [
+                            {
+                                model: TipoStands,
+                                as: 'tipo_stand',
+                                attributes: ['idTipoStands', 'tipo']
+                            },
+                            {
+                                model: DetalleStands,
+                                as: 'detallesStands',
+                                attributes: ['idDetalleStands', 'cantidad', 'idProducto', 'idStand'],
+                                include: [
+                                    {
+                                        model: db.productos,
+                                        as: 'producto',
+                                        attributes: ['idProducto', 'nombreProducto', 'precio', 'foto', 'talla', 'descripcion', 'foto']
+                                    }
+                                ]
+                            },
+                        ],
+                    },
+                ],
+            });
+
+            if (!asignaciones || asignaciones.length === 0) {
+                return res.status(404).json({ message: 'No se encontraron stands asignados a este voluntario.' });
+            }
+
+            res.status(200).json(asignaciones);
+        } catch (error) {
+            console.error('Error al obtener stands asignados:', error);
+            res.status(500).json({ error: 'Error al obtener los stands asignados.' });
+        }
+    },
     
     async findActivateStand(req, res) {
         return STANDS.findAll({
