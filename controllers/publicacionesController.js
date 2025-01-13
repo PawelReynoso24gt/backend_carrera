@@ -345,7 +345,7 @@ module.exports = {
 
                 // RUTA RELATIVA
                 for (const file of req.files) {
-                    fotosPaths.push(`publicaciones/${tipo}/${file.filename}`);
+                    fotosPaths.push(`publicaciones_image/${tipo}/${file.filename}`);
                 }
 
                 const folder = folderMap[tipo];
@@ -490,176 +490,6 @@ module.exports = {
         }
     },
 
-    // // Actualizar una publicación existente
-    // async updateCompleto(req, res) {
-    //     const { nombrePublicacion, fechaPublicacion, descripcion, estado, idSede, tipo, idRifa, idEvento } = req.body;
-    //     const id = req.params.id;
-
-    //     const camposActualizados = {};
-    //     if (nombrePublicacion !== undefined) camposActualizados.nombrePublicacion = nombrePublicacion;
-    //     if (descripcion !== undefined) camposActualizados.descripcion = descripcion;
-    //     if (fechaPublicacion !== undefined) {
-    //         try {
-    //             // Parsear la fecha y establecer segundos a 0
-    //             const [datePart, timePart] = fechaPublicacion.split(' ');
-    //             const [year, month, day] = datePart.split('-');
-    //             const [hour, minute] = timePart.split(':');
-                
-    //             const fechaValida = new Date(year, month - 1, day, hour, minute, 0); // Siempre segundos = 0
-
-    //             // Verificar que la fecha sea válida
-    //             if (isNaN(fechaValida.getTime())) {
-    //                 return res.status(400).json({ message: 'El formato de fecha y hora es inválido.' });
-    //             }
-
-    //             camposActualizados.fechaPublicacion = fechaValida; // Guardar la fecha ajustada
-    //         } catch (error) {
-    //             return res.status(400).json({ message: 'Error procesando la fecha de publicación.' });
-    //         }
-    //     }
-    //     if (estado !== undefined) camposActualizados.estado = estado;
-
-    //     if (idSede !== undefined) {
-    //         const sedeExistente = await SEDES.findByPk(idSede);
-    //         if (!sedeExistente) {
-    //             return res.status(400).json({ message: 'La sede especificada no existe.' });
-    //         }
-    //         camposActualizados.idSede = idSede;
-    //     }
-
-    //     const fotosPaths = []; // Array para almacenar las rutas de las fotos nuevas
-
-    //     try {
-    //         // Verificar la existencia de la publicación
-    //         const publicacionExistente = await PUBLICACIONES.findByPk(id, {
-    //             include: [
-    //                 { model: db.publicacion_generales, as: 'publicacionesGenerales' },
-    //                 { model: db.publicacion_eventos, as: 'publicacionesEventos' },
-    //                 { model: db.publicacion_rifas, as: 'publicacionesRifas' }
-    //             ]
-    //         });
-
-    //         if (!publicacionExistente) {
-    //             return res.status(404).json({ message: 'Publicación no encontrada' });
-    //         }
-
-    //         // Identificar la carpeta y tipo actual
-    //         const folderMap = {
-    //             generales: 'src/publicaciones/generales',
-    //             eventos: 'src/publicaciones/eventos',
-    //             rifas: 'src/publicaciones/rifas',
-    //         };
-
-    //         const oldFolder = folderMap[tipo];
-    //         const newFolder = folderMap[tipo];
-
-    //         if (!newFolder) {
-    //             return res.status(400).json({ message: 'El nuevo tipo especificado no es válido.' });
-    //         }
-
-    //         // Si el tipo cambió, mover las fotos y eliminar las anteriores
-    //         if (tipo !== undefined) {
-    //             const fotosAnteriores = [
-    //                 ...(publicacionExistente.publicacionesGenerales || []),
-    //                 ...(publicacionExistente.publicacionesEventos || []),
-    //                 ...(publicacionExistente.publicacionesRifas || [])
-    //             ];
-
-    //             const fotosAnterioresPaths = fotosAnteriores.map(foto => foto.foto);
-
-    //             // Comparar fotos nuevas con las existentes y eliminar las que no están
-    //             for (const fotoAnterior of fotosAnterioresPaths) {
-    //                 if (!fotosPaths.includes(fotoAnterior)) {
-    //                     const oldPath = path.join(oldFolder, path.basename(fotoAnterior));
-    //                     if (fs.existsSync(oldPath)) {
-    //                         fs.unlinkSync(oldPath); // Eliminar archivo del sistema de archivos
-    //                     }
-    //                 }
-    //             }
-
-    //             // Eliminar registros en las tablas anteriores
-    //             await db.publicacion_generales.destroy({ where: { idPublicacion: id } });
-    //             await db.publicacion_eventos.destroy({ where: { idPublicacion: id } });
-    //             await db.publicacion_rifas.destroy({ where: { idPublicacion: id } });
-    //         }
-
-    //         // Procesar nuevas fotos si se envían
-    //         if (req.files && req.files.length > 0) {
-
-    //             // Usar la carpeta correspondiente al tipo proporcionado en la solicitud
-    //             const targetFolder = folderMap[tipo];
-
-    //             if (!fs.existsSync(newFolder)) {
-    //                 fs.mkdirSync(newFolder, { recursive: true });
-    //             }
-
-    //             for (const file of req.files) {
-    //                 const fotoPath = `publicaciones/${tipo}/${file.filename}`;
-    //                 const destinationPath = path.join(targetFolder, file.filename);
-
-    //                 // Mover la foto a la carpeta correspondiente al tipo
-    //                 fs.renameSync(file.path, destinationPath);
-    //                 fotosPaths.push(fotoPath);
-    //             }
-    //         }
-
-    //         // Guardar las nuevas fotos en la tabla correspondiente
-    //         if (tipo === 'generales') {
-    //             await db.publicacion_generales.bulkCreate(
-    //                 fotosPaths.map(fotoPath => ({
-    //                     idPublicacion: id,
-    //                     foto: fotoPath,
-    //                     estado: estado || 1,
-    //                 }))
-    //             );
-    //         } else if (tipo === 'eventos') {
-    //             if (!idEvento) {
-    //                 return res.status(400).json({ message: 'El campo idEvento es obligatorio para tipo "eventos".' });
-    //             }
-    //             await db.publicacion_eventos.bulkCreate(
-    //                 fotosPaths.map(fotoPath => ({
-    //                     idPublicacion: id,
-    //                     idEvento,
-    //                     foto: fotoPath,
-    //                     estado: estado || 1,
-    //                 }))
-    //             );
-    //         } else if (tipo === 'rifas') {
-    //             if (!idRifa) {
-    //                 return res.status(400).json({ message: 'El campo idRifa es obligatorio para tipo "rifas".' });
-    //             }
-    //             await db.publicacion_rifas.bulkCreate(
-    //                 fotosPaths.map(fotoPath => ({
-    //                     idPublicacion: id,
-    //                     idRifa,
-    //                     foto: fotoPath,
-    //                     estado: estado || 1,
-    //                 }))
-    //             );
-    //         }
-
-    //         // Actualizar los campos principales
-    //         await PUBLICACIONES.update(camposActualizados, { where: { idPublicacion: id } });
-
-    //         // Convertir fecha al formato UTC-6 para la respuesta
-    //         const publicacionActualizada = await PUBLICACIONES.findByPk(id);
-    //         const publicacionConFormato = {
-    //             ...publicacionActualizada.toJSON(),
-    //             fechaPublicacion: format(new Date(publicacionActualizada.fechaPublicacion), "yyyy-MM-dd HH:mm:ss", {
-    //                 timeZone: "America/Guatemala",
-    //             }),
-    //         };
-
-    //         return res.status(200).json({
-    //             message: `La publicación con ID: ${id} ha sido actualizada correctamente`,
-    //             updatedPublicacion: publicacionConFormato,
-    //         });
-    //     } catch (error) {
-    //         console.error(`Error al actualizar la publicación con ID ${id}:`, error);
-    //         return res.status(500).json({ error: 'Error al actualizar la publicación' });
-    //     }
-    // },
-
     // Actualizar una publicación existente
     async updateCompleto(req, res) {
         const { nombrePublicacion, fechaPublicacion, descripcion, estado, idSede, tipo, idRifa, idEvento, photosToRemove, photosToMove } = req.body;
@@ -762,7 +592,7 @@ module.exports = {
                         }
 
                         // Actualizar tablas
-                        const newPathDb = `publicaciones/${tipo}/${path.basename(photoRecord.foto)}`;
+                        const newPathDb = `publicaciones_image/${tipo}/${path.basename(photoRecord.foto)}`;
 
                         if (currentType === "generales") {
                             // Mover de 'generales' a nuevo tipo
@@ -821,66 +651,6 @@ module.exports = {
                 }
             }
 
-            // // Mover fotos entre tablas
-            // if (photosToMove) {
-            //     const photosToMoveArray = JSON.parse(photosToMove);
-            //     for (const photo of photosToMoveArray) {
-            //         const { id, currentType, newType } = photo;
-
-            //         let photoRecord = null;
-
-            //         // Buscar la foto en la tabla actual
-            //         if (currentType === "generales") {
-            //             photoRecord = await db.publicacion_generales.findByPk(id);
-            //             if (photoRecord) await db.publicacion_generales.destroy({ where: { idPublicacionGeneral: id } });
-            //         } else if (currentType === "eventos") {
-            //             photoRecord = await db.publicacion_eventos.findByPk(id);
-            //             if (photoRecord) await db.publicacion_eventos.destroy({ where: { idPublicacionEvento: id } });
-            //         } else if (currentType === "rifas") {
-            //             photoRecord = await db.publicacion_rifas.findByPk(id);
-            //             if (photoRecord) await db.publicacion_rifas.destroy({ where: { idPublicacionRifa: id } });
-            //         }
-
-            //         // Mover el archivo físico a la nueva carpeta
-            //         if (photoRecord) {
-            //             const oldPath = path.join(__dirname, "../", photoRecord.foto);
-            //             const newFolder = path.join(__dirname, "../", `src/publicaciones/${newType}`);
-            //             if (!fs.existsSync(newFolder)) fs.mkdirSync(newFolder, { recursive: true });
-            //             const newPath = path.join(newFolder, path.basename(photoRecord.foto));
-
-            //             console.log(`Moviendo archivo desde ${oldPath} a ${newPath}`); // Log del movimiento
-
-            //             if (fs.existsSync(oldPath)) {
-            //                 fs.renameSync(oldPath, newPath);console.log(`Archivo movido exitosamente a ${newPath}`); // Confirmación del movimiento
-            //             } else {
-            //                 console.log(`El archivo ${oldPath} no existe, no se pudo mover.`); // Archivo no encontrado
-            //             }
-            //             // Insertar en la nueva tabla
-            //             if (newType === "generales") {
-            //                 await db.publicacion_generales.create({
-            //                     idPublicacion: id,
-            //                     foto: `publicaciones/${newType}/${path.basename(photoRecord.foto)}`,
-            //                     estado: photoRecord.estado,
-            //                 });
-            //             } else if (newType === "eventos") {
-            //                 await db.publicacion_eventos.create({
-            //                     idPublicacion: id,
-            //                     idEvento,
-            //                     foto: `publicaciones/${newType}/${path.basename(photoRecord.foto)}`,
-            //                     estado: photoRecord.estado,
-            //                 });
-            //             } else if (newType === "rifas") {
-            //                 await db.publicacion_rifas.create({
-            //                     idPublicacion: id,
-            //                     idRifa,
-            //                     foto: `publicaciones/${newType}/${path.basename(photoRecord.foto)}`,
-            //                     estado: photoRecord.estado,
-            //                 });
-            //             }
-            //         }
-            //     }
-            // }
-
             // Eliminar las fotos seleccionadas
             if (photosToRemove) {
                 const photosToRemoveArray = JSON.parse(photosToRemove);
@@ -930,7 +700,7 @@ module.exports = {
             const newPath = path.join(targetFolder, file.filename);
             console.log(`Moviendo archivo desde ${file.path} a ${newPath}`); // Log del movimiento
             fs.renameSync(file.path, newPath);
-            fotosPaths.push(`publicaciones/${tipo}/${file.filename}`);
+            fotosPaths.push(`publicaciones_image/${tipo}/${file.filename}`);
             }
             console.log("Rutas de las nuevas fotos procesadas:", fotosPaths); // Log de las rutas finales
 

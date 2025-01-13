@@ -513,6 +513,8 @@ module.exports = (app) => {
 
   // * RUTAS DETALLE PRODUCTOS
   router.get('/detalle_productos', detalle_productosController.find);
+    router.get('/detalle_productos/activos', detalle_productosController.findActive);
+    router.get('/detalle_productos/inactivos', detalle_productosController.findInactive);
   router.get('/detalle_productos/:id', detalle_productosController.findById);
   router.post('/detalle_productos/create', detalle_productosController.createDetalleProducto);
   router.put('/detalle_productos/update/:id', detalle_productosController.updateDetalleProducto);
@@ -554,45 +556,45 @@ module.exports = (app) => {
   router.put('/asistencia_eventos/update/:id', asistenciaEventosController.update);
   router.delete('/asistencia_eventos/delete/:id', asistenciaEventosController.delete);
 
-  //* RUTAS DE RECAUDACION DE RIFAS
-  router.get('/recaudaciones', recaudacionRifasController.findAll);
-  router.get('/recaudaciones/activas', recaudacionRifasController.findActive);
-  router.get('/recaudaciones/inactivas', recaudacionRifasController.findInactive);
-  router.get('/recaudaciones/fecha/:fecha', recaudacionRifasController.getByDate);
-  router.get('/recaudaciones/detalle/:idRecaudacionRifa', recaudacionRifasController.getRecaudacionCompleta);
-  router.get('/recaudaciones/todas', recaudacionRifasController.getTodasRecaudaciones)
-  router.get('/recaudaciones/todas/inactivas', recaudacionRifasController.getTodasRecaudacionesInactive);
-  router.post('/recaudaciones', recaudacionRifasController.create);
-  router.post('/recaudaciones/rifa/completa', recaudacionRifasController.createRecaudacionRifa);
-  router.put('/recaudaciones/:idRecaudacionRifa', recaudacionRifasController.update);
-  router.delete('/recaudaciones/:idRecaudacionRifa', recaudacionRifasController.delete);
+    //* RUTAS DE RECAUDACION DE RIFAS
+    router.get('/recaudaciones', recaudacionRifasController.findAll);
+    router.get('/recaudaciones/activas', recaudacionRifasController.findActive);
+    router.get('/recaudaciones/inactivas', recaudacionRifasController.findInactive);
+    router.get('/recaudaciones/fecha/:fecha', recaudacionRifasController.getByDate);
+    router.get('/recaudaciones/detalle/:idRecaudacionRifa', recaudacionRifasController.getRecaudacionCompleta);
+    router.get('/recaudaciones/todas', recaudacionRifasController.getTodasRecaudaciones)
+    router.get('/recaudaciones/todas/inactivas', recaudacionRifasController.getTodasRecaudacionesInactive);
+    router.post('/recaudaciones/rifa/completa', recaudacionRifasController.createRecaudacionRifa);
+    router.put('/recaudaciones/:idRecaudacionRifa', recaudacionRifasController.update);
+    router.put('/recaudaciones/rifa/completa/update/:idRecaudacionRifa', recaudacionRifasController.updateRecaudacionRifa);
+    router.delete('/recaudaciones/:idRecaudacionRifa', recaudacionRifasController.delete);
 
-  // * RUTAS DE VENTAS
-  router.get('/ventas', ventasController.findAll);
-  router.get('/ventas/voluntarios', ventasController.findAllVoluntarios);
-  router.get('/ventas/stands', ventasController.findAllVentasStands);
-  router.get('/ventas/activas', ventasController.findActive);
-  router.get('/ventas/voluntarios/activas', ventasController.findActiveVoluntarios);
-  router.get('/ventas/stands/activas', ventasController.findActiveVentasStands);
-  router.get('/ventas/inactivas', ventasController.findInactive);
-  router.get('/ventas/voluntarios/inactivas', ventasController.findInactiveVoluntarios);
-  router.get('/ventas/stands/inactivas', ventasController.findInactiveVentasStands);
-  router.get('/detalle_ventas_voluntarios/ventaCompleta/:idVenta', ventasController.findByVentaId);
-  router.get('/detalle_ventas_stands/ventaCompleta/:idVenta', ventasController.findByVentaIdStand);
-  router.get('/ventas/:id', ventasController.findById);
-  router.post('/ventas/create', ventasController.create);
-  router.post('/ventas/create/completa', ventasController.createFullVenta);
-  router.post('/ventas/create/stands/completa', ventasController.createFullVentaStand);
-  router.put('/ventas/update/:id', ventasController.update);
-  router.put('/ventas/update/completa/:id', ventasController.updateFullVenta);
-
-  //* RUTAS DETALLE PAGO RIFAS
-  router.get('/detallespago', detallePagoRifasController.findAll);
-  router.get('/detallespago/activos', detallePagoRifasController.findActive);
-  router.get('/detallespago/inactivos', detallePagoRifasController.findInactive);
-  router.post('/detallespago', detallePagoRifasController.create);
-  router.put('/detallespago/:idDetallePagoRecaudacionRifa', detallePagoRifasController.update);
-  router.delete('/detallespago/:idDetallePagoRecaudacionRifa', detallePagoRifasController.delete);
+    // * RUTAS DE VENTAS
+    router.get('/ventas', ventasController.findAll);
+    router.get('/ventas/voluntarios', ventasController.findAllVoluntarios);
+    router.get('/ventas/stands', ventasController.findAllVentasStands);
+    router.get('/ventas/activas', ventasController.findActive);
+    router.get('/ventas/voluntarios/activas', ventasController.findActiveVoluntarios);
+    router.get('/ventas/stands/activas', ventasController.findActiveVentasStands);
+    router.get('/ventas/inactivas', ventasController.findInactive);
+    router.get('/ventas/voluntarios/inactivas', ventasController.findInactiveVoluntarios);
+    router.get('/ventas/stands/inactivas', ventasController.findInactiveVentasStands);
+    router.get('/detalle_ventas_voluntarios/ventaCompleta/:idVenta', ventasController.findByVentaId);
+    router.get('/detalle_ventas_stands/ventaCompleta/:idVenta', ventasController.findByVentaIdStand);
+    router.get('/ventas/:id', ventasController.findById);
+    router.post('/ventas/create/completa', ventasController.createFullVenta);
+    router.post('/ventas/create/stands/completa', ventasController.createFullVentaStand);
+    router.put('/ventas/update/:id', ventasController.update);
+    router.put('/ventas/update/completa/:idVenta', ventasController.updateFullVenta);
+    router.put('/ventas/update/stands/completa/:idVenta', ventasController.updateFullVentaStand);
+    
+    //* RUTAS DETALLE PAGO RIFAS
+    router.get('/detallespago', detallePagoRifasController.findAll);
+    router.get('/detallespago/activos', detallePagoRifasController.findActive);
+    router.get('/detallespago/inactivos', detallePagoRifasController.findInactive);
+    router.post('/detallespago', detallePagoRifasController.create);
+    router.put('/detallespago/:idDetallePagoRecaudacionRifa', detallePagoRifasController.update);
+    router.delete('/detallespago/:idDetallePagoRecaudacionRifa', detallePagoRifasController.delete);
 
   //* RUTAS ASPIRANTES 
   router.get('/aspirantes/activos', aspirantesController.findActive);

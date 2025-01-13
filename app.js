@@ -39,8 +39,8 @@ require("./routes")(app);
  app.use(express.static('./public'));
 
  // Middleware para servir imágenes de publicaciones
-app.use('/publicaciones', express.static(path.join(__dirname, 'src/publicaciones')));
-app.use('/productos', express.static(path.join(__dirname, 'src/productos')));
+app.use('/publicaciones_image', express.static(path.join(__dirname, 'src/publicaciones')));
+app.use('/productos_image', express.static(path.join(__dirname, 'src/productos')));
 app.use('/personas_image', express.static(path.join(__dirname, 'src/personas')));
 app.use('/fotos_sedes_image', express.static(path.join(__dirname, 'src/fotos_sedes')));
 
