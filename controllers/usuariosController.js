@@ -103,7 +103,9 @@ async function createToken(user, idVoluntario, idEmpleado) {
         idEmpleado: idEmpleado,
     });
 
-    const expiresAt = new Date(Date.now() + 3600000); // Expira en 1 hora
+    // Calcular la fecha de expiración al final del día
+    const now = new Date();
+    const expiresAt = new Date(now.getFullYear(), now.getMonth(), now.getDate(), 23, 59, 59, 999);
 
     // Actualizar el token en la base de datos
     await USERS.update({
