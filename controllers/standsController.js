@@ -266,8 +266,8 @@ async findVirtualStandProducts(req, res) {
         }
     
         // Expresiones regulares para validar el formato de los campos, incluyendo espacios
-        const regexNombreStand = /^[A-Za-z0-9\s-]+$/;
-        const regexDireccion = /^[A-Za-z0-9\s-]+$/;
+        const regexNombreStand = /^[A-Za-z0-9\s-,.:]+$/;
+        const regexDireccion = /^[A-Za-z0-9\s-,.:]+$/;
     
         if (!regexNombreStand.test(datos.nombreStand)) {
             return res.status(400).json({ message: 'El nombre del stand solo debe contener letras, números, guiones y espacios.' });
@@ -315,8 +315,8 @@ async findVirtualStandProducts(req, res) {
         const camposActualizados = {};
     
         // Validación de nombreStand y direccion si están presentes en los datos
-        const regexNombreStand = /^[A-Za-z0-9\s-]+$/;
-        const regexDireccion = /^[A-Za-z0-9\s-]+$/;
+        const regexNombreStand = /^[A-Za-z0-9\s-,.:]+$/;
+        const regexDireccion = /^[A-Za-z0-9\s-,.:]+$/;
     
         if (datos.nombreStand !== undefined) {
             if (!regexNombreStand.test(datos.nombreStand)) {
