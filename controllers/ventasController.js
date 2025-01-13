@@ -448,6 +448,7 @@ module.exports = {
     
     // * VENTA COMPLETA POR VOLUNTARIOS
     async createFullVenta(req, res) {
+        const { venta, detalles, pagos } = req.body;
 
         // Validar datos
         if (!venta || !detalles || !pagos) {
@@ -565,7 +566,6 @@ module.exports = {
                     { transaction }
                 );
             }
-            console.log("Datos recibidos en createFullVenta:", req.body);
             await transaction.commit(); // Confirmar la transacción
             return res.status(201).json({
                 message: "Venta creada con éxito.",
