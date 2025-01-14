@@ -317,6 +317,47 @@ async findVirtualStandProducts(req, res) {
     }
 },
 
+    // * metodo para el telefono
+    async findDetalleProductosVirtual(req, res) {
+        try {
+            const standVirtual = await db.stands.findOne({
+                where: {
+                    idStand: 1,
+                    idTipoStands: 1
+                }, // Busca el stand con idStand 1 y idTipoStands 1
+                include: [
+                    {
+                        model: DetalleStands,
+                        as: 'detallesStands',
+                        attributes: ['idDetalleStands', 'cantidad', 'idProducto', 'idStand'], // Incluye solo los detalles necesarios
+                        include: [
+                            {
+                                model: db.productos,
+                                as: 'producto',
+                                attributes: ['idProducto', 'nombreProducto', 'precio', 'descripcion', 'estado', 'foto', 'talla'], // Incluye solo los productos necesarios
+                            },
+                        ],
+                    },
+                    {
+                        model: TipoStands,
+                        as: 'tipo_stand',
+                        attributes: ['idTipoStands', 'tipo']
+                    }
+                ],
+            });
+
+            if (!standVirtual) {
+                return res.status(404).json({ message: 'No se encontró el stand con idStand 1 y idTipoStands 1.' });
+            }
+
+            return res.status(200).json(standVirtual); // Devuelve el stand con los detalles
+        } catch (error) {
+            console.error('Error al obtener los detalles del stand Virtual:', error);
+            return res.status(500).json({
+                message: 'Ocurrió un error al obtener los detalles del stand Virtual.',
+            });
+        }
+    },
 
     createStand: async (req, res) => {
         const datos = req.body;

@@ -263,6 +263,7 @@ module.exports = (app) => {
     router.get('/stand/activas', standsController.findActivateStand);
     router.get('/stand/inactivas', standsController.findaInactivateStand);
     router.get('/stands/virtual/products', standsController.findVirtualStandProducts);
+    router.get('/stands/virtual/productos/detalles', standsController.findDetalleProductosVirtual);
     router.get('/stands/detalles', standsController.findStandDetalles);
     router.get('/stands/voluntarios/:idStand', standsController.getVoluntariosEnStands);
     router.get('/stands/voluntarios/inscritos/:idVoluntario', standsController.getStandsDeVoluntario);
