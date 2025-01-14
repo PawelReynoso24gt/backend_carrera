@@ -138,9 +138,9 @@ module.exports = {
         }
 
 
-        let fotoRuta = 'productos/sin-foto.png'; // Valor predeterminado
+        let fotoRuta = 'productos_image/sin-foto.png'; // Valor predeterminado
         if (req.file) {
-            fotoRuta = `productos/${req.file.filename}`; // Guardar la ruta relativa
+            fotoRuta = `productos_image/${req.file.filename}`; // Guardar la ruta relativa
         }
 
 
@@ -234,11 +234,11 @@ module.exports = {
          // Manejar actualización de la foto
         let nuevaFotoRuta;
         if (req.file) {
-            nuevaFotoRuta = `productos/${req.file.filename}`;
+            nuevaFotoRuta = `productos_image/${req.file.filename}`;
 
             // Buscar el producto actual para eliminar la foto anterior si existe
             const productoActual = await PRODUCTOS.findByPk(id);
-            if (productoActual && productoActual.foto && productoActual.foto !== 'productos/sin-foto.png') {
+            if (productoActual && productoActual.foto && productoActual.foto !== 'productos_image/sin-foto.png') {
                 const fotoPath = path.join(__dirname, '../src', productoActual.foto);
                 if (fs.existsSync(fotoPath)) {
                     fs.unlinkSync(fotoPath); // Eliminar la foto anterior
