@@ -242,6 +242,7 @@ module.exports = (app) => {
   router.get('/rifas/activos', rifasController.findActive);
   router.get('/rifas/inactivos', rifasController.findInactive);
   router.get('/rifas/talonarios/:idRifa', rifasController.findTalonariosVoluntarios);
+  router.get('/rifas/voluntarios/talonarios/:idVoluntario/:idRifa', rifasController.findVoluntariosTalonarios);
   router.get('/rifas/:id', rifasController.findById);
   router.post('/rifas', rifasController.create);
   router.put('/rifas/:id', rifasController.update);

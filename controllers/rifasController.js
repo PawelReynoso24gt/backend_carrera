@@ -125,6 +125,61 @@ module.exports = {
         }
     },
 
+    // Obtener los voluntarios con talonarios solicitados por rifa
+    async findVoluntariosTalonarios(req, res) {
+        const { idRifa, idVoluntario } = req.params;
+
+        try {
+            // Validar que se haya proporcionado un idRifa válido
+            if (!idRifa) {
+                return res.status(400).json({ message: 'El idRifa es requerido.' });
+            }
+
+            // Validar que se haya proporcionado un idVoluntario válido
+            if (!idVoluntario) {
+                return res.status(400).json({ message: 'El idVoluntario es requerido.' });
+            }
+
+            // Consultar los talonarios asociados a la rifa y solicitados por el voluntario
+            const talonarios = await TALONARIOS.findAll({
+                where: { idRifa },
+                include: [
+                    {
+                        model: RIFAS, // Incluir la información de la rifa
+                        attributes: ['nombreRifa', 'precioBoleto', 'descripcion', 'estado'],
+                    },
+                    {
+                        model: SOLICITUD_TALONARIOS, // Información de las solicitudes asociadas
+                        required: true,
+                        where: { idVoluntario }, // Filtrar por el voluntario
+                        include: [
+                            {
+                                model: VOLUNTARIOS, // Información de los voluntarios en las solicitudes
+                                include: [
+                                    {
+                                        model: PERSONAS, // Información adicional del voluntario
+                                        attributes: ['idPersona', 'nombre', 'telefono', 'correo'],
+                                    },
+                                ],
+                            },
+                        ],
+                    },
+                ],
+            });
+
+            // Verificar si se encontraron resultados
+            if (!talonarios || talonarios.length === 0) {
+                return res.status(404).json({ message: 'No se encontraron talonarios para esta rifa y voluntario.' });
+            }
+
+            // Responder con los datos
+            return res.status(200).json(talonarios);
+        } catch (error) {
+            console.error('Error al obtener talonarios por rifa y voluntario:', error);
+            return res.status(500).json({ message: 'Error interno del servidor.' });
+        }
+    },
+
     // Obtener rifa por ID
     async findById(req, res) {
         const id = req.params.id;
