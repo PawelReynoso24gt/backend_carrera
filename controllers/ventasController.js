@@ -566,7 +566,6 @@ module.exports = {
                     { transaction }
                 );
             }
-            console.log("Datos recibidos en createFullVenta:", req.body);
             await transaction.commit(); // Confirmar la transacción
             return res.status(201).json({
                 message: "Venta creada con éxito.",

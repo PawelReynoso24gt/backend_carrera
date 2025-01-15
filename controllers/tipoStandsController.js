@@ -6,8 +6,8 @@ const TipoStands = db.tipo_stands;
 
 // Función para validar los datos de entrada para create y update
 function validateTipoStandData(data) {
-    const tipoRegex = /^[A-Za-zÀ-ÿ\s]+$/; // Solo letras y espacios
-    const descripcionRegex = /^[A-ZÀ-ÿa-z0-9.,()"\s]+$/; // Letras, números, comas, puntos, paréntesis, comillas y espacios
+    const tipoRegex = /^[A-Za-zÀ-ÿ\s,.]+$/; // Solo letras y espacios
+    const descripcionRegex = /^[A-ZÀ-ÿa-z0-9.,()"\s,.:]+$/; // Letras, números, comas, puntos, paréntesis, comillas y espacios
 
     if (data.tipo !== undefined) {
         if (!tipoRegex.test(data.tipo)) {

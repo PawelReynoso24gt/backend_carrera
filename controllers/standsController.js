@@ -182,6 +182,67 @@ module.exports = {
             res.status(500).json({ error: 'Error al obtener los voluntarios asignados.' });
         }
     },
+
+    // Método para obtener los stands a los que está inscrito un voluntario
+    async getStandsDeVoluntario(req, res) {
+        const { idVoluntario } = req.params; // Supone que el id del voluntario se pasa como parámetro
+        try {
+            const asignaciones = await AsignacionStands.findAll({
+                where: { estado: 1 }, // Solo asignaciones activas
+                include: [
+                    {
+                        model: db.inscripcion_eventos,
+                        as: 'inscripcionEvento', // Alias definido en la relación
+                        where: { idVoluntario: idVoluntario }, // Filtrar por el id del voluntario
+                        include: [
+                            {
+                                model: db.voluntarios, // Modelo del voluntario
+                                as: 'voluntario', // Alias definido en la relación
+                                include: [
+                                    {
+                                        model: db.personas, // Si tienes un modelo de Persona
+                                        as: 'persona', // Alias definido
+                                    },
+                                ],
+                            },
+                        ],
+                    },
+                    {
+                        model: db.stands, // Modelo del stand
+                        as: 'stand', // Alias definido en la relación
+                        include: [
+                            {
+                                model: TipoStands,
+                                as: 'tipo_stand',
+                                attributes: ['idTipoStands', 'tipo']
+                            },
+                            {
+                                model: DetalleStands,
+                                as: 'detallesStands',
+                                attributes: ['idDetalleStands', 'cantidad', 'idProducto', 'idStand'],
+                                include: [
+                                    {
+                                        model: db.productos,
+                                        as: 'producto',
+                                        attributes: ['idProducto', 'nombreProducto', 'precio', 'foto', 'talla', 'descripcion', 'foto']
+                                    }
+                                ]
+                            },
+                        ],
+                    },
+                ],
+            });
+
+            if (!asignaciones || asignaciones.length === 0) {
+                return res.status(404).json({ message: 'No se encontraron stands asignados a este voluntario.' });
+            }
+
+            res.status(200).json(asignaciones);
+        } catch (error) {
+            console.error('Error al obtener stands asignados:', error);
+            res.status(500).json({ error: 'Error al obtener los stands asignados.' });
+        }
+    },
     
     async findActivateStand(req, res) {
         return STANDS.findAll({
@@ -256,6 +317,47 @@ async findVirtualStandProducts(req, res) {
     }
 },
 
+    // * metodo para el telefono
+    async findDetalleProductosVirtual(req, res) {
+        try {
+            const standVirtual = await db.stands.findOne({
+                where: {
+                    idStand: 1,
+                    idTipoStands: 1
+                }, // Busca el stand con idStand 1 y idTipoStands 1
+                include: [
+                    {
+                        model: DetalleStands,
+                        as: 'detallesStands',
+                        attributes: ['idDetalleStands', 'cantidad', 'idProducto', 'idStand'], // Incluye solo los detalles necesarios
+                        include: [
+                            {
+                                model: db.productos,
+                                as: 'producto',
+                                attributes: ['idProducto', 'nombreProducto', 'precio', 'descripcion', 'estado', 'foto', 'talla'], // Incluye solo los productos necesarios
+                            },
+                        ],
+                    },
+                    {
+                        model: TipoStands,
+                        as: 'tipo_stand',
+                        attributes: ['idTipoStands', 'tipo']
+                    }
+                ],
+            });
+
+            if (!standVirtual) {
+                return res.status(404).json({ message: 'No se encontró el stand con idStand 1 y idTipoStands 1.' });
+            }
+
+            return res.status(200).json(standVirtual); // Devuelve el stand con los detalles
+        } catch (error) {
+            console.error('Error al obtener los detalles del stand Virtual:', error);
+            return res.status(500).json({
+                message: 'Ocurrió un error al obtener los detalles del stand Virtual.',
+            });
+        }
+    },
 
     createStand: async (req, res) => {
         const datos = req.body;
@@ -266,8 +368,8 @@ async findVirtualStandProducts(req, res) {
         }
     
         // Expresiones regulares para validar el formato de los campos, incluyendo espacios
-        const regexNombreStand = /^[A-Za-z0-9\s-]+$/;
-        const regexDireccion = /^[A-Za-z0-9\s-]+$/;
+        const regexNombreStand = /^[A-Za-z0-9\s-,.:]+$/;
+        const regexDireccion = /^[A-Za-z0-9\s-,.:]+$/;
     
         if (!regexNombreStand.test(datos.nombreStand)) {
             return res.status(400).json({ message: 'El nombre del stand solo debe contener letras, números, guiones y espacios.' });
@@ -315,8 +417,8 @@ async findVirtualStandProducts(req, res) {
         const camposActualizados = {};
     
         // Validación de nombreStand y direccion si están presentes en los datos
-        const regexNombreStand = /^[A-Za-z0-9\s-]+$/;
-        const regexDireccion = /^[A-Za-z0-9\s-]+$/;
+        const regexNombreStand = /^[A-Za-z0-9\s-,.:]+$/;
+        const regexDireccion = /^[A-Za-z0-9\s-,.:]+$/;
     
         if (datos.nombreStand !== undefined) {
             if (!regexNombreStand.test(datos.nombreStand)) {
