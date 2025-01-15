@@ -4,6 +4,9 @@ const db = require('../models');
 const ASISTENCIA_EVENTOS = db.asistencia_eventos;
 const EMPLEADOS = db.empleados;
 const INSCRIPCION_EVENTOS = db.inscripcion_eventos;
+const EVENTOS = db.eventos;
+const VOLUNTARIOS = db.voluntarios;
+const PERSONAS = db.personas; 
 
 module.exports = {
     // Obtener todas las asistencias
@@ -19,7 +22,27 @@ module.exports = {
                     {
                         model: INSCRIPCION_EVENTOS,
                         as: 'inscripcionEvento',
-                        attributes: ['idInscripcionEvento', 'fechaHoraInscripcion', 'estado']
+                        attributes: ['idInscripcionEvento', 'fechaHoraInscripcion', 'estado'],
+                        include: [
+                            {
+                                model: EVENTOS, 
+                                as: 'evento',    
+                                attributes: ['idEvento', 'nombreEvento'] // Atributos que deseas obtener
+                            },
+                            {
+                                model: VOLUNTARIOS,
+                                as: 'voluntario',
+                                attributes: ['idVoluntario'],
+                                include:
+                                [
+                                    {
+                                        model: PERSONAS,
+                                        as: 'persona',
+                                        attributes:['nombre']
+                                    }
+                                ]
+                            }
+                        ]
                     }
                 ],
                 where: { estado: 1 } // Solo activos por defecto

@@ -345,17 +345,17 @@ module.exports = {
           const eventosEnRango = await eventos.findAll({
             where: {
               fechaHoraInicio: {
-                [Op.gte]: fechaInicioFormato,  // Mayor o igual que la fecha de inicio
+                [Op.gte]: fechaInicioFormato, // Mayor o igual que la fecha de inicio
               },
               fechaHoraFin: {
-                [Op.lte]: fechaFinFormato,  // Menor o igual que la fecha de fin
+                [Op.lte]: fechaFinFormato, // Menor o igual que la fecha de fin
               },
             },
             include: [
               {
                 model: recaudacion_eventos,
                 as: 'recaudaciones',
-                attributes: ['recaudacion'],
+                attributes: ['recaudacion', 'numeroPersonas'], // Incluye número de personas
               },
               {
                 model: inscripcion_eventos,
@@ -366,13 +366,14 @@ module.exports = {
                     as: 'asistencias',
                     attributes: ['idInscripcionEvento'],
                     where: {
-                      estado: 1  // Solo contar asistencias activas
-                    }
-                  }
-                ]
-              }
-            ]
+                      estado: 1, // Solo contar asistencias activas
+                    },
+                  },
+                ],
+              },
+            ],
           });
+          
       
           // Preparar los resultados
           const resultados = [];
@@ -380,7 +381,13 @@ module.exports = {
           for (const evento of eventosEnRango) {
             // Calcular la recaudación total del evento
             const recaudacionTotal = evento.recaudaciones.reduce((total, recaudacion) => total + parseFloat(recaudacion.recaudacion), 0);
-      
+            
+              const totalPersonas = evento.recaudaciones.reduce(
+                (total, recaudacion) => total + parseInt(recaudacion.numeroPersonas, 10),
+                0
+              );
+
+              
             // Contar la cantidad de voluntarios que asistieron
             const voluntariosAsistieron = new Set();
             evento.inscripciones.forEach(inscripcion => {
@@ -399,6 +406,7 @@ module.exports = {
               nombreEvento: evento.nombreEvento,
               recaudacionTotal,
               cantidadVoluntariosAsistieron,
+              numeroPersonas: totalPersonas, 
               fechaHoraInicio: evento.fechaHoraInicio,
               fechaHoraFin: evento.fechaHoraFin,
             });
