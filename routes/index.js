@@ -718,7 +718,7 @@ module.exports = (app) => {
   // * RUTAS DE REPORTES
   router.post('/reportesAspirantes', checkPermissions('Generar reporte aspirantes'), aspirantesController.reporteAspirantes);
   router.post("/reportesRifas", checkPermissions('Generar reporte rifas'), reportesController.reporteRifas);
-
+  router.get('/reportePedidos', detalle_pedidosController.reportePedidosConDetalle);
     // * ENDPOINT DE PERMISOS 
     router.get('/usuarios/permisos', obtenerPermisosController.getPermissionsForRole);
 
@@ -727,6 +727,7 @@ module.exports = (app) => {
 
     // * TRASLADOS COMPLETOS 
     router.get('/trasladosCompletos/:id', trasladosCompletosController.getDetalleTrasladoById);
+    router.get('/reporteTraslados', trasladosCompletosController.reporteTrasladosConDetalle);
     router.post('/trasladosCompletos', trasladosCompletosController.createTrasladoConDetalle);
     router.put('/trasladosCompletos/:id', trasladosCompletosController.updateTrasladoConDetalle);
 

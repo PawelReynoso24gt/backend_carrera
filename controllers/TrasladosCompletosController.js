@@ -2,6 +2,8 @@
 const db = require('../models');
 const { traslados, detalle_traslados, detalle_productos, productos, TipoTraslado } = db;
 const { Sequelize } = require('sequelize');
+const moment = require('moment'); // Asegúrate de tener instalada esta dependencia
+const { Op } = require('sequelize');
 
 module.exports = {
     async createTrasladoConDetalle(req, res) {
@@ -296,7 +298,73 @@ module.exports = {
             console.error('Error al obtener detalle del traslado:', error);
             return res.status(500).json({ message: 'Error al obtener detalle del traslado.' });
         }
+    },
+
+    async reporteTrasladosConDetalle(req, res) {
+        try {
+            const { fechaInicio, fechaFin } = req.query;
+    
+            // Verificar que las fechas se proporcionen
+            if (!fechaInicio || !fechaFin) {
+                return res.status(400).json({ message: 'Se requieren las fechas de inicio y fin.' });
+            }
+    
+            // Convertir las fechas de formato DD-MM-YYYY a YYYY-MM-DD
+            const fechaInicioFormato = fechaInicio.split("-").reverse().join("-");
+            const fechaFinFormato = fechaFin.split("-").reverse().join("-");
+    
+            // Validar que las fechas sean válidas
+            const fechaInicioValida = moment(fechaInicioFormato, 'YYYY-MM-DD', true).isValid();
+            const fechaFinValida = moment(fechaFinFormato, 'YYYY-MM-DD', true).isValid();
+    
+            if (!fechaInicioValida || !fechaFinValida) {
+                return res.status(400).json({ message: 'Las fechas no son válidas. Formato esperado: DD-MM-YYYY' });
+            }
+    
+            // Consultar traslados en el rango de fechas con sus detalles
+            const trasladosConDetalle = await traslados.findAll({
+                where: {
+                    fecha: {
+                        [Sequelize.Op.gte]: fechaInicioFormato,
+                        [Sequelize.Op.lte]: fechaFinFormato,
+                    },
+                },
+                include: [
+                    {
+                        model: detalle_traslados,
+                        include: [{ model: productos, as: 'producto' }]
+                    },
+                    { model: TipoTraslado, as: 'tipoTraslado' }
+                ],
+            });
+    
+            // Verificar si se encontraron traslados
+            if (trasladosConDetalle.length === 0) {
+                return res.status(404).json({ message: 'No se encontraron traslados en el rango de fechas especificado.' });
+            }
+    
+            // Formatear los resultados
+            const reporte = trasladosConDetalle.map(traslado => {
+                return {
+                    idTraslado: traslado.idTraslado,
+                    fecha: moment(traslado.fecha).format('DD/MM/YYYY'),
+                    descripcion: traslado.descripcion,
+                    tipo: traslado.tipoTraslado.tipo,
+                    detalles: traslado.detalle_traslados.map(detalle => ({
+                        idProducto: detalle.idProducto,
+                        nombreProducto: detalle.producto.nombreProducto,
+                        cantidad: detalle.cantidad,
+                    })),
+                };
+            });
+    
+            return res.status(200).json({ reporte });
+        } catch (error) {
+            console.error('Error al obtener el reporte de traslados con detalle:', error);
+            return res.status(500).json({ message: 'Error al obtener el reporte de traslados con detalle.' });
+        }
     }
+    
     
 
 };

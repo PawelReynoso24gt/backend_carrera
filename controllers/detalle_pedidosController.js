@@ -4,6 +4,9 @@ const DetallePedido = db.detalle_pedidos;
 const Pedidos = db.pedidos;
 const Productos = db.productos;
 const { parseISO, startOfDay, format } = require('date-fns');
+const { Sequelize } = require('sequelize');
+const moment = require('moment'); // Asegúrate de tener instalada esta dependencia
+const { Op } = require('sequelize');
 
 module.exports = {
   // Obtener todos los detalles de pedidos activos
@@ -306,6 +309,83 @@ async getPedidoConDetalle(req, res) {
   } catch (error) {
       console.error('Error al obtener pedido con detalle:', error);
       return res.status(500).json({ message: 'Error al obtener pedido con detalle.' });
+  }
+},
+
+async reportePedidosConDetalle(req, res) {
+  try {
+      const { fechaInicio, fechaFin } = req.query;
+
+      // Verificar que las fechas se proporcionen
+      if (!fechaInicio || !fechaFin) {
+          return res.status(400).json({ message: 'Se requieren las fechas de inicio y fin.' });
+      }
+
+      // Convertir las fechas de formato DD-MM-YYYY a YYYY-MM-DD
+      const fechaInicioFormato = fechaInicio.split("-").reverse().join("-");
+      const fechaFinFormato = fechaFin.split("-").reverse().join("-");
+
+      // Validar que las fechas sean válidas
+      const fechaInicioValida = moment(fechaInicioFormato, 'YYYY-MM-DD', true).isValid();
+      const fechaFinValida = moment(fechaFinFormato, 'YYYY-MM-DD', true).isValid();
+
+      if (!fechaInicioValida || !fechaFinValida) {
+          return res.status(400).json({ message: 'Las fechas no son válidas. Formato esperado: DD-MM-YYYY' });
+      }
+
+      // Consultar pedidos en el rango de fechas con sus detalles
+      const pedidosConDetalle = await Pedidos.findAll({
+          where: {
+              fecha: {
+                  [Sequelize.Op.gte]: fechaInicioFormato,
+                  [Sequelize.Op.lte]: fechaFinFormato,
+              },
+          },
+          include: [
+              {
+                  model: DetallePedido,
+                  include: [
+                      {
+                          model: Productos,
+                          attributes: ['idProducto', 'nombreProducto', 'descripcion', 'precio']
+                      }
+                  ],
+                  attributes: ['idDetallePedido', 'cantidad', 'estado']
+              }
+          ],
+          attributes: ['idPedido', 'fecha', 'descripcion', 'estado', 'idSede', 'idUsuario']
+      });
+
+      // Verificar si se encontraron pedidos
+      if (pedidosConDetalle.length === 0) {
+          return res.status(404).json({ message: 'No se encontraron pedidos en el rango de fechas especificado.' });
+      }
+
+      // Formatear los resultados
+      const reporte = pedidosConDetalle.map(pedido => {
+        return {
+            idPedido: pedido.idPedido,
+            fecha: moment(pedido.fecha).format('DD/MM/YYYY'),
+            descripcion: pedido.descripcion,
+            estado: pedido.estado,
+            idSede: pedido.idSede,
+            idUsuario: pedido.idUsuario,
+            detalles: pedido.detalle_pedidos.map(detalle => ({  // Cambiar 'DetallePedidos' por 'detalle_pedidos'
+                idDetallePedido: detalle.idDetallePedido,
+                idProducto: detalle.idProducto,
+                nombreProducto: detalle.producto.nombreProducto,
+                descripcionProducto: detalle.producto.descripcion,
+                precioProducto: detalle.producto.precio,
+                cantidad: detalle.cantidad,
+                estado: detalle.estado
+            }))
+        };
+    });
+
+      return res.status(200).json({ reporte });
+  } catch (error) {
+      console.error('Error al obtener el reporte de pedidos con detalle:', error);
+      return res.status(500).json({ message: 'Error al obtener el reporte de pedidos con detalle.' });
   }
 }
 
