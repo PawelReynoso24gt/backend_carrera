@@ -301,6 +301,7 @@ module.exports = {
             usuario: datos.usuario,
             contrasenia: hashPassword(datos.contrasenia),
             changedPassword: 0,
+            passwordCreatedAt: new Date(),
             estado: 1,
             idRol: datos.idRol,
             idSede: datos.idSede,
@@ -375,6 +376,7 @@ module.exports = {
 
             // Actualizar la contraseña con SHA-256
             user.contrasenia = hashPassword(newPassword);
+            user.passwordCreatedAt = new Date(); // Actualizar la fecha de creación de la contraseña
             user.changedPassword = 1; // Marcar la contraseña como cambiada
             await user.save();
 
@@ -405,6 +407,8 @@ module.exports = {
 
             // Actualizar la contraseña con SHA-256
             user.contrasenia = hashPassword(newPassword);
+            user.changedPassword = 0; // Marcar la contraseña como cambiada
+            user.passwordCreatedAt = new Date(); // Actualizar la fecha de creación de la contraseña
             await user.save();
 
             return res.status(200).send('La contraseña ha sido reiniciada exitosamente');
@@ -440,23 +444,31 @@ module.exports = {
     async verifyChangedPassword(req, res) {
         try {
             const idUsuario = req.userId; // Obtenido del token
-            // console.log("ID del usuario autenticado:", idUsuario);
-
+            const PASSWORD_CHANGE_GRACE_PERIOD = 15; // Período de gracia en días
+    
             const user = await USERS.findByPk(idUsuario, {
-                attributes: ['changedPassword'], // Solo obtenemos los campos necesarios
+                attributes: ['changedPassword', 'passwordCreatedAt'], // Obtener también la fecha de creación de la contraseña
             });
-
+    
             if (!user) {
                 return res.status(404).send({ message: 'Usuario no encontrado.' });
             }
-
+    
             if (user.changedPassword === 0) {
+                const now = new Date();
+                const passwordExpirationDate = new Date(user.passwordCreatedAt);
+                passwordExpirationDate.setDate(passwordExpirationDate.getDate() + PASSWORD_CHANGE_GRACE_PERIOD);
+    
+                const timeDiff = passwordExpirationDate - now;
+                const daysRemaining = Math.ceil(timeDiff / (1000 * 60 * 60 * 24));
+    
                 return res.status(200).send({
                     changedPassword: 0,
-                    message: 'Necesitas cambiar tu contraseña.',
+                    daysRemaining: daysRemaining,
+                    message: `Necesitas cambiar tu contraseña. Te quedan ${daysRemaining} días para cambiarla, de lo contrario, tu usuario será bloqueado.`,
                 });
             }
-
+    
             return res.status(200).send({
                 changedPassword: 1,
                 message: 'Tu contraseña ya ha sido cambiada.',
