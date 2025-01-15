@@ -62,9 +62,26 @@ function validatePasswordChange(currentPassword, newPassword) {
     if (!currentPassword) {
         return 'La contraseña actual es requerida';
     }
-    if (!newPassword || newPassword.length < 8) {
-        return 'La nueva contraseña debe tener al menos 8 caracteres';
+    const validatePassword = (password) => {
+        if (password.length < 8) {
+            return "La contraseña es demasiado corta.";
+        } else if (!/[A-Z]/.test(password)) {
+            return "La contraseña debe contener al menos una letra mayúscula.";
+        } else if (!/[a-z]/.test(password)) {
+            return "La contraseña debe contener al menos una letra minúscula.";
+        } else if (!/[0-9]/.test(password)) {
+            return "La contraseña debe contener al menos un número.";
+        } else if (!/[!@#$%^&*]/.test(password)) {
+            return "La contraseña debe contener al menos un carácter especial.";
+        }
+        return null;
+    };
+
+    const passwordError = validatePassword(newPassword);
+    if (passwordError) {
+        return passwordError;
     }
+
     return null;
 }
 
@@ -445,30 +462,30 @@ module.exports = {
         try {
             const idUsuario = req.userId; // Obtenido del token
             const PASSWORD_CHANGE_GRACE_PERIOD = 15; // Período de gracia en días
-    
+
             const user = await USERS.findByPk(idUsuario, {
                 attributes: ['changedPassword', 'passwordCreatedAt'], // Obtener también la fecha de creación de la contraseña
             });
-    
+
             if (!user) {
                 return res.status(404).send({ message: 'Usuario no encontrado.' });
             }
-    
+
             if (user.changedPassword === 0) {
                 const now = new Date();
                 const passwordExpirationDate = new Date(user.passwordCreatedAt);
                 passwordExpirationDate.setDate(passwordExpirationDate.getDate() + PASSWORD_CHANGE_GRACE_PERIOD);
-    
+
                 const timeDiff = passwordExpirationDate - now;
                 const daysRemaining = Math.ceil(timeDiff / (1000 * 60 * 60 * 24));
-    
+
                 return res.status(200).send({
                     changedPassword: 0,
                     daysRemaining: daysRemaining,
                     message: `Necesitas cambiar tu contraseña. Te quedan ${daysRemaining} días para cambiarla, de lo contrario, tu usuario será bloqueado.`,
                 });
             }
-    
+
             return res.status(200).send({
                 changedPassword: 1,
                 message: 'Tu contraseña ya ha sido cambiada.',
