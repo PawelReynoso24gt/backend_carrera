@@ -626,6 +626,7 @@ module.exports = (app) => {
   router.get('/aspirantes/activos', checkPermissions('Ver aspirantes'), aspirantesController.findActive);
   router.get('/aspirantes/inactivos', checkPermissions('Ver aspirantes'), aspirantesController.findInactive);
   router.get('/aspirantes/estado/:idAspirante', aspirantesController.verifyStatus);
+  router.get('/aspirantes/:idAspirante', aspirantesController.findOne);
     router.post('/aspirantes', aspirantesController.create);
   router.put('/aspirantes/:idAspirante', aspirantesController.update);
   router.get('/aspirantes', aspirantesController.findAll);
