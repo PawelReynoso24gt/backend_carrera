@@ -215,12 +215,16 @@ module.exports = {
         }
     
         if (datos.idCategoria !== undefined) {
-            // Verificar si la categoría existe
-            const categoria = await CATEGORIAS.findByPk(datos.idCategoria);
+            const idCategoria = parseInt(datos.idCategoria, 10);
+            if (isNaN(idCategoria)) {
+                return res.status(400).json({ message: 'El ID de categoría es inválido.' });
+            }
+
+            const categoria = await CATEGORIAS.findByPk(idCategoria);
             if (!categoria) {
                 return res.status(400).json({ message: 'La categoría especificada no existe.' });
             }
-            camposActualizados.idCategoria = datos.idCategoria;
+            camposActualizados.idCategoria = idCategoria;
         }
     
         if (datos.estado !== undefined) {

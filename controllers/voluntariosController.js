@@ -132,7 +132,7 @@ module.exports = {
         const datos_ingreso = {
             codigoQR: generateQRCode(), // Generar el código QR
             fechaRegistro: datos.fechaRegistro,
-            fechaSalida: null,
+            fechaSalida: datos.fechaSalida || null,
             estado: datos.estado !== undefined ? datos.estado : 1,
             idPersona: datos.idPersona,
         };
