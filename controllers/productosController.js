@@ -266,6 +266,35 @@ module.exports = {
         }
     },  
 
+    // Actualizar el estado de un producto existente
+    async updateEstado(req, res) {
+        const { estado } = req.body;
+        const id = req.params.id;
+
+        // Validar que estado sea un número (por ejemplo, 0 o 1)
+        if (![0, 1].includes(parseInt(estado, 10))) {
+            return res.status(400).json({ message: 'El estado debe ser 0 (inactivo) o 1 (activo).' });
+        }
+
+        try {
+            const [rowsUpdated] = await PRODUCTOS.update(
+                { estado: parseInt(estado, 10) },
+                {
+                    where: { idProducto: id }
+                }
+            );
+
+            if (rowsUpdated === 0) {
+                return res.status(404).json({ message: 'Producto no encontrado' });
+            }
+
+            return res.status(200).json({ message: 'El estado del producto ha sido actualizado' });
+        } catch (error) {
+            console.error(`Error al actualizar el estado del producto con ID ${id}:`, error);
+            return res.status(500).json({ error: 'Error al actualizar el estado del producto' });
+        }
+    },
+
     // Eliminar un producto
     async delete(req, res) {
         const id = req.params.id; 

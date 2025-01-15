@@ -72,6 +72,7 @@ const tipoNotificacionesController = require('../controllers/tipoNotificacionCon
 const tipo_situacionesController = require('../controllers/tipo_situacionesController');
 const situacionesController = require('../controllers/situacionesController');
 const reportesController = require('../controllers/reportesController');
+const { ro } = require('date-fns/locale');
 
 module.exports = (app) => {
 
@@ -234,6 +235,7 @@ module.exports = (app) => {
   router.get('/productos/inactivos', productosController.findInactive);
   //router.get('/productos/:id', productosController.findById); 
   router.post('/productos', uploadP.single('foto'), productosController.create);
+  router.put('/productos/estado/:id', productosController.updateEstado);
   router.put('/productos/:id', uploadP.single('foto'), productosController.update);
   router.delete('/productos/:id', productosController.delete);
 
@@ -620,9 +622,6 @@ module.exports = (app) => {
 
   // * RUTAS BITACORAS
   router.get('/bitacora', bitacorasController.find);
-  router.get('/bitacora/problemas', bitacorasController.findProblemaDetectado);
-  router.get('/bitacora/problemasRevision', bitacorasController.findProblemaRevision);
-  router.get('/bitacora/problemasSolucionados', bitacorasController.findProblemaSolucionado);
   router.get('/bitacora/notificacionGeneralEvento', bitacorasController.findCatEvento);
   router.get('/bitacora/:id', bitacorasController.findById);
   router.post('/bitacora/create', bitacorasController.createBitacora);

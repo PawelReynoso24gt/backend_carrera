@@ -33,7 +33,7 @@ const storage = multer.diskStorage({
         if (!fs.existsSync(folder)) {
             fs.mkdirSync(folder, { recursive: true });
         }
-        console.log(`Guardando archivo en: ${folder}`); // Log del directorio
+        //console.log(`Guardando archivo en: ${folder}`); // Log del directorio
         cb(null, folder);
     },
     filename: (req, file, cb) => {

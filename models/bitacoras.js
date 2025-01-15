@@ -36,12 +36,13 @@ module.exports = (sequelize, DataTypes) => {
         allowNull: false,
       },
       estado: {
-        type: DataTypes.STRING(150),
+        type: DataTypes.INTEGER,
         allowNull: false,
+        defaultValue: 1,
       },
       idUsuario: {
         type: DataTypes.INTEGER,
-        allowNull: false,
+        allowNull: true,
         references: {
           model: 'usuarios',
           key: 'idUsuario',
