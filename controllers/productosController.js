@@ -215,12 +215,16 @@ module.exports = {
         }
     
         if (datos.idCategoria !== undefined) {
-            // Verificar si la categoría existe
-            const categoria = await CATEGORIAS.findByPk(datos.idCategoria);
+            const idCategoria = parseInt(datos.idCategoria, 10);
+            if (isNaN(idCategoria)) {
+                return res.status(400).json({ message: 'El ID de categoría es inválido.' });
+            }
+
+            const categoria = await CATEGORIAS.findByPk(idCategoria);
             if (!categoria) {
                 return res.status(400).json({ message: 'La categoría especificada no existe.' });
             }
-            camposActualizados.idCategoria = datos.idCategoria;
+            camposActualizados.idCategoria = idCategoria;
         }
     
         if (datos.estado !== undefined) {
@@ -265,6 +269,35 @@ module.exports = {
             return res.status(500).json({ error: 'Error al actualizar el producto' });
         }
     },  
+
+    // Actualizar el estado de un producto existente
+    async updateEstado(req, res) {
+        const { estado } = req.body;
+        const id = req.params.id;
+
+        // Validar que estado sea un número (por ejemplo, 0 o 1)
+        if (![0, 1].includes(parseInt(estado, 10))) {
+            return res.status(400).json({ message: 'El estado debe ser 0 (inactivo) o 1 (activo).' });
+        }
+
+        try {
+            const [rowsUpdated] = await PRODUCTOS.update(
+                { estado: parseInt(estado, 10) },
+                {
+                    where: { idProducto: id }
+                }
+            );
+
+            if (rowsUpdated === 0) {
+                return res.status(404).json({ message: 'Producto no encontrado' });
+            }
+
+            return res.status(200).json({ message: 'El estado del producto ha sido actualizado' });
+        } catch (error) {
+            console.error(`Error al actualizar el estado del producto con ID ${id}:`, error);
+            return res.status(500).json({ error: 'Error al actualizar el estado del producto' });
+        }
+    },
 
     // Eliminar un producto
     async delete(req, res) {

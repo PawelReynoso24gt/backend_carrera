@@ -229,7 +229,7 @@ module.exports = {
     const id = req.params.id;
     const datos = req.body;
 
-    console.log("Datos recibidos del frontend:", datos); // Verifica los datos recibido
+    //console.log("Datos recibidos del frontend:", datos); // Verifica los datos recibido
   
     const camposActualizados = {};
   

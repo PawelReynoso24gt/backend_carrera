@@ -566,7 +566,6 @@ module.exports = {
                     { transaction }
                 );
             }
-            console.log("Datos recibidos en createFullVenta:", req.body);
             await transaction.commit(); // Confirmar la transacción
             return res.status(201).json({
                 message: "Venta creada con éxito.",
@@ -740,7 +739,7 @@ module.exports = {
     async createFullVentaStand(req, res) {
         const { venta, detalles, pagos } = req.body;
 
-        console.log("Datos recibidos para actualizar:", req.body);
+        //console.log("Datos recibidos para actualizar:", req.body);
 
         // Validar datos generales
         if (!venta || !detalles || !pagos) {
@@ -778,7 +777,7 @@ module.exports = {
 
             if (esPagoSolicitado) {
             // Lógica para pagos solicitados directamente aquí
-            console.log('Procesando pagos solicitados');
+            //console.log('Procesando pagos solicitados');
             
             // Validar que todos los detalles tengan un voluntario
             for (const detalle of detalles) {
@@ -875,7 +874,7 @@ module.exports = {
             });
 
             } else {
-                console.log('Procesando lógica para otros pagos');
+                //console.log('Procesando lógica para otros pagos');
                 // Crear la venta principal
                 const nuevaVenta = await VENTAS.create(
                     {
@@ -1055,7 +1054,7 @@ module.exports = {
         const { idVenta } = req.params;
         const { venta, detalles, pagos } = req.body;
     
-        console.log("Datos recibidos para actualizar:", req.body);
+        //console.log("Datos recibidos para actualizar:", req.body);
     
         if (!idVenta || !venta || !detalles || !pagos) {
             return res.status(400).json({ message: "Faltan datos para actualizar la venta." });
@@ -1210,7 +1209,7 @@ module.exports = {
         const { idVenta } = req.params;
         const { venta, detalles, pagos } = req.body;
     
-        console.log("datos recibidos:", req.body);
+        //console.log("datos recibidos:", req.body);
     
         if (!venta || !detalles || !pagos || !idVenta) {
             console.error('Datos recibidos son inválidos:', req.body);

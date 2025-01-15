@@ -132,7 +132,7 @@ module.exports = {
         const datos_ingreso = {
             codigoQR: generateQRCode(), // Generar el código QR
             fechaRegistro: datos.fechaRegistro,
-            fechaSalida: null,
+            fechaSalida: datos.fechaSalida || null,
             estado: datos.estado !== undefined ? datos.estado : 1,
             idPersona: datos.idPersona,
         };
@@ -246,5 +246,48 @@ module.exports = {
         console.error('Error al buscar voluntarios con productos asignados:', error);
         return res.status(500).json({ message: 'Ocurrió un error al buscar voluntarios con productos asignados.' });
         }
-    },  
+    }, 
+    
+    // productos por id de voluntarios
+    async findWithAssignedProductsById(req, res) {
+        const { idVoluntario } = req.params;
+    
+        try {
+            const voluntarioConProductos = await db.voluntarios.findOne({
+                include: [
+                    {
+                        model: db.detalle_productos_voluntarios,
+                        as: 'detalle_productos_voluntarios',
+                        required: true, // Solo trae el voluntario si tiene productos asignados
+                        attributes: ['idProducto', 'cantidad'], // Datos necesarios
+                        include: [
+                            {
+                                model: db.productos,
+                                as: 'producto',
+                                attributes: ['idProducto', 'nombreProducto', 'precio', 'foto'], // Información del producto
+                            },
+                        ],
+                    },
+                    {
+                        model: db.personas,
+                        as: 'persona',
+                        attributes: ['idPersona', 'nombre', 'telefono', 'domicilio'], // Información del voluntario
+                    },
+                ],
+                where: {
+                    idVoluntario: idVoluntario,
+                    estado: 1
+                }
+            });
+    
+            if (!voluntarioConProductos) {
+                return res.status(404).json({ message: 'No se encontró el voluntario con productos asignados.' });
+            }
+    
+            return res.status(200).json(voluntarioConProductos);
+        } catch (error) {
+            console.error('Error al buscar el voluntario con productos asignados:', error);
+            return res.status(500).json({ message: 'Ocurrió un error al buscar el voluntario con productos asignados.' });
+        }
+    },
 };

@@ -76,6 +76,7 @@ const reportesController = require('../controllers/reportesController');
 const obtenerPermisosController = require('../controllers/obtenerPermisosController');
 const voluntarioDelMesController = require('../controllers/voluntarioDelMes');
 const trasladosCompletosController = require('../controllers/TrasladosCompletosController');
+const { ro } = require('date-fns/locale');
 
 module.exports = (app) => {
 
@@ -244,6 +245,7 @@ module.exports = (app) => {
   router.get('/productos/inactivos', checkPermissions('Ver productos'), productosController.findInactive);
   //router.get('/productos/:id', productosController.findById); 
   router.post('/productos', uploadP.single('foto'), productosController.create);
+  router.put('/productos/estado/:id', productosController.updateEstado);
   router.put('/productos/:id', uploadP.single('foto'), productosController.update);
   router.delete('/productos/:id', productosController.delete);
 
@@ -252,6 +254,7 @@ module.exports = (app) => {
     router.get('/rifas/activos', checkPermissions('Ver rifas'), rifasController.findActive);
     router.get('/rifas/inactivos', checkPermissions('Ver rifas'), rifasController.findInactive);
     router.get('/rifas/talonarios/:idRifa', rifasController.findTalonariosVoluntarios);
+  router.get('/rifas/voluntarios/talonarios/:idVoluntario/:idRifa', rifasController.findVoluntariosTalonarios);
     router.get('/rifas/:id', rifasController.findById);
     router.post('/rifas', rifasController.create);
     router.put('/rifas/:id', rifasController.update);
@@ -268,18 +271,20 @@ module.exports = (app) => {
     router.delete('/pedidos/:idPedido', pedidosController.delete);
 
 
-    // * RUTAS DE STAND
-    router.get('/stand', checkPermissions('Ver stands'), standsController.find);
-    router.get('/stand/activas', checkPermissions('Ver stands'), standsController.findActivateStand);
-    router.get('/stand/inactivas', checkPermissions('Ver stands'), standsController.findaInactivateStand);
-    router.get('/stands/virtual/products', checkPermissions('Ver stand virtual'), standsController.findVirtualStandProducts);
-    router.get('/stands/detalles', standsController.findStandDetalles);
-    router.get('/stands/voluntarios/:idStand', standsController.getVoluntariosEnStands);
-    router.post('/stand/create', standsController.createStand);
-    router.put('/stand/update/:id', standsController.updateStand);
-    router.delete('/stand/:id', standsController.deleteStand);
-    
-    // * RUTAS DE MUNICIPIOS
+      // * RUTAS DE STAND
+      router.get('/stand', checkPermissions('Ver stands'), standsController.find);
+      router.get('/stand/activas', checkPermissions('Ver stands'), standsController.findActivateStand);
+      router.get('/stand/inactivas', checkPermissions('Ver stands'), standsController.findaInactivateStand);
+      router.get('/stands/virtual/products', checkPermissions('Ver stand virtual'), standsController.findVirtualStandProducts);
+    router.get('/stands/virtual/productos/detalles', standsController.findDetalleProductosVirtual);
+      router.get('/stands/detalles', standsController.findStandDetalles);
+      router.get('/stands/voluntarios/:idStand', standsController.getVoluntariosEnStands);
+    router.get('/stands/voluntarios/inscritos/:idVoluntario', standsController.getStandsDeVoluntario);
+      router.post('/stand/create', standsController.createStand);
+      router.put('/stand/update/:id', standsController.updateStand);
+      router.delete('/stand/:id', standsController.deleteStand);
+        
+        // * RUTAS DE MUNICIPIOS
     router.get('/municipios', checkPermissions('Ver municipios'),  municipiosController.find);
     router.get('/municipios/activas', checkPermissions('Ver municipios'),  municipiosController.findActivateMunicipios);
     router.get('/municipios/inactivas', checkPermissions('Ver municipios'),  municipiosController.findInactiveMunicipios);
@@ -359,15 +364,16 @@ module.exports = (app) => {
   router.put('/talonarios/update/:id', talonariosController.updateTalo);
   router.delete('/talonarios/delete/:id', talonariosController.deleteTalo);
 
-  // * RUTAS DE VOLUNTARIOS
-  router.get('/voluntarios', checkPermissions('Ver voluntarios'), voluntariosController.find);
-  router.get('/voluntarios/conProductos', voluntariosController.findWithAssignedProducts);
-  router.get('/voluntarios/activos', checkPermissions('Ver voluntarios'), voluntariosController.findActivateVol);
-  router.get('/voluntarios/inactivos', checkPermissions('Ver voluntarios'), voluntariosController.findaInactivateVol);
-  router.get('/voluntarios/:id', voluntariosController.findById);
-  router.post('/voluntarios/create', voluntariosController.createVol);
-  router.put('/voluntarios/update/:id', voluntariosController.updateVol);
-  router.delete('/voluntarios/delete/:id', voluntariosController.deleteVol);
+    // * RUTAS DE VOLUNTARIOS
+    router.get('/voluntarios', checkPermissions('Ver voluntarios'), voluntariosController.find);
+    router.get('/voluntarios/conProductos', voluntariosController.findWithAssignedProducts);
+    router.get('/voluntarios/conProductos/:idVoluntario', voluntariosController.findWithAssignedProductsById);
+    router.get('/voluntarios/activos', checkPermissions('Ver voluntarios'), voluntariosController.findActivateVol); 
+    router.get('/voluntarios/inactivos', checkPermissions('Ver voluntarios'), voluntariosController.findaInactivateVol);
+    router.get('/voluntarios/:id', voluntariosController.findById);
+    router.post('/voluntarios/create', voluntariosController.createVol);
+    router.put('/voluntarios/update/:id', voluntariosController.updateVol); 
+    router.delete('/voluntarios/delete/:id', voluntariosController.deleteVol);
 
   // * RUTAS DE ACTIVIDADES
   router.get('/actividades', checkPermissions('Ver actividades'), actividadesController.find);
@@ -632,9 +638,6 @@ module.exports = (app) => {
 
   // * RUTAS BITACORAS
   router.get('/bitacora', checkPermissions('Ver bitácoras'), bitacorasController.find);
-  router.get('/bitacora/problemas', bitacorasController.findProblemaDetectado);
-  router.get('/bitacora/problemasRevision', bitacorasController.findProblemaRevision);
-  router.get('/bitacora/problemasSolucionados', bitacorasController.findProblemaSolucionado);
   router.get('/bitacora/notificacionGeneralEvento', bitacorasController.findCatEvento);
   router.get('/bitacora/:id', bitacorasController.findById);
   router.post('/bitacora/create', bitacorasController.createBitacora);

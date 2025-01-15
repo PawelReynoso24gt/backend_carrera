@@ -2,6 +2,7 @@
 const db = require('../models');
 const Bitacora = db.bitacoras;
 const Usuarios = db.usuarios;
+const Personas = db.personas;
 const CategoriasBitacora = db.categoria_bitacoras;
 
 module.exports = {
@@ -9,7 +10,26 @@ module.exports = {
   async find(req, res) {
     try {
       const bitacoras = await Bitacora.findAll({
-        where: { estado: 'activo' },
+        where: { estado: 1 },
+        include: [
+          {
+            model: Usuarios,
+            as: 'usuario',
+            attributes: ['idUsuario'],
+            include: [
+              {
+                model: Personas,
+                as: 'persona',
+                attributes: ['idPersona', 'nombre'],
+              },
+            ],
+          },
+          {
+            model: CategoriasBitacora,
+            as: 'categoria_bitacora',
+            attributes: ['idCategoriaBitacora', 'categoria'],
+          },
+        ],
       });
       return res.status(200).json(bitacoras);
     } catch (error) {
@@ -24,94 +44,7 @@ module.exports = {
   async findCatEvento(req, res) {
     try {
       const bitacoras = await Bitacora.findAll({
-        where: { estado: 'mostrar', idCategoriaBitacora: 7 },
-      });
-      return res.status(200).json(bitacoras);
-    } catch (error) {
-      console.error('Error al recuperar las bitácoras:', error);
-      return res.status(500).json({
-        message: 'Ocurrió un error al recuperar los datos.',
-      });
-    }
-  },
-
-  // Obtener los problemas detectados con información del usuario
-  async findProblemaDetectado(req, res) {
-    try {
-      const bitacoras = await Bitacora.findAll({
-        where: { estado: 'problema detectado' },
-        include: [
-          {
-            model: db.usuarios, // El modelo relacionado
-            as: 'usuario', // Alias definido en la asociación del modelo de bitácoras
-            attributes: ['idUsuario', 'usuario'], // Campos específicos que quieres traer
-            include: [
-              {
-                model: db.personas, // Incluir el modelo relacionado con usuarios (opcional)
-                as: 'persona', // Alias definido en el modelo
-                attributes: ['idPersona', 'nombre'], // Campos que quieras de personas
-              },
-            ],
-          },
-        ],
-      });
-      return res.status(200).json(bitacoras);
-    } catch (error) {
-      console.error('Error al recuperar las bitácoras:', error);
-      return res.status(500).json({
-        message: 'Ocurrió un error al recuperar los datos.',
-      });
-    }
-  },
-
-  // Obtener los problemas en revisión
-  async findProblemaRevision(req, res) {
-    try {
-      const bitacoras = await Bitacora.findAll({
-        where: { estado: 'problema en revisión' },
-        include: [
-          {
-            model: db.usuarios, // El modelo relacionado
-            as: 'usuario', // Alias definido en la asociación del modelo de bitácoras
-            attributes: ['idUsuario', 'usuario'], // Campos específicos que quieres traer
-            include: [
-              {
-                model: db.personas, // Incluir el modelo relacionado con usuarios (opcional)
-                as: 'persona', // Alias definido en el modelo
-                attributes: ['idPersona', 'nombre'], // Campos que quieras de personas
-              },
-            ],
-          },
-        ],
-      });
-      return res.status(200).json(bitacoras);
-    } catch (error) {
-      console.error('Error al recuperar las bitácoras:', error);
-      return res.status(500).json({
-        message: 'Ocurrió un error al recuperar los datos.',
-      });
-    }
-  },
-
-  // Obtener los problemas solucionados
-  async findProblemaSolucionado(req, res) {
-    try {
-      const bitacoras = await Bitacora.findAll({
-        where: { estado: 'problema solucionado' },
-        include: [
-          {
-            model: db.usuarios, // El modelo relacionado
-            as: 'usuario', // Alias definido en la asociación del modelo de bitácoras
-            attributes: ['idUsuario', 'usuario'], // Campos específicos que quieres traer
-            include: [
-              {
-                model: db.personas, // Incluir el modelo relacionado con usuarios (opcional)
-                as: 'persona', // Alias definido en el modelo
-                attributes: ['idPersona', 'nombre'], // Campos que quieras de personas
-              },
-            ],
-          },
-        ],
+        where: { estado: 1, idCategoriaBitacora: 7 },
       });
       return res.status(200).json(bitacoras);
     } catch (error) {
@@ -144,15 +77,20 @@ module.exports = {
   async createBitacora(req, res) {
     const datos = req.body;
 
-    if (!datos.fechaHora || !datos.descripcion || !datos.estado || !datos.idUsuario || !datos.idCategoriaBitacora) {
+    // Asegurar que estado tenga un valor por defecto de 1
+    const estado = datos.estado !== undefined ? datos.estado : 1;
+
+    if (!datos.descripcion || !datos.idCategoriaBitacora) {
       return res.status(400).json({ message: 'Faltan campos requeridos.' });
     }
 
     try {
-      // Validar que el usuario exista
-      const usuarioExistente = await Usuarios.findByPk(datos.idUsuario);
-      if (!usuarioExistente) {
-        return res.status(400).json({ error: 'El idUsuario ingresado no existe.' });
+      // Validar que el usuario exista solo si idUsuario no es null
+      if (datos.idUsuario !== null) {
+        const usuarioExistente = await Usuarios.findByPk(datos.idUsuario);
+        if (!usuarioExistente) {
+          return res.status(400).json({ error: 'El idUsuario ingresado no existe.' });
+        }
       }
 
       // Validar que la categoría exista
@@ -162,10 +100,10 @@ module.exports = {
       }
 
       const nuevaBitacora = await Bitacora.create({
-        fechaHora: datos.fechaHora,
+        fechaHora: new Date(), // Establecer la fecha y hora actual
         descripcion: datos.descripcion,
-        estado: datos.estado,
-        idUsuario: datos.idUsuario,
+        estado: estado,
+        idUsuario: datos.idUsuario || null,
         idCategoriaBitacora: datos.idCategoriaBitacora,
       });
 
