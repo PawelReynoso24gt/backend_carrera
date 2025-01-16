@@ -73,5 +73,34 @@ module.exports = {
             console.error('Error al actualizar la notificación:', error);
             return res.status(500).json({ message: 'Error al actualizar la notificación' });
         }
-    }        
+    },
+    
+    // Crear una nueva notificación
+    async create(req, res) {
+        try {
+            const { idBitacora, idTipoNotificacion, idPersona } = req.body;
+
+            // Verificar que todos los campos necesarios están presentes
+            if (!idBitacora || !idTipoNotificacion || !idPersona) {
+                return res.status(400).json({ message: 'Todos los campos son requeridos: idBitacora, idTipoNotificacion, idPersona.' });
+            }
+
+            // Crear una nueva notificación con estado 1
+            const newNotificacion = await NOTIFICACIONES.create({
+                idBitacora,
+                idTipoNotificacion,
+                idPersona,
+                estado: 1,
+                fechaHora: new Date() // Puedes especificar una fecha y hora personalizada si es necesario
+            });
+
+            return res.status(201).json({
+                message: "Notificación creada exitosamente",
+                notificacion: newNotificacion
+            });
+        } catch (error) {
+            console.error('Error al crear la notificación:', error);
+            return res.status(500).json({ message: 'Error al crear la notificación' });
+        }
+    }
 };

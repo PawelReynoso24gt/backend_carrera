@@ -3,6 +3,10 @@ const db = require('../models');
 const DetallePedido = db.detalle_pedidos;
 const Pedidos = db.pedidos;
 const Productos = db.productos;
+const { parseISO, startOfDay, format } = require('date-fns');
+const { Sequelize } = require('sequelize');
+const moment = require('moment'); // Asegúrate de tener instalada esta dependencia
+const { Op } = require('sequelize');
 
 module.exports = {
   // Obtener todos los detalles de pedidos activos
@@ -135,4 +139,254 @@ module.exports = {
       return res.status(500).json({ error: 'Error al eliminar el detalle de pedido' });
     }
   },
+
+  async createPedidoConDetalle(req, res) {
+    const { fecha, descripcion, idSede, idUsuario, detalles } = req.body;
+
+    if (!fecha || !descripcion || !idSede || !idUsuario || !Array.isArray(detalles) || detalles.length === 0) {
+        return res.status(400).json({ message: 'Faltan campos requeridos o los detalles están vacíos.' });
+    }
+
+    const fechaInicioDia = format(startOfDay(parseISO(fecha)), "yyyy-MM-dd'T'HH:mm:ss");
+
+    const transaction = await db.sequelize.transaction();
+
+    try {
+        // Crear el pedido
+        const pedido = await Pedidos.create(
+            { fecha: fechaInicioDia, descripcion, estado: 1, idSede, idUsuario },
+            { transaction }
+        );
+
+        // Validar y procesar los detalles del pedido
+        for (const detalle of detalles) {
+            const { idProducto, cantidad } = detalle;
+
+            if (!idProducto || !cantidad) {
+                throw new Error('Cada detalle debe contener idProducto y cantidad.');
+            }
+
+            // Verificar si el producto existe
+            const producto = await Productos.findByPk(idProducto, { transaction });
+            if (!producto) {
+                throw new Error(`Producto con ID ${idProducto} no encontrado.`);
+            }
+
+            // Crear el detalle del pedido
+            await DetallePedido.create(
+                {
+                    idPedido: pedido.idPedido,
+                    idProducto,
+                    cantidad,
+                    estado: 1
+                },
+                { transaction }
+            );
+        }
+
+        // Confirmar la transacción
+        await transaction.commit();
+
+        return res.status(201).json({ message: 'Pedido creado con éxito.', pedido });
+    } catch (error) {
+        // Revertir la transacción en caso de error
+        await transaction.rollback();
+        console.error('Error al crear pedido con detalle:', error);
+        return res.status(500).json({ message: error.message || 'Error al crear pedido con detalle.' });
+    }
+},
+
+async updatePedidoConDetalle(req, res) {
+  const idPedido = req.params.id; // ID del pedido a actualizar
+  const { fecha, descripcion, idSede, idUsuario, detalles } = req.body;
+
+  if (!fecha || !descripcion || !idSede || !idUsuario || !Array.isArray(detalles) || detalles.length === 0) {
+      return res.status(400).json({ message: 'Faltan campos requeridos o los detalles están vacíos.' });
+  }
+
+  const fechaInicioDia = format(startOfDay(parseISO(fecha)), "yyyy-MM-dd'T'HH:mm:ss");
+
+  const transaction = await db.sequelize.transaction();
+
+  try {
+      // Verificar si el pedido existe
+      const pedidoExistente = await Pedidos.findByPk(idPedido, { transaction });
+      if (!pedidoExistente) {
+          return res.status(404).json({ message: 'El pedido no existe.' });
+      }
+
+      // Actualizar el pedido
+      await Pedidos.update(
+          { fecha: fechaInicioDia, descripcion, idSede, idUsuario },
+          { where: { idPedido }, transaction }
+      );
+
+      // Obtener los detalles existentes del pedido
+      const detallesExistentes = await DetallePedido.findAll({
+          where: { idPedido },
+          transaction
+      });
+
+      // Crear un mapa de detalles existentes para fácil comparación
+      const detallesExistentesMap = new Map(
+          detallesExistentes.map(det => [det.idProducto, det])
+      );
+
+      // Procesar los nuevos detalles
+      for (const detalle of detalles) {
+          const { idProducto, cantidad } = detalle;
+
+          if (!idProducto || !cantidad) {
+              throw new Error('Cada detalle debe contener idProducto y cantidad.');
+          }
+
+          if (detallesExistentesMap.has(idProducto)) {
+              // Si el detalle ya existe, actualizar la cantidad si es diferente
+              const detalleExistente = detallesExistentesMap.get(idProducto);
+              if (detalleExistente.cantidad !== cantidad) {
+                  await DetallePedido.update(
+                      { cantidad },
+                      { where: { idDetallePedido: detalleExistente.idDetallePedido }, transaction }
+                  );
+              }
+              // Eliminar del mapa para que al final solo queden los detalles que se deben eliminar
+              detallesExistentesMap.delete(idProducto);
+          } else {
+              // Si el detalle no existe, crear uno nuevo
+              await DetallePedido.create(
+                  { idPedido, idProducto, cantidad, estado: 1 },
+                  { transaction }
+              );
+          }
+      }
+
+      // Eliminar los detalles que no están en los nuevos detalles
+      for (const detalleExistente of detallesExistentesMap.values()) {
+          await DetallePedido.destroy({
+              where: { idDetallePedido: detalleExistente.idDetallePedido },
+              transaction
+          });
+      }
+
+      // Confirmar la transacción
+      await transaction.commit();
+
+      return res.status(200).json({ message: 'Pedido actualizado con éxito.' });
+  } catch (error) {
+      // Revertir la transacción en caso de error
+      await transaction.rollback();
+      console.error('Error al actualizar pedido con detalle:', error);
+      return res.status(500).json({ message: error.message || 'Error al actualizar pedido con detalle.' });
+  }
+},
+
+async getPedidoConDetalle(req, res) {
+  const idPedido = req.params.id; 
+
+  try {
+      // Buscar el pedido con sus detalles
+      const pedido = await Pedidos.findByPk(idPedido, {
+          include: [
+              {
+                  model: DetallePedido,
+                  include: [
+                      {
+                          model: Productos,
+                          attributes: ['idProducto', 'nombreProducto', 'descripcion', 'precio']
+                      }
+                  ],
+                  attributes: ['idDetallePedido', 'cantidad', 'estado']
+              }
+          ],
+          attributes: ['idPedido', 'fecha', 'descripcion', 'estado', 'idSede', 'idUsuario']
+      });
+
+      if (!pedido) {
+          return res.status(404).json({ message: 'Pedido no encontrado.' });
+      }
+
+      return res.status(200).json({ pedido });
+  } catch (error) {
+      console.error('Error al obtener pedido con detalle:', error);
+      return res.status(500).json({ message: 'Error al obtener pedido con detalle.' });
+  }
+},
+
+async reportePedidosConDetalle(req, res) {
+  try {
+      const { fechaInicio, fechaFin } = req.query;
+
+      // Verificar que las fechas se proporcionen
+      if (!fechaInicio || !fechaFin) {
+          return res.status(400).json({ message: 'Se requieren las fechas de inicio y fin.' });
+      }
+
+      // Convertir las fechas de formato DD-MM-YYYY a YYYY-MM-DD
+      const fechaInicioFormato = fechaInicio.split("-").reverse().join("-");
+      const fechaFinFormato = fechaFin.split("-").reverse().join("-");
+
+      // Validar que las fechas sean válidas
+      const fechaInicioValida = moment(fechaInicioFormato, 'YYYY-MM-DD', true).isValid();
+      const fechaFinValida = moment(fechaFinFormato, 'YYYY-MM-DD', true).isValid();
+
+      if (!fechaInicioValida || !fechaFinValida) {
+          return res.status(400).json({ message: 'Las fechas no son válidas. Formato esperado: DD-MM-YYYY' });
+      }
+
+      // Consultar pedidos en el rango de fechas con sus detalles
+      const pedidosConDetalle = await Pedidos.findAll({
+          where: {
+              fecha: {
+                  [Sequelize.Op.gte]: fechaInicioFormato,
+                  [Sequelize.Op.lte]: fechaFinFormato,
+              },
+          },
+          include: [
+              {
+                  model: DetallePedido,
+                  include: [
+                      {
+                          model: Productos,
+                          attributes: ['idProducto', 'nombreProducto', 'descripcion', 'precio']
+                      }
+                  ],
+                  attributes: ['idDetallePedido', 'cantidad', 'estado']
+              }
+          ],
+          attributes: ['idPedido', 'fecha', 'descripcion', 'estado', 'idSede', 'idUsuario']
+      });
+
+      // Verificar si se encontraron pedidos
+      if (pedidosConDetalle.length === 0) {
+          return res.status(404).json({ message: 'No se encontraron pedidos en el rango de fechas especificado.' });
+      }
+
+      // Formatear los resultados
+      const reporte = pedidosConDetalle.map(pedido => {
+        return {
+            idPedido: pedido.idPedido,
+            fecha: moment(pedido.fecha).format('DD/MM/YYYY'),
+            descripcion: pedido.descripcion,
+            estado: pedido.estado,
+            idSede: pedido.idSede,
+            idUsuario: pedido.idUsuario,
+            detalles: pedido.detalle_pedidos.map(detalle => ({  // Cambiar 'DetallePedidos' por 'detalle_pedidos'
+                idDetallePedido: detalle.idDetallePedido,
+                idProducto: detalle.idProducto,
+                nombreProducto: detalle.producto.nombreProducto,
+                descripcionProducto: detalle.producto.descripcion,
+                precioProducto: detalle.producto.precio,
+                cantidad: detalle.cantidad,
+                estado: detalle.estado
+            }))
+        };
+    });
+
+      return res.status(200).json({ reporte });
+  } catch (error) {
+      console.error('Error al obtener el reporte de pedidos con detalle:', error);
+      return res.status(500).json({ message: 'Error al obtener el reporte de pedidos con detalle.' });
+  }
+}
+
 };

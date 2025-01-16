@@ -26,6 +26,10 @@ module.exports = (sequelize, DataTypes) => {
         type: DataTypes.DECIMAL(10, 2),
         allowNull: false,
       },
+      numeroPersonas: {
+        type: DataTypes.INTEGER,
+        allowNull: false,
+      },
       estado: {
         type: DataTypes.INTEGER,
         allowNull: false,
