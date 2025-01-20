@@ -8,7 +8,9 @@ const TipoStands = db.tipo_stands;
 const DetalleStands = db.detalle_stands;
 const AsignacionStands = db.asignacion_stands;
 const TipoPagos = db.tipo_pagos;
-
+const Evento = db.eventos;
+const StandHorarios = db.stand_horarios;
+const { toZonedTime, format } = require('date-fns-tz'); 
 
 // Métodos CRUD
 module.exports = {
@@ -24,6 +26,14 @@ module.exports = {
                         model: TipoStands,
                         as: 'tipo_stand',
                         attributes: ['idTipoStands', 'tipo']
+                    },
+                    {
+                        model: Sede,
+                        attributes: ['idSede', 'nombreSede']
+                    },
+                    {
+                        model: Evento,
+                        attributes: ['idEvento', 'nombreEvento']
                     },
                     {
                         model: DetalleStands,
@@ -78,7 +88,7 @@ module.exports = {
                 message: 'Ocurrió un error al recuperar los datos.'
             });
         }
-    },
+    },  
 
     // * buscar todos los detalles de un stand para ventas
     async findStandDetalles(req, res) {
@@ -363,13 +373,13 @@ async findVirtualStandProducts(req, res) {
         const datos = req.body;
     
         // Validación de campos requeridos
-        if (!datos.nombreStand || !datos.direccion || !datos.idSede || !datos.idTipoStands) {
+        if (!datos.nombreStand || !datos.direccion || !datos.idSede || !datos.idTipoStands || !datos.idEvento  || !datos.fechaInicio || !datos.fechaFinal) {
             return res.status(400).json({ message: 'Faltan campos requeridos.' });
         }
-    
+
         // Expresiones regulares para validar el formato de los campos, incluyendo espacios
-        const regexNombreStand = /^[A-Za-z0-9\s-,.:]+$/;
-        const regexDireccion = /^[A-Za-z0-9\s-,.:]+$/;
+        const regexNombreStand = /^[A-Za-z0-9\s-,.:áéíóúÁÉÍÓÚñÑüÜ]+$/;
+        const regexDireccion = /^[A-Za-z0-9\s-,.:áéíóúÁÉÍÓÚñÑüÜ]+$/;
     
         if (!regexNombreStand.test(datos.nombreStand)) {
             return res.status(400).json({ message: 'El nombre del stand solo debe contener letras, números, guiones y espacios.' });
@@ -382,8 +392,13 @@ async findVirtualStandProducts(req, res) {
         try {
             // Validación de existencia de idSede y idTipoStands
             const sedeExistente = await Sede.findByPk(datos.idSede);
+            const eventoExistente = await Evento.findByPk(datos.idEvento);
             const tipoStandExistente = await TipoStands.findByPk(datos.idTipoStands);
     
+            if (!eventoExistente) {
+                return res.status(400).json({ error: 'El idEvento ingresado no existe.' });
+            }
+
             if (!sedeExistente) {
                 return res.status(400).json({ error: 'El idSede ingresado no existe.' });
             }
@@ -397,8 +412,11 @@ async findVirtualStandProducts(req, res) {
                 estado: datos.estado !== undefined ? datos.estado : 1, 
                 nombreStand: datos.nombreStand,
                 direccion: datos.direccion,
+                fechaInicio: datos.fechaInicio, // No convertir a UTC
+                fechaFinal: datos.fechaFinal,  
                 idSede: datos.idSede,
-                idTipoStands: datos.idTipoStands
+                idTipoStands: datos.idTipoStands,
+                idEvento: datos.idEvento
             };
     
             const standCreado = await STANDS.create(datos_ingreso);
@@ -409,69 +427,103 @@ async findVirtualStandProducts(req, res) {
             return res.status(500).json({ error: 'Error al insertar el stand' });
         }
     },
+
+    createStandWithHorarios: async (req, res) => {
+        const { standData, horarios } = req.body;
     
-    updateStand: async (req, res) => {
-        const datos = req.body;
-        const id = req.params.id;
-    
-        const camposActualizados = {};
-    
-        // Validación de nombreStand y direccion si están presentes en los datos
-        const regexNombreStand = /^[A-Za-z0-9\s-,.:]+$/;
-        const regexDireccion = /^[A-Za-z0-9\s-,.:]+$/;
-    
-        if (datos.nombreStand !== undefined) {
-            if (!regexNombreStand.test(datos.nombreStand)) {
-                return res.status(400).json({ message: 'El nombre del stand solo debe contener letras, números, guiones y espacios.' });
-            }
-            camposActualizados.nombreStand = datos.nombreStand;
+        if (!standData) {
+          return res.status(400).json({ message: 'Faltan datos para crear el stand.' });
         }
     
-        if (datos.direccion !== undefined) {
-            if (!regexDireccion.test(datos.direccion)) {
-                return res.status(400).json({ message: 'La dirección solo debe contener letras, números, guiones y espacios.' });
-            }
-            camposActualizados.direccion = datos.direccion;
-        }
-    
-        if (datos.tipo !== undefined) camposActualizados.tipo = datos.tipo;
-        if (datos.estado !== undefined) camposActualizados.estado = datos.estado;
-        if (datos.idSede !== undefined) camposActualizados.idSede = datos.idSede;
-        if (datos.idTipoStands !== undefined) camposActualizados.idTipoStands = datos.idTipoStands;
-    
+        const transaction = await db.sequelize.transaction();
         try {
-            // Validación de existencia de idSede y idTipoStands si están presentes en los datos
-            if (datos.idSede) {
-                const sedeExistente = await Sede.findByPk(datos.idSede);
-                if (!sedeExistente) {
-                    return res.status(400).json({ error: 'El idSede ingresado no existe.' });
-                }
-            }
+          // Crear el stand
+          const newStand = await STANDS.create(standData, { transaction });
     
-            if (datos.idTipoStands) {
-                const tipoStandExistente = await TipoStands.findByPk(datos.idTipoStands);
-                if (!tipoStandExistente) {
-                    return res.status(400).json({ error: 'El idTipoStands ingresado no existe.' });
-                }
-            }
+          // Crear los horarios asociados (si los hay)
+          if (horarios && horarios.length > 0) {
+            const horariosData = horarios.map((horario) => ({
+              idStand: newStand.idStand,
+              idDetalleHorario: horario.idDetalleHorario,
+              estado: horario.estado || 1,
+            }));
+            await StandHorarios.bulkCreate(horariosData, { transaction });
+          }
     
-            // Realizar la actualización
-            const [rowsUpdated] = await STANDS.update(camposActualizados, {
-                where: { idStand: id } 
-            });
-    
-            if (rowsUpdated === 0) {
-                return res.status(404).json({ message: 'Stand no encontrado' });
-            }
-    
-            return res.status(200).json({ message: 'El stand ha sido actualizado' });
-    
+          // Confirmar la transacción
+          await transaction.commit();
+          return res.status(201).json({ message: 'Stand creado con éxito', stand: newStand });
         } catch (error) {
-            console.error(`Error al actualizar el stand con ID ${id}:`, error);
-            return res.status(500).json({ error: 'Error al actualizar stand' });
+          await transaction.rollback();
+          console.error('Error al crear el stand:', error);
+          return res.status(500).json({ error: 'Error al crear el stand.' });
         }
-    },    
-    
+      },
+      updateStand: async (req, res) => {
+        const { standData, horarios } = req.body; // Recibimos standData y horarios
+        const id = req.params.id;
+      
+        const transaction = await db.sequelize.transaction();
+        try {
+          // Validar existencia del stand
+          const standExistente = await STANDS.findByPk(id);
+          if (!standExistente) {
+            return res.status(404).json({ message: 'Stand no encontrado.' });
+          }
+      
+          // Actualizar datos del stand si están presentes
+          if (standData) {
+            await STANDS.update(standData, { where: { idStand: id }, transaction });
+          }
+      
+          // Si se proporcionan horarios, procesarlos
+          if (horarios && horarios.length >= 0) {
+            // Obtener horarios existentes
+            const horariosExistentes = await StandHorarios.findAll({
+              where: { idStand: id },
+              attributes: ['idDetalleHorario'],
+              raw: true, // Retorna solo los datos
+            });
+      
+            const existentes = horariosExistentes.map((h) => h.idDetalleHorario);
+      
+            // Identificar horarios a añadir y a eliminar
+            const horariosToAdd = horarios
+              .map((h) => h.idDetalleHorario)
+              .filter((idDetalleHorario) => !existentes.includes(idDetalleHorario));
+      
+            const horariosToRemove = existentes.filter(
+              (idDetalleHorario) => !horarios.map((h) => h.idDetalleHorario).includes(idDetalleHorario)
+            );
+      
+            // Añadir nuevos horarios
+            if (horariosToAdd.length > 0) {
+              const nuevosHorarios = horariosToAdd.map((idDetalleHorario) => ({
+                idStand: id,
+                idDetalleHorario,
+                estado: 1, // Estado por defecto
+              }));
+              await StandHorarios.bulkCreate(nuevosHorarios, { transaction });
+            }
+      
+            // Eliminar horarios que ya no están en la lista
+            if (horariosToRemove.length > 0) {
+              await StandHorarios.destroy({
+                where: { idStand: id, idDetalleHorario: horariosToRemove },
+                transaction,
+              });
+            }
+          }
+      
+          await transaction.commit();
+          return res.status(200).json({ message: 'Stand actualizado correctamente.' });
+        } catch (error) {
+          await transaction.rollback();
+          console.error(`Error al actualizar el stand con ID ${id}:`, error);
+          return res.status(500).json({ error: 'Error al actualizar el stand.' });
+        }
+    },
+      
 
     async deleteStand(req, res) {
         const id = req.params.id; 

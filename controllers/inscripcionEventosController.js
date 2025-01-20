@@ -302,5 +302,47 @@ module.exports = {
             console.error('Error al eliminar la inscripción:', error);
             return res.status(500).json({ error: 'Error al eliminar la inscripción' });
         }
-    }
+    },
+
+    async obtenerInscripciones(req, res) {
+        const { idVoluntario } = req.params;
+    
+        try {
+            // Obtener inscripciones activas del voluntario con el evento asociado
+            const inscripciones = await INSCRIPCION_EVENTOS.findAll({
+                where: { idVoluntario, estado: 1 }, // Solo inscripciones activas
+                attributes: ["idInscripcionEvento"],
+                include: [
+                    {
+                        model: EVENTOS,
+                        as: "evento",
+                        attributes: ["idEvento", "nombreEvento"], // Obtener el id y nombre del evento
+                    },
+                ],
+            });
+    
+            if (!inscripciones || inscripciones.length === 0) {
+                return res.status(404).json({
+                    message: "No se encontraron inscripciones asociadas al voluntario.",
+                });
+            }
+    
+            // Mapear las inscripciones para incluir los datos requeridos
+            const result = inscripciones.map((inscripcion) => ({
+                idInscripcionEvento: inscripcion.idInscripcionEvento,
+                idEvento: inscripcion.evento.idEvento,
+                nombreEvento: inscripcion.evento.nombreEvento, // Incluye el nombre del evento para contexto
+            }));
+    
+            return res.status(200).json(result);
+        } catch (error) {
+            console.error("Error al obtener inscripciones del voluntario:", error);
+            return res
+                .status(500)
+                .json({ message: "Error al obtener las inscripciones del voluntario." });
+        }
+    },
+
+    
+    
 };

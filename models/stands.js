@@ -23,6 +23,15 @@ module.exports = (sequelize, DataTypes) => {
       this.belongsTo(models.sedes, { 
         foreignKey: 'idSede' 
       });
+
+      this.belongsTo(models.eventos, {
+        foreignKey: 'idEvento',
+      });
+
+      stands.hasMany(models.stand_horarios, {
+        foreignKey: 'idStand'
+      });
+      
     }
   }
   stands.init({
@@ -39,6 +48,14 @@ module.exports = (sequelize, DataTypes) => {
       type: DataTypes.STRING(255),
       allowNull: false
     },
+      fechaInicio: {
+        type: DataTypes.STRING,
+        allowNull: true // Permitir valores nulos si es opcional
+    },
+    fechaFinal: {
+        type: DataTypes.STRING,
+        allowNull: true // Permitir valores nulos si es opcional
+    },
     estado: {
      type: DataTypes.INTEGER,
      allowNull: false
@@ -50,6 +67,10 @@ module.exports = (sequelize, DataTypes) => {
     idTipoStands: {
      type: DataTypes.INTEGER,
      allowNull: false
+    },
+    idEvento: { // Nuevo campo idEvento
+      type: DataTypes.INTEGER,
+      allowNull: false,
     },
     createdAt: {
       type: DataTypes.DATE,
