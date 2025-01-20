@@ -94,6 +94,11 @@ module.exports = (app) => {
   router.post('/aspirantes', aspirantesController.create);
   router.post('/personas/create', personasController.create);
 
+    // * RUTAS DE NOTIFICACIONES (a mi parecer deberian ir antes del token)
+    router.get('/notificaciones', notificacionesController.find);
+    router.post('/notificaciones/create', notificacionesController.create);
+    router.put('/notificaciones/:id', notificacionesController.update);
+
   // ! Todas las rutas a continuación requieren autenticación
   router.use(authenticateToken); // Middleware para proteger las rutas con autenticación
 
@@ -625,6 +630,7 @@ module.exports = (app) => {
   router.get('/aspirantes/activos', checkPermissions('Ver aspirantes'), aspirantesController.findActive);
   router.get('/aspirantes/inactivos', checkPermissions('Ver aspirantes'), aspirantesController.findInactive);
   router.get('/aspirantes/estado/:idAspirante', aspirantesController.verifyStatus);
+  router.get('/aspirantes/:idAspirante', aspirantesController.findOne);
     router.post('/aspirantes', aspirantesController.create);
   router.put('/aspirantes/:idAspirante', aspirantesController.update);
   router.get('/aspirantes', aspirantesController.findAll);
@@ -715,10 +721,6 @@ module.exports = (app) => {
   router.post('/situaciones/create', situacionesController.create);
   router.put('/situaciones/update/reporte/:id', situacionesController.updateReporte);
   router.put('/situaciones/update/respuesta/:id', situacionesController.updateRespuesta);
-
-  // * RUTAS DE NOTIFICACIONES
-  router.get('/notificaciones', notificacionesController.find);
-  router.put('/notificaciones/:id', notificacionesController.update);
 
   // * RUTAS DE TIPOS DE NOTIFICACIONES
   router.get('/tipoNotificaciones', tipoNotificacionesController.find);

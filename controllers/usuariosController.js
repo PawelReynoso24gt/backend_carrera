@@ -62,9 +62,26 @@ function validatePasswordChange(currentPassword, newPassword) {
     if (!currentPassword) {
         return 'La contraseña actual es requerida';
     }
-    if (!newPassword || newPassword.length < 8) {
-        return 'La nueva contraseña debe tener al menos 8 caracteres';
+    const validatePassword = (password) => {
+        if (password.length < 8) {
+            return "La contraseña es demasiado corta.";
+        } else if (!/[A-Z]/.test(password)) {
+            return "La contraseña debe contener al menos una letra mayúscula.";
+        } else if (!/[a-z]/.test(password)) {
+            return "La contraseña debe contener al menos una letra minúscula.";
+        } else if (!/[0-9]/.test(password)) {
+            return "La contraseña debe contener al menos un número.";
+        } else if (!/[!@#$%^&*]/.test(password)) {
+            return "La contraseña debe contener al menos un carácter especial.";
+        }
+        return null;
+    };
+
+    const passwordError = validatePassword(newPassword);
+    if (passwordError) {
+        return passwordError;
     }
+
     return null;
 }
 
@@ -301,6 +318,7 @@ module.exports = {
             usuario: datos.usuario,
             contrasenia: hashPassword(datos.contrasenia),
             changedPassword: 0,
+            passwordCreatedAt: new Date(),
             estado: 1,
             idRol: datos.idRol,
             idSede: datos.idSede,
@@ -375,6 +393,7 @@ module.exports = {
 
             // Actualizar la contraseña con SHA-256
             user.contrasenia = hashPassword(newPassword);
+            user.passwordCreatedAt = new Date(); // Actualizar la fecha de creación de la contraseña
             user.changedPassword = 1; // Marcar la contraseña como cambiada
             await user.save();
 
@@ -405,6 +424,8 @@ module.exports = {
 
             // Actualizar la contraseña con SHA-256
             user.contrasenia = hashPassword(newPassword);
+            user.changedPassword = 0; // Marcar la contraseña como cambiada
+            user.passwordCreatedAt = new Date(); // Actualizar la fecha de creación de la contraseña
             await user.save();
 
             return res.status(200).send('La contraseña ha sido reiniciada exitosamente');
@@ -440,10 +461,10 @@ module.exports = {
     async verifyChangedPassword(req, res) {
         try {
             const idUsuario = req.userId; // Obtenido del token
-            // console.log("ID del usuario autenticado:", idUsuario);
+            const PASSWORD_CHANGE_GRACE_PERIOD = 15; // Período de gracia en días
 
             const user = await USERS.findByPk(idUsuario, {
-                attributes: ['changedPassword'], // Solo obtenemos los campos necesarios
+                attributes: ['changedPassword', 'passwordCreatedAt'], // Obtener también la fecha de creación de la contraseña
             });
 
             if (!user) {
@@ -451,9 +472,17 @@ module.exports = {
             }
 
             if (user.changedPassword === 0) {
+                const now = new Date();
+                const passwordExpirationDate = new Date(user.passwordCreatedAt);
+                passwordExpirationDate.setDate(passwordExpirationDate.getDate() + PASSWORD_CHANGE_GRACE_PERIOD);
+
+                const timeDiff = passwordExpirationDate - now;
+                const daysRemaining = Math.ceil(timeDiff / (1000 * 60 * 60 * 24));
+
                 return res.status(200).send({
                     changedPassword: 0,
-                    message: 'Necesitas cambiar tu contraseña.',
+                    daysRemaining: daysRemaining,
+                    message: `Necesitas cambiar tu contraseña. Te quedan ${daysRemaining} días para cambiarla, de lo contrario, tu usuario será bloqueado.`,
                 });
             }
 

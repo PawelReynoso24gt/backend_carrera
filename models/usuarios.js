@@ -33,37 +33,42 @@ module.exports = (sequelize, DataTypes) => {
       allowNull: false
     },
     contrasenia: {
-        type: DataTypes.STRING(255),
-        allowNull: false
+      type: DataTypes.STRING(255),
+      allowNull: false
     },
     token: {
-        type: DataTypes.STRING(255),
-        allowNull: true
+      type: DataTypes.STRING(255),
+      allowNull: true
     },
     tokenExpiresAt: {
-        type: DataTypes.DATE,
-        allowNull: true
+      type: DataTypes.DATE,
+      allowNull: true
     },
     changedPassword: {
-        type: DataTypes.INTEGER,
-        allowNull: false,
-        defaultValue: 0
+      type: DataTypes.INTEGER,
+      allowNull: false,
+      defaultValue: 0
+    },
+    passwordCreatedAt: {
+      type: DataTypes.DATE,
+      allowNull: false,
+      defaultValue: DataTypes.NOW
     },
     estado: {
-        type: DataTypes.INTEGER,
-        allowNull: false
+      type: DataTypes.INTEGER,
+      allowNull: false
     },
     idRol: {
-        type: DataTypes.INTEGER,
-        allowNull: false
-      },
+      type: DataTypes.INTEGER,
+      allowNull: false
+    },
     idSede: {
       type: DataTypes.INTEGER,
       allowNull: false
     },
     idPersona: {
-        type: DataTypes.INTEGER,
-        allowNull: false
+      type: DataTypes.INTEGER,
+      allowNull: false
     },
     createdAt: {
       type: DataTypes.DATE,
@@ -73,7 +78,7 @@ module.exports = (sequelize, DataTypes) => {
     updatedAt: {
       type: DataTypes.DATE,
       allowNull: false,
-      defaultValue: DataTypes.NOW 
+      defaultValue: DataTypes.NOW
     }
   }, {
     sequelize,

@@ -49,6 +49,41 @@ module.exports = {
         }
     },
 
+    // * traer un solo aspirante
+    async findOne(req, res) {
+        const { idAspirante } = req.params;
+
+        try {
+            const aspirante = await ASPIRANTES.findByPk(idAspirante, {
+                include: [
+                    {
+                        model: PERSONAS,
+                        attributes: [
+                            'idPersona',
+                            'nombre',
+                            'fechaNacimiento',
+                            'telefono',
+                            'domicilio',
+                            'CUI',
+                            'correo',
+                        ],
+                    },
+                ],
+            });
+
+            if (!aspirante) {
+                return res.status(404).json({ message: 'Aspirante no encontrado.' });
+            }
+
+            return res.status(200).json(aspirante);
+        } catch (error) {
+            console.error('Error al buscar el aspirante:', error);
+            return res.status(500).json({
+                message: error.message || 'Error al buscar el aspirante.',
+            });
+        }
+    },
+
         // * Verificar el estado de un aspirante por ID
     async verifyStatus(req, res) {
         const { idAspirante } = req.params;
