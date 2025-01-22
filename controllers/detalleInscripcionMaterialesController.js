@@ -121,6 +121,40 @@ module.exports = {
         }
     },
 
+    async findByComision(req, res) {
+        const { idComision } = req.params;
+    
+        try {
+          // Verificar si el parámetro idComision existe
+          if (!idComision) {
+            return res.status(400).json({ message: 'Se requiere el ID de la comisión.' });
+          }
+    
+          // Buscar inscripción de la comisión
+          const inscripcion = await INSCRIPCION_COMISIONES.findOne({
+            where: { idComision },
+            include: [
+              {
+                model: INSCRIPCION_EVENTOS,
+                as: 'inscripcionEvento',
+                attributes: ['idInscripcionEvento', 'fechaHoraInscripcion', 'estado']
+              }
+            ]
+          });
+    
+          if (!inscripcion) {
+            return res.status(404).json({ message: 'No se encontró inscripción para la comisión.' });
+          }
+    
+          return res.status(200).json(inscripcion);
+        } catch (error) {
+          console.error('Error al buscar inscripción por comisión:', error);
+          return res.status(500).json({ message: 'Error al buscar inscripción por comisión.' });
+        }
+      },
+
+      
+    
     // Obtener un detalle por ID
     async findById(req, res) {
         try {

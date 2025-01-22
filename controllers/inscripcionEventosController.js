@@ -144,16 +144,16 @@ module.exports = {
         try {
 
                 // Validar si ya existe una inscripción con el mismo idVoluntario e idEvento
-            const existente = await INSCRIPCION_EVENTOS.findOne({
-                where: {
-                    idVoluntario,
-                    idEvento
-                }
-            });
-
-            if (existente) {
-                return res.status(400).json({ message: 'El voluntario ya está inscrito en este evento.' });
-            }
+                const existente = await INSCRIPCION_EVENTOS.findOne({
+                    where: {
+                        idVoluntario,
+                        idEvento
+                    }
+                });
+                
+                if (existente) {
+                    return res.status(400).json({ message: 'El voluntario ya está inscrito en este evento.' });
+                }                
             
             const nuevaInscripcion = await INSCRIPCION_EVENTOS.create({
                 fechaHoraInscripcion,

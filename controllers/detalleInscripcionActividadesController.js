@@ -52,7 +52,42 @@ module.exports = {
             });
         }
     },
+
+    async findInscripcionByComisionAndVoluntario(req, res) {
+        const { idComision, idVoluntario } = req.params;
     
+        try {
+          // Buscar inscripción de comisiones vinculada al voluntario y la comisión
+          const inscripcion = await INSCRIPCION_COMISIONES.findOne({
+            where: {
+              idComision,
+              idVoluntario,
+              estado: 1, // Solo inscripciones activas
+            },
+            include: [
+              {
+                model: INSCRIPCION_EVENTOS,
+                attributes: ['idInscripcionEvento'], // Solo devolver lo necesario
+              },
+            ],
+          });
+    
+          // Validar si no se encontró la inscripción
+          if (!inscripcion) {
+            return res.status(404).json({ message: "No se encontró la inscripción." });
+          }
+    
+          // Responder con los datos necesarios
+          return res.status(200).json({
+            idInscripcionComision: inscripcion.idInscripcionComision,
+            idInscripcionEvento: inscripcion.inscripcion_evento?.idInscripcionEvento || null,
+          });
+        } catch (error) {
+          console.error("Error al buscar inscripciones:", error);
+          return res.status(500).json({ message: "Error al buscar inscripciones." });
+        }
+      },
+      
 
     // Obtener detalles activos
     async findActive(req, res) {

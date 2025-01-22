@@ -26,7 +26,7 @@ module.exports = (sequelize, DataTypes) => {
       primaryKey: true
     },
     fecha: {
-      type: DataTypes.DATE,
+      type: DataTypes.STRING(255),
       allowNull: false
     },
     estado: {
