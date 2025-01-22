@@ -9,6 +9,10 @@ module.exports = (sequelize, DataTypes) => {
         as: 'sede'
       });
 
+      this.hasMany(models.stands, {
+        foreignKey: 'idEvento',
+      });
+
       // Relación con comisiones
       this.hasMany(models.comisiones, {
         foreignKey: 'idEvento',
