@@ -494,5 +494,52 @@ module.exports = {
             console.error('Error al obtener el reporte de situaciones:', error);
             return res.status(500).json({ message: 'Error al obtener el reporte de situaciones.' });
         }
+    },
+
+    // Obtener situaciones por idUsuario
+async findByUsuario(req, res) {
+    const { idUsuario } = req.params;
+
+    try {
+        const situaciones = await SITUACIONES.findAll({
+            where: { idUsuario }, // Filtra por el idUsuario
+            include: [
+                {
+                    model: TIPO_SITUACIONES,
+                    attributes: ['idTipoSituacion', 'tipoSituacion'],
+                    as: 'tipo_situacione',
+                },
+                {
+                    model: db.usuarios,
+                    attributes: ['idUsuario', 'usuario'],
+                    as: 'usuario',
+                    include: [
+                        {
+                            model: db.personas,
+                            attributes: ['nombre'],
+                            as: 'persona',
+                        },
+                    ],
+                },
+            ],
+        });
+
+        if (situaciones.length === 0) {
+            return res.status(404).json({ message: 'No se encontraron situaciones para este usuario.' });
+        }
+
+        // Formatear las fechas antes de enviar la respuesta
+        const situacionesFormateadas = situaciones.map((situacion) => {
+            const situacionJSON = situacion.toJSON();
+            situacionJSON.fechaOcurrencia = moment(situacion.fechaOcurrencia).format('DD/MM/YYYY HH:mm:ss');
+            return situacionJSON;
+        });
+
+        return res.status(200).json(situacionesFormateadas);
+    } catch (error) {
+        console.error('Error al recuperar las situaciones por usuario:', error);
+        return res.status(500).json({ message: 'Ocurrió un error al recuperar las situaciones.' });
     }
+}
+
 };

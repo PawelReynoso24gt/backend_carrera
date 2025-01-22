@@ -76,6 +76,7 @@ const reportesController = require('../controllers/reportesController');
 const obtenerPermisosController = require('../controllers/obtenerPermisosController');
 const voluntarioDelMesController = require('../controllers/voluntarioDelMes');
 const trasladosCompletosController = require('../controllers/TrasladosCompletosController');
+const standHorariosController = require('../controllers/standHorariosController');
 const { ro } = require('date-fns/locale');
 
 module.exports = (app) => {
@@ -99,7 +100,7 @@ module.exports = (app) => {
     router.put('/notificaciones/:id', notificacionesController.update);
 
   // ! Todas las rutas a continuación requieren autenticación
-   router.use(authenticateToken); // Middleware para proteger las rutas con autenticación
+  router.use(authenticateToken); // Middleware para proteger las rutas con autenticación
 
   // * USUARIOS
   router.get('/usuarios/activos', checkPermissions('Ver usuarios'), usuariosController.find);
@@ -170,6 +171,7 @@ module.exports = (app) => {
   router.get('/stand/activas', standsController.findActivateStand);
   router.get('/stand/inactivas', standsController.findaInactivateStand);
   router.post('/stand/create', standsController.createStand);
+  router.post('/stand/createHorarios', standsController.createStandWithHorarios);
   router.put('/stand/update/:id', standsController.updateStand);
   router.delete('/stand/:id', standsController.deleteStand);
 
@@ -248,7 +250,7 @@ module.exports = (app) => {
   router.get('/productos', checkPermissions('Ver productos'), productosController.find);
   router.get('/productos/activos', checkPermissions('Ver productos'), productosController.findActive);
   router.get('/productos/inactivos', checkPermissions('Ver productos'), productosController.findInactive);
-  //router.get('/productos/:id', productosController.findById); 
+  router.get('/productos/:id', productosController.findById); 
   router.post('/productos', uploadP.single('foto'), productosController.create);
   router.put('/productos/estado/:id', productosController.updateEstado);
   router.put('/productos/:id', uploadP.single('foto'), productosController.update);
@@ -280,7 +282,7 @@ module.exports = (app) => {
       router.get('/stand', checkPermissions('Ver stands'), standsController.find);
       router.get('/stand/activas', checkPermissions('Ver stands'), standsController.findActivateStand);
       router.get('/stand/inactivas', checkPermissions('Ver stands'), standsController.findaInactivateStand);
-      router.get('/stands/virtual/products', checkPermissions('Ver stand virtual'), standsController.findVirtualStandProducts);
+      router.get('/stands/virtual/products', standsController.findVirtualStandProducts);
     router.get('/stands/virtual/productos/detalles', standsController.findDetalleProductosVirtual);
       router.get('/stands/detalles', standsController.findStandDetalles);
       router.get('/stands/voluntarios/:idStand', standsController.getVoluntariosEnStands);
@@ -487,6 +489,7 @@ module.exports = (app) => {
   router.get('/inscripcion_eventos/inactivos', inscripcionEventosController.findInactive);
   router.get('/inscripcion_eventos/:id', inscripcionEventosController.findById);
   router.get("/inscripciones/voluntario/:idVoluntario", inscripcionEventosController.obtenerInscripcionesPorVoluntario);
+  router.get("/inscripciones/:idVoluntario", inscripcionEventosController.obtenerInscripciones);
   router.post('/inscripcion_eventos/create', inscripcionEventosController.create);
   router.put('/inscripcion_eventos/update/:id', inscripcionEventosController.update);
   router.delete('/inscripcion_eventos/delete/:id', inscripcionEventosController.delete);
@@ -516,6 +519,7 @@ module.exports = (app) => {
   router.get('/asignacion_stands/voluntarios_por_stand/inactivos', checkPermissions('Ver asignación de stands'), asignacionStandsController.findVoluntariosByInactiveStands);
   router.get('/asignacion_stands/activos', asignacionStandsController.findActive);
   router.get('/asignacion_stands/inactivos', asignacionStandsController.findInactive);
+  router.get('/asignacion/voluntario/:idVoluntario', asignacionStandsController.findAsignacionByVoluntario);
   router.get('/asignacion_stands/:id', asignacionStandsController.findById);
   router.post('/asignacion_stands/create', asignacionStandsController.create);
   router.put('/asignacion_stands/update/:id', asignacionStandsController.update);
@@ -708,6 +712,7 @@ module.exports = (app) => {
   // * RUTAS DE SITUACIONES
   router.get('/situaciones', situacionesController.findAll);
   router.get('/situaciones/reporte', situacionesController.findGroupedByEstadoWithDates);
+  router.get('/situaciones/usuario/:idUsuario', situacionesController.findByUsuario);
     router.get('/situaciones/reportadas', checkPermissions('Ver situaciones'), situacionesController.findReportadas);
   router.get('/situaciones/en_revision', checkPermissions('Ver situaciones'), situacionesController.findEnRevision);
   router.get('/situaciones/en_proceso', checkPermissions('Ver situaciones'), situacionesController.findEnProceso);
@@ -738,6 +743,13 @@ module.exports = (app) => {
     router.get('/reporteTraslados', checkPermissions('Generar reporte traslados'), trasladosCompletosController.reporteTrasladosConDetalle);
     router.post('/trasladosCompletos', trasladosCompletosController.createTrasladoConDetalle);
     router.put('/trasladosCompletos/:id', trasladosCompletosController.updateTrasladoConDetalle);
+
+    // * HORARIOS STANDS 
+    router.get('/standHorario/:idStand', standHorariosController.findByStand);
+    router.get('/standHorario', standHorariosController.findAll);
+    router.post('/standHorario', standHorariosController.create);
+    router.put('/standHorario/:id', standHorariosController.update);
+    router.delete('/standHorario/:id', standHorariosController.delete);
 
   // Ruta para servir fotos de personas
   app.use('/personas_image', express.static(path.join(__dirname, 'src/personas')));
