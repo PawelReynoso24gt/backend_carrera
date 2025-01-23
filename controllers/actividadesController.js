@@ -92,6 +92,34 @@ module.exports = {
         }
     },
 
+    // Obtener actividades por comisión
+async findByComision(req, res) {
+    const { idComision } = req.params;
+
+    try {
+        const actividades = await ACTIVIDADES.findAll({
+            where: {
+                idComision,
+                estado: 1 // Solo actividades activas
+            },
+            include: {
+                model: COMISIONES,
+                as: 'comision',
+                attributes: ['idComision', 'comision', 'descripcion', 'estado']
+            }
+        });
+
+        if (actividades.length === 0) {
+            return res.status(404).json({ message: 'No se encontraron actividades para esta comisión.' });
+        }
+
+        return res.status(200).json(actividades);
+    } catch (error) {
+        console.error('Error al recuperar las actividades por comisión:', error);
+        return res.status(500).json({ message: 'Error al recuperar las actividades.' });
+    }
+},
+
     // Crear una nueva actividad
     async create(req, res) {
         const { actividad, descripcion, idComision } = req.body;

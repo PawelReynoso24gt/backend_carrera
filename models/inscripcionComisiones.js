@@ -22,7 +22,9 @@ module.exports = (sequelize, DataTypes) => {
             // Relacion con inscripcion de materiales
             this.hasMany(models.detalle_inscripcion_materiales, {
                 foreignKey: 'idInscripcionComision'
-            });         
+            });      
+            
+            
         }
     }
 

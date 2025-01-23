@@ -63,6 +63,37 @@ module.exports = {
     }
   },
 
+// * Buscar materiales por comisión
+async findByComision(req, res) {
+  const { idComision } = req.params;
+
+  if (!idComision || isNaN(idComision)) {
+    return res.status(400).send({ message: 'Se requiere un ID de comisión válido.' });
+  }
+
+  try {
+    const materiales = await MATERIALES.findAll({
+      where: { idComision }, // Filtrar materiales por el idComision
+      include: [
+        {
+          model: COMISIONES,
+          attributes: ['idComision', 'comision', 'descripcion', 'estado']
+        }
+      ]
+    });
+
+    if (!materiales || materiales.length === 0) {
+      return res.status(404).send({ message: 'No se encontraron materiales para esta comisión.' });
+    }
+
+    return res.status(200).send(materiales);
+  } catch (error) {
+    console.error('Error al buscar materiales por comisión:', error);
+    return res.status(500).send({ message: 'Error al buscar materiales por comisión.' });
+  }
+},
+
+
   // * Crear material
   async create(req, res) {
     const datos = req.body;
