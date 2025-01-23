@@ -153,14 +153,19 @@ module.exports = {
     async reporteContabilidad(req, res) {
 
         try {
-            let { fechaInicio, fechaFin } = req.body;
+            let { fechaInicio, fechaFin } = req.query;
+
+            // Validar que las fechas no sean nulas o vacías
+            if (!fechaInicio || !fechaFin) {
+                return res.status(400).json({ message: 'Las fechas de inicio y fin son requeridas.' });
+            }
 
             // Convertir fechas a rangos completos de 24 horas usando moment
             fechaInicio = moment(fechaInicio, 'YYYY-MM-DD HH:mm:ss').startOf('day').toDate();
             fechaFin = moment(fechaFin, 'YYYY-MM-DD HH:mm:ss').endOf('day').toDate();
     
-            //console.log('Fecha inicio:', moment(fechaInicio).format('YYYY-MM-DD HH:mm:ss'));
-            //console.log('Fecha fin:', moment(fechaFin).format('YYYY-MM-DD HH:mm:ss'));
+            console.log('Fecha inicio:', moment(fechaInicio).format('YYYY-MM-DD HH:mm:ss'));
+            console.log('Fecha fin:', moment(fechaFin).format('YYYY-MM-DD HH:mm:ss'));
 
             // Obtener las rifas que caen dentro del rango de fechas especificado
             const rifas = await RIFAS.findAll({
