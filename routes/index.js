@@ -600,7 +600,7 @@ module.exports = (app) => {
 
     // * RUTAS DE VENTAS
     router.get('/ventas', ventasController.findAll);
-    router.get('/ventas/voluntarios', checkPermissions('Ver ventas voluntarios'), ventasController.findAllVoluntarios);
+    router.get('/ventas/voluntarios',  ventasController.findAllVoluntarios);
     router.get('/ventas/stands', checkPermissions('Ver ventas stands'), ventasController.findAllVentasStands);
     router.get('/ventas/activas', ventasController.findActive);
     router.get('/ventas/voluntarios/activas', ventasController.findActiveVoluntarios);
@@ -729,6 +729,7 @@ module.exports = (app) => {
   router.post('/reportesAspirantes', checkPermissions('Generar reporte aspirantes'), aspirantesController.reporteAspirantes);
   router.post("/reportesRifas", checkPermissions('Generar reporte rifas'), reportesController.reporteRifas);
   router.get('/reportePedidos', checkPermissions('Generar reporte pedidos'), detalle_pedidosController.reportePedidosConDetalle);
+  router.get('/reporteContabilidad', reportesController.reporteContabilidad);
     // * ENDPOINT DE PERMISOS 
     router.get('/usuarios/permisos', obtenerPermisosController.getPermissionsForRole);
 
