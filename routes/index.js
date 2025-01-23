@@ -733,6 +733,7 @@ module.exports = (app) => {
   router.post('/reportesAspirantes', checkPermissions('Generar reporte aspirantes'), aspirantesController.reporteAspirantes);
   router.post("/reportesRifas", checkPermissions('Generar reporte rifas'), reportesController.reporteRifas);
   router.get('/reportePedidos', checkPermissions('Generar reporte pedidos'), detalle_pedidosController.reportePedidosConDetalle);
+  router.get('/reporteContabilidad', reportesController.reporteContabilidad);
     // * ENDPOINT DE PERMISOS 
     router.get('/usuarios/permisos', obtenerPermisosController.getPermissionsForRole);
 
