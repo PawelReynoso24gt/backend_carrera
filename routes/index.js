@@ -99,6 +99,9 @@ module.exports = (app) => {
     router.post('/notificaciones/create', notificacionesController.create);
     router.put('/notificaciones/:id', notificacionesController.update);
 
+  // * RUTA DE INVITADO (ver publicaciones, no usa permisos ni token)
+  router.get('/publicaciones/invitado', publicacionesController.findInvitado);
+
   // ! Todas las rutas a continuación requieren autenticación
   router.use(authenticateToken); // Middleware para proteger las rutas con autenticación
 
