@@ -163,7 +163,7 @@ module.exports = {
                                 include: [
                                     {
                                         model: RIFAS, // Información de la rifa
-                                        attributes: ['nombreRifa', 'precioBoleto', 'descripcion', 'ventaTotal']
+                                        attributes: ['nombreRifa', 'precioBoleto', 'descripcion', 'ventaTotal', 'fechaInicio', 'fechaFin']
                                     }
                                 ]
                             },
