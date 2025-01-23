@@ -39,7 +39,7 @@ module.exports = {
         try {
             const rifas = await RIFAS.findAll({
                 where: {
-                    estado: 1 
+                    estado: 1
                 },
                 include: {
                     model: SEDES,
@@ -60,7 +60,7 @@ module.exports = {
         try {
             const rifas = await RIFAS.findAll({
                 where: {
-                    estado: 0 
+                    estado: 0
                 },
                 include: {
                     model: SEDES,
@@ -239,7 +239,7 @@ module.exports = {
             return res.status(400).json({ message: 'La sede especificada no existe.' });
         }
 
-        const nuevaRifa = { 
+        const nuevaRifa = {
             nombreRifa: datos.nombreRifa,
             precioBoleto: datos.precioBoleto,
             descripcion: datos.descripcion,
@@ -247,7 +247,7 @@ module.exports = {
             fechaFin,
             ventaTotal: 0,
             idSede: datos.idSede,
-            estado: datos.estado !== undefined ? datos.estado : 1 
+            estado: datos.estado !== undefined ? datos.estado : 1
         };
 
         try {
@@ -294,7 +294,7 @@ module.exports = {
             }
             camposActualizados.fechaInicio = fechaInicio;
         }
-    
+
         if (datos.fechaFin !== undefined) {
             // Validar y convertir fechaFin
             const fechaFin = parse(datos.fechaFin, "yyyy-MM-dd", new Date());
@@ -302,7 +302,7 @@ module.exports = {
                 return res.status(400).json({ message: 'La fecha de fin no es válida.' });
             }
             camposActualizados.fechaFin = fechaFin;
-    
+
             // Verificar que fechaFin no sea menor a fechaInicio
             if (camposActualizados.fechaInicio && camposActualizados.fechaFin < camposActualizados.fechaInicio) {
                 return res.status(400).json({ message: 'La fecha de fin no puede ser menor a la fecha de inicio.' });
@@ -332,7 +332,7 @@ module.exports = {
             const [rowsUpdated] = await RIFAS.update(
                 camposActualizados,
                 {
-                    where: { idRifa: id } 
+                    where: { idRifa: id }
                 }
             );
             if (rowsUpdated === 0) {
@@ -347,20 +347,47 @@ module.exports = {
 
     // Eliminar una rifa
     async delete(req, res) {
-        const id = req.params.id; 
-    
+        const id = req.params.id;
+
         try {
             const rifa = await RIFAS.findByPk(id);
-    
+
             if (!rifa) {
                 return res.status(404).json({ error: 'Rifa no encontrada' });
             }
-    
+
             await rifa.destroy();
             return res.status(200).json({ message: 'Rifa eliminada correctamente' });
         } catch (error) {
             console.error('Error al eliminar rifa:', error);
             return res.status(500).json({ error: 'Error al eliminar rifa' });
+        }
+    },
+
+    // Obtener una rifa por ID con todos los talonarios asociados
+    async findRifaWithTalonarios(req, res) {
+        const id = req.params.id;
+
+        try {
+            const rifa = await RIFAS.findByPk(id, {
+                include: [
+                    {
+                        model: TALONARIOS,
+                        attributes: ['idTalonario', 'codigoTalonario', 'cantidadBoletos', 'correlativoInicio', 'correlativoFinal', 'estado'],
+                    }
+                ]
+            });
+
+            if (!rifa) {
+                return res.status(404).json({ message: 'Rifa no encontrada' });
+            }
+
+            return res.status(200).json(rifa);
+        } catch (error) {
+            console.error(`Error al buscar rifa con ID ${id}:`, error);
+            return res.status(500).json({
+                message: 'Ocurrió un error al recuperar la rifa.'
+            });
         }
     }
 };
