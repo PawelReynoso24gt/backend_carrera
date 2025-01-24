@@ -655,7 +655,6 @@ module.exports = (app) => {
 
   // * RUTAS BITACORAS
   router.get('/bitacora', checkPermissions('Ver bitácoras'), bitacorasController.find);
-  router.get('/bitacora/notificacionGeneralEvento', bitacorasController.findCatEvento);
   router.get('/bitacora/:id', bitacorasController.findById);
   router.post('/bitacora/create', bitacorasController.createBitacora);
   router.put('/bitacora/update/:id', bitacorasController.updateBitacora);
