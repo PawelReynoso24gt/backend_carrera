@@ -35,6 +35,41 @@ module.exports = {
         }
     },
 
+    // Obtener todas las publicaciones PARA INVITADO
+    async findInvitado(req, res) {
+        try {
+            const publicaciones = await PUBLICACIONES.findAll({
+                where: { estado: 1 },
+                include: [
+                    { model: db.sedes, as: 'sede' },
+                    { model: db.publicacion_generales, as: 'publicacionesGenerales' },
+                    { model: db.publicacion_eventos, as: 'publicacionesEventos', include: [{ model: db.eventos, as: 'evento' }] },
+                    { model: db.publicacion_rifas, as: 'publicacionesRifas', include: [{ model: db.rifas, as: 'rifa' }] }
+                ]
+            });
+    
+            // Agregar el tipo de publicación dinámicamente
+            const publicacionesConTipo = publicaciones.map(publicacion => {
+                let tipoPublicacion = 'Sin Tipo'; // Valor por defecto
+                if (publicacion.publicacionesGenerales && publicacion.publicacionesGenerales.length > 0) {
+                    tipoPublicacion = 'generales';
+                } else if (publicacion.publicacionesEventos && publicacion.publicacionesEventos.length > 0) {
+                    tipoPublicacion = 'eventos';
+                } else if (publicacion.publicacionesRifas && publicacion.publicacionesRifas.length > 0) {
+                    tipoPublicacion = 'rifas';
+                }
+                return { ...publicacion.toJSON(), tipoPublicacion }; // Agregar el campo
+            });
+    
+            return res.status(200).json(publicacionesConTipo);
+        } catch (error) {
+            console.error('Error al recuperar las publicaciones:', error);
+            return res.status(500).json({
+                message: 'Ocurrió un error al recuperar las publicaciones.'
+            });
+        }
+    }, 
+
     // Obtener todas las publicaciones
     async findCompleto(req, res) {
         try {

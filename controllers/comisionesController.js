@@ -88,7 +88,7 @@ module.exports = {
         }
     },
 
-
+    
     async findActiveComiById(req, res) {
         const { idVoluntario } = req.query; // Obtener el ID del voluntario desde la solicitud
 
@@ -186,6 +186,37 @@ module.exports = {
         }
     },
 
+    // Método en el controlador de comisiones
+async findInscripcionesByComision(req, res) {
+    const { idComision, idVoluntario } = req.params;
+
+    try {
+        const inscripcionComision = await db.inscripcion_comisiones.findOne({
+            where: {
+                idComision,
+                idVoluntario
+            },
+            include: [
+                {
+                    model: db.inscripcion_eventos,
+                    as: 'inscripcionEvento',
+                    attributes: ['idInscripcionEvento', 'idEvento']
+                }
+            ]
+        });
+
+        if (!inscripcionComision) {
+            return res.status(404).json({ message: 'No se encontró la inscripción para la comisión proporcionada.' });
+        }
+
+        return res.status(200).json(inscripcionComision);
+    } catch (error) {
+        console.error('Error al buscar inscripciones:', error);
+        return res.status(500).json({ message: 'Error al buscar inscripciones.' });
+    }
+},
+
+
     // Obtener comisión por ID 
     async findById(req, res) {
         const id = req.params.id;
@@ -253,22 +284,21 @@ module.exports = {
         }
     },
 
-    // Obtener comisiones por ID de Evento
+        // Obtener comisiones por ID de Evento
         async findByEvento(req, res) {
-            const { eventoId } = req.query;
+            const { eventoId, idVoluntario } = req.query; // Asegúrate de recibir `idVoluntario` en la solicitud
 
             try {
-                // Validar que el eventoId fue proporcionado
                 if (!eventoId) {
                     return res.status(400).json({ message: 'Se requiere el ID del evento.' });
                 }
 
-                // Buscar las comisiones asociadas al idEvento
+                if (!idVoluntario) {
+                    return res.status(400).json({ message: 'Se requiere el ID del voluntario.' });
+                }
+
                 const comisiones = await COMISIONES.findAll({
-                    where: { 
-                        idEvento: eventoId,
-                        estado: 1 // Filtrar solo las comisiones activas
-                    },
+                    where: { idEvento: eventoId },
                     include: [
                         {
                             model: db.eventos,
@@ -278,24 +308,51 @@ module.exports = {
                         {
                             model: db.detalle_horarios,
                             as: 'detalleHorario',
-                            attributes: ['idDetalleHorario', 'cantidadPersonas', 'estado']
+                            attributes: ['idDetalleHorario', 'cantidadPersonas', 'estado'],
+                            include: [
+                                {
+                                    model: db.horarios,
+                                    as: 'horario',
+                                    attributes: ['idHorario', 'horarioInicio', 'horarioFinal', 'estado']
+                                }
+                            ]
+                        },
+                        {
+                            model: db.inscripcion_comisiones,
+                            attributes: ['idInscripcionComision'], // Usa los nombres reales de las columnas
+                            where: { idVoluntario },
+                            required: false // Asegura que no se excluyan las comisiones sin inscripción
                         }
                     ]
                 });
 
-                // Validar si no se encontraron comisiones
                 if (!comisiones.length) {
                     return res.status(404).json({ message: 'No se encontraron comisiones para este evento.' });
                 }
 
-                // Responder con las comisiones encontradas
-                return res.status(200).json(comisiones);
+                // Agregar el campo `isInscrito` basado en si hay inscripciones y datos de horarios
+                const formattedComisiones = comisiones.map((comision) => {
+                    const detalleHorario = comision.detalleHorario || null;
+                    const horario = detalleHorario ? detalleHorario.horario : null;
+
+                    return {
+                        ...comision.toJSON(),
+                        isInscrito: comision.inscripcion_comisiones && comision.inscripcion_comisiones.length > 0,
+                        horarioInicio: horario ? horario.horarioInicio : null,
+                        horarioFinal: horario ? horario.horarioFinal : null
+                    };
+                });
+
+                return res.status(200).json(formattedComisiones);
             } catch (error) {
                 console.error('Error al recuperar comisiones por evento:', error);
                 return res.status(500).json({ message: 'Error al recuperar comisiones por evento.' });
             }
         },
-        
+
+
+
+
     // Actualizar una comisión existente
     async update(req, res) {
         const { comision, descripcion, estado, idEvento, idDetalleHorario } = req.body;

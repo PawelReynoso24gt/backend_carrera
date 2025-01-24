@@ -99,6 +99,9 @@ module.exports = (app) => {
     router.post('/notificaciones/create', notificacionesController.create);
     router.put('/notificaciones/:id', notificacionesController.update);
 
+  // * RUTA DE INVITADO (ver publicaciones, no usa permisos ni token)
+  router.get('/publicaciones/invitado', publicacionesController.findInvitado);
+
   // ! Todas las rutas a continuación requieren autenticación
   router.use(authenticateToken); // Middleware para proteger las rutas con autenticación
 
@@ -263,6 +266,7 @@ module.exports = (app) => {
     router.get('/rifas/talonarios/:idRifa', rifasController.findTalonariosVoluntarios);
   router.get('/rifas/voluntarios/talonarios/:idVoluntario/:idRifa', rifasController.findVoluntariosTalonarios);
     router.get('/rifas/:id', rifasController.findById);
+    router.get('/rifas/withTalonarios/:id', rifasController.findRifaWithTalonarios);
     router.post('/rifas', rifasController.create);
     router.put('/rifas/:id', rifasController.update);
     router.delete('/rifas/:id', rifasController.delete);
@@ -342,6 +346,7 @@ module.exports = (app) => {
   router.get('/comisiones/activos', checkPermissions('Ver comisiones'), comisionesController.findActive);
   router.get('/comisiones/inactivos', checkPermissions('Ver comisiones'), comisionesController.findInactive);
   router.get('/comisiones/active', comisionesController.findActiveComiById);
+  router.get('/inscripciones/comision/:idComision/voluntario/:idVoluntario', comisionesController.findInscripcionesByComision);
   router.get('/comisiones/:id', comisionesController.findById);
   router.post('/comisiones/create', comisionesController.create);
   router.put('/comisiones/update/:id', comisionesController.update);
@@ -351,6 +356,7 @@ module.exports = (app) => {
   router.get('/materiales/all', checkPermissions('Ver materiales'), materialesController.find);
   router.get('/materiales/:id', materialesController.findById);
   router.get('/materialesByName', materialesController.findByName);
+  router.get('/materiales/comision/:idComision', materialesController.findByComision);
   router.post('/materiales', materialesController.create);
   router.put('/materiales/:id', materialesController.update);
   router.delete('/materiales/:id', materialesController.delete);
@@ -386,6 +392,7 @@ module.exports = (app) => {
   router.get('/actividades', checkPermissions('Ver actividades'), actividadesController.find);
   router.get('/actividades/activos', checkPermissions('Ver actividades'), actividadesController.findActive);
   router.get('/actividades/inactivos', checkPermissions('Ver actividades'), actividadesController.findInactive);
+  router.get('/actividades/comision/:idComision', actividadesController.findByComision);
   router.get('/actividades/:id', actividadesController.findById);
   router.post('/actividades/create', actividadesController.create);
   router.put('/actividades/update/:id', actividadesController.update);
@@ -552,7 +559,7 @@ module.exports = (app) => {
   // * RuUTAS DE DETALLE DE INSCRIPCION DE ACTIVIDADES
   router.get('/detalle_inscripcion_actividades', checkPermissions('Ver detalles de inscripciones a actividades'), detalleInscripcionActividadesController.find);
   router.get('/detalle_inscripcion_actividades/activos', checkPermissions('Ver detalles de inscripciones a actividades'), detalleInscripcionActividadesController.findActive);
-  router.get('/detalle_inscripcion_actividades/inactivos', checkPermissions('Ver detalles de inscripciones a actividades'), detalleInscripcionActividadesController.findInactive);
+  router.get('/detalle_inscripcion_actividades/inactivos', checkPermissions('Ver detalles de inscripciones a actividades'), detalleInscripcionActividadesController.findInactive); 
   router.get('/detalle_inscripcion_actividades/:id', detalleInscripcionActividadesController.findById);
   router.post('/detalle_inscripcion_actividades/create', detalleInscripcionActividadesController.create);
   router.put('/detalle_inscripcion_actividades/update/:id', detalleInscripcionActividadesController.update);
@@ -648,7 +655,6 @@ module.exports = (app) => {
 
   // * RUTAS BITACORAS
   router.get('/bitacora', checkPermissions('Ver bitácoras'), bitacorasController.find);
-  router.get('/bitacora/notificacionGeneralEvento', bitacorasController.findCatEvento);
   router.get('/bitacora/:id', bitacorasController.findById);
   router.post('/bitacora/create', bitacorasController.createBitacora);
   router.put('/bitacora/update/:id', bitacorasController.updateBitacora);
@@ -729,6 +735,7 @@ module.exports = (app) => {
   router.post('/reportesAspirantes', checkPermissions('Generar reporte aspirantes'), aspirantesController.reporteAspirantes);
   router.post("/reportesRifas", checkPermissions('Generar reporte rifas'), reportesController.reporteRifas);
   router.get('/reportePedidos', checkPermissions('Generar reporte pedidos'), detalle_pedidosController.reportePedidosConDetalle);
+  router.get('/reporteContabilidad', reportesController.reporteContabilidad);
     // * ENDPOINT DE PERMISOS 
     router.get('/usuarios/permisos', obtenerPermisosController.getPermissionsForRole);
 
