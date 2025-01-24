@@ -5,9 +5,14 @@ const cors          = require('cors');
 const logger        = require('morgan');
 const bodyParser    = require('body-parser');
 const http = require('http');
+const EventEmitter = require('events'); // Importar EventEmitter
 const app = express();
 
 /*  require('./routes')(app); */
+
+// Crear una instancia de EventEmitter y configurar el límite de listeners
+const bus = new EventEmitter();
+bus.setMaxListeners(20); // Incrementar el límite de listeners a 20
 
 app.use(logger('dev'));
 

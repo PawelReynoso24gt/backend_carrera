@@ -99,6 +99,9 @@ module.exports = (app) => {
     router.post('/notificaciones/create', notificacionesController.create);
     router.put('/notificaciones/:id', notificacionesController.update);
 
+  // * RUTA DE INVITADO (ver publicaciones, no usa permisos ni token)
+  router.get('/publicaciones/invitado', publicacionesController.findInvitado);
+
   // ! Todas las rutas a continuación requieren autenticación
   router.use(authenticateToken); // Middleware para proteger las rutas con autenticación
 
@@ -652,7 +655,6 @@ module.exports = (app) => {
 
   // * RUTAS BITACORAS
   router.get('/bitacora', checkPermissions('Ver bitácoras'), bitacorasController.find);
-  router.get('/bitacora/notificacionGeneralEvento', bitacorasController.findCatEvento);
   router.get('/bitacora/:id', bitacorasController.findById);
   router.post('/bitacora/create', bitacorasController.createBitacora);
   router.put('/bitacora/update/:id', bitacorasController.updateBitacora);
@@ -733,6 +735,7 @@ module.exports = (app) => {
   router.post('/reportesAspirantes', checkPermissions('Generar reporte aspirantes'), aspirantesController.reporteAspirantes);
   router.post("/reportesRifas", checkPermissions('Generar reporte rifas'), reportesController.reporteRifas);
   router.get('/reportePedidos', checkPermissions('Generar reporte pedidos'), detalle_pedidosController.reportePedidosConDetalle);
+  router.get('/reporteContabilidad', reportesController.reporteContabilidad);
     // * ENDPOINT DE PERMISOS 
     router.get('/usuarios/permisos', obtenerPermisosController.getPermissionsForRole);
 
