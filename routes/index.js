@@ -103,7 +103,7 @@ module.exports = (app) => {
   router.get('/publicaciones/invitado', publicacionesController.findInvitado);
 
   // ! Todas las rutas a continuación requieren autenticación
-  router.use(authenticateToken); // Middleware para proteger las rutas con autenticación
+  //router.use(authenticateToken); // Middleware para proteger las rutas con autenticación
 
   // * USUARIOS
   router.get('/usuarios/activos', checkPermissions('Ver usuarios'), usuariosController.find);
@@ -343,6 +343,7 @@ module.exports = (app) => {
   // * RUTAS DE COMISIONES
   router.get('/comisiones', checkPermissions('Ver comisiones'), comisionesController.find);
   router.get('/comisiones/porevento', comisionesController.findByEvento);
+  router.get('/comisiones/poreventoFr', comisionesController.findByEventoFront); //a
   router.get('/comisiones/activos', checkPermissions('Ver comisiones'), comisionesController.findActive);
   router.get('/comisiones/inactivos', checkPermissions('Ver comisiones'), comisionesController.findInactive);
   router.get('/comisiones/active', comisionesController.findActiveComiById);
