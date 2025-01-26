@@ -153,6 +153,17 @@ module.exports = {
         }
 
         try {
+            // Verificar si ya existe una asistencia para este idInscripcionEvento
+            const asistenciaExistente = await ASISTENCIA_EVENTOS.findOne({
+                where: { idInscripcionEvento }
+            });
+
+            if (asistenciaExistente) {
+                return res.status(400).json({
+                    message: 'Ya existe una asistencia registrada para este evento.'
+                });
+            }
+
             const nuevaAsistencia = await ASISTENCIA_EVENTOS.create({
                 estado,
                 idInscripcionEvento,
