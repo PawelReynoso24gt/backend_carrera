@@ -286,7 +286,7 @@ async findInscripcionesByComision(req, res) {
     },
 
         // Obtener comisiones por ID de Evento
-        async findByEventoFront(req, res) {
+        async findByEvento(req, res) {
             const { eventoId } = req.query; // Solo se requiere `eventoId`
         
             try {
@@ -373,7 +373,7 @@ async findInscripcionesByComision(req, res) {
             }
         },
         
-        async findByEvento(req, res) {
+        async findByEventoFront(req, res) {
             const { eventoId, idVoluntario } = req.query; // Asegúrate de recibir `idVoluntario` en la solicitud
 
             try {
