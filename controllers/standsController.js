@@ -459,8 +459,9 @@ async findVirtualStandProducts(req, res) {
           return res.status(500).json({ error: 'Error al crear el stand.' });
         }
       },
+
       updateStand: async (req, res) => {
-        const { standData, horarios } = req.body; // Recibimos standData y horarios
+        const { standData, horarios, estado } = req.body; // Recibimos standData y horarios
         const id = req.params.id;
       
         const transaction = await db.sequelize.transaction();
@@ -471,10 +472,17 @@ async findVirtualStandProducts(req, res) {
             return res.status(404).json({ message: 'Stand no encontrado.' });
           }
       
+          if (estado !== undefined) {
+            await STANDS.update({ estado }, { where: { idStand: id }, transaction });
+        }
+        
           // Actualizar datos del stand si están presentes
-          if (standData) {
-            await STANDS.update(standData, { where: { idStand: id }, transaction });
-          }
+           if (standData && Object.keys(standData).length > 0) {
+            await STANDS.update(
+                standData,
+                { where: { idStand: id }, transaction }
+            );
+        }
       
           // Si se proporcionan horarios, procesarlos
           if (horarios && horarios.length >= 0) {

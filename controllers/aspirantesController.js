@@ -49,6 +49,43 @@ module.exports = {
         }
     },
 
+    async denyAspirante(req, res) {
+        const { idAspirante } = req.params;
+    
+        try {
+            // Buscar el aspirante por ID
+            const aspirante = await ASPIRANTES.findByPk(idAspirante);
+    
+            if (!aspirante) {
+                return res.status(404).json({ message: 'Aspirante no encontrado.' });
+            }
+    
+            if (aspirante.estado === -1) {
+                return res.status(400).json({ message: 'El aspirante ya ha sido denegado.' });
+            }
+    
+            if (aspirante.estado === 0) {
+                return res.status(400).json({ message: 'El aspirante ya ha sido aceptado previamente.' });
+            }
+    
+            // Actualizar el estado del aspirante a denegado (-1)
+            aspirante.estado = -1;
+            await aspirante.save();
+    
+            // Retornar la respuesta con el aspirante actualizado
+            return res.status(200).json({
+                message: 'La solicitud del aspirante ha sido denegada exitosamente.',
+                aspirante,
+            });
+        } catch (error) {
+            console.error('Error al denegar la solicitud del aspirante:', error);
+            return res.status(500).json({
+                message: error.message || 'Error al denegar la solicitud del aspirante.',
+            });
+        }
+    },
+    
+
     // * traer un solo aspirante
     async findOne(req, res) {
         const { idAspirante } = req.params;

@@ -20,7 +20,7 @@ module.exports = {
                 {
                     model: USUARIOS,
                     as: 'usuario',
-                    attributes: ['usuario']
+                    attributes: ['idUsuario','usuario']
                 }
             ]
         })
@@ -47,7 +47,7 @@ module.exports = {
               {
                 model: USUARIOS,
                 as: 'usuario',
-                attributes: ['usuario'],
+                attributes: ['idUsuario','usuario'],
               },
             ],
           });
@@ -74,7 +74,7 @@ module.exports = {
               {
                 model: USUARIOS,
                 as: 'usuario',
-                attributes: ['usuario'],
+                attributes: ['idUsuario','usuario'],
               },
             ],
           });
@@ -223,7 +223,7 @@ module.exports = {
                 {
                     model: USUARIOS,
                     as: 'usuario',
-                    attributes: ['usuario']
+                    attributes: ['idUsuario','usuario']
                 }
             ]
         })
@@ -254,7 +254,7 @@ module.exports = {
                 {
                     model: USUARIOS,
                     as: 'usuario',
-                    attributes: ['usuario']
+                    attributes: ['idUsuario','usuario']
                 }
             ]
         })
