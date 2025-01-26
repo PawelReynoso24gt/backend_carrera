@@ -21,7 +21,18 @@ module.exports = {
                                 as: 'evento',
                                 attributes: ['nombreEvento'], // Incluir el nombre del evento
                             },
-                        ],
+                            {
+                                model: db.voluntarios,
+                                 as: 'voluntario',
+                                 attributes: ['idVoluntario'],
+                                include: [
+                                    {
+                                        model: db.personas,
+                                        attributes: ['nombre'], // Incluir el nombre del evento
+                                    }
+                                ]
+                            },
+                        ]
                     },
                     {
                         model: INSCRIPCION_COMISIONES,
