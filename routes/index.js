@@ -103,7 +103,7 @@ module.exports = (app) => {
   router.get('/publicaciones/invitado', publicacionesController.findInvitado);
 
   // ! Todas las rutas a continuación requieren autenticación
-  //router.use(authenticateToken); // Middleware para proteger las rutas con autenticación
+  router.use(authenticateToken); // Middleware para proteger las rutas con autenticación
 
   // * USUARIOS
   router.get('/usuarios/activos', checkPermissions('Ver usuarios'), usuariosController.find);
@@ -643,6 +643,7 @@ module.exports = (app) => {
   router.put('/aspirantes/:idAspirante', aspirantesController.update);
   router.get('/aspirantes', aspirantesController.findAll);
   router.put('/aspirantes/aceptar/:idAspirante', aspirantesController.acceptAspirante);
+  router.put('/aspirantes/denegar/:idAspirante', aspirantesController.denyAspirante);
   router.delete('/aspirantes/:idAspirante', aspirantesController.delete);
 
   // * RUTAS RECAUDACION EVENTOS
