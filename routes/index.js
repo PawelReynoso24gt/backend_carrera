@@ -103,7 +103,7 @@ module.exports = (app) => {
   router.get('/publicaciones/invitado', publicacionesController.findInvitado);
 
   // ! Todas las rutas a continuación requieren autenticación
-  //router.use(authenticateToken); // Middleware para proteger las rutas con autenticación
+  router.use(authenticateToken); // Middleware para proteger las rutas con autenticación
 
   // * USUARIOS
   router.get('/usuarios/activos', usuariosController.find);
@@ -558,18 +558,18 @@ module.exports = (app) => {
   router.delete('/detalle_productos/delete/:id', detalle_productosController.deleteDetalleProducto);
 
   // * RuUTAS DE DETALLE DE INSCRIPCION DE ACTIVIDADES
-  router.get('/detalle_inscripcion_actividades', checkPermissions('Ver detalles de inscripciones a actividades'), detalleInscripcionActividadesController.find);
-  router.get('/detalle_inscripcion_actividades/activos', checkPermissions('Ver detalles de inscripciones a actividades'), detalleInscripcionActividadesController.findActive);
-  router.get('/detalle_inscripcion_actividades/inactivos', checkPermissions('Ver detalles de inscripciones a actividades'), detalleInscripcionActividadesController.findInactive); 
+  router.get('/detalle_inscripcion_actividades', detalleInscripcionActividadesController.find);
+  router.get('/detalle_inscripcion_actividades/activos', detalleInscripcionActividadesController.findActive);
+  router.get('/detalle_inscripcion_actividades/inactivos', detalleInscripcionActividadesController.findInactive); 
   router.get('/detalle_inscripcion_actividades/:id', detalleInscripcionActividadesController.findById);
   router.post('/detalle_inscripcion_actividades/create', detalleInscripcionActividadesController.create);
   router.put('/detalle_inscripcion_actividades/update/:id', detalleInscripcionActividadesController.update);
   router.delete('/detalle_inscripcion_actividades/delete/:id', detalleInscripcionActividadesController.delete);
 
   // * RUTAS DE DETALLE DE INSCRIPCION DE MATERIALES
-  router.get('/detalle_inscripcion_materiales', checkPermissions('Ver detalles de inscripciones a materiales'), detalleInscripcionMaterialesController.find);
-  router.get('/detalle_inscripcion_materiales/activos', checkPermissions('Ver detalles de inscripciones a materiales'), detalleInscripcionMaterialesController.findActive);
-  router.get('/detalle_inscripcion_materiales/inactivos', checkPermissions('Ver detalles de inscripciones a materiales'), detalleInscripcionMaterialesController.findInactive);
+  router.get('/detalle_inscripcion_materiales', detalleInscripcionMaterialesController.find);
+  router.get('/detalle_inscripcion_materiales/activos', detalleInscripcionMaterialesController.findActive);
+  router.get('/detalle_inscripcion_materiales/inactivos', detalleInscripcionMaterialesController.findInactive);
   router.get('/detalle_inscripcion_materiales/:id', detalleInscripcionMaterialesController.findById);
   router.post('/detalle_inscripcion_materiales/create',  detalleInscripcionMaterialesController.create);
   router.put('/detalle_inscripcion_materiales/update/:id', detalleInscripcionMaterialesController.update);
