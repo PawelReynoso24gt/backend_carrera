@@ -643,6 +643,7 @@ module.exports = (app) => {
   router.put('/aspirantes/:idAspirante', aspirantesController.update);
   router.get('/aspirantes', aspirantesController.findAll);
   router.put('/aspirantes/aceptar/:idAspirante', aspirantesController.acceptAspirante);
+  router.put('/aspirantes/denegar/:idAspirante', aspirantesController.denyAspirante);
   router.delete('/aspirantes/:idAspirante', aspirantesController.delete);
 
   // * RUTAS RECAUDACION EVENTOS
