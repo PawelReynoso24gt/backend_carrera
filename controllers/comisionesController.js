@@ -2,6 +2,7 @@
 const { where } = require("sequelize");
 const db = require("../models");
 const COMISIONES = db.comisiones;
+const INSCRIPCION_COMISION = db.inscripcion_comisiones;
 
 // Métodos CRUD
 module.exports = {
@@ -292,6 +293,27 @@ async findInscripcionesByComision(req, res) {
                 if (!eventoId) {
                     return res.status(400).json({ message: 'Se requiere el ID del evento.' });
                 }
+
+                // Obtener inscripciones activas del evento
+                const inscripciones = await INSCRIPCION_COMISION.findAll({
+                    where: { estado: 1 },
+                    include: [
+                        {
+                            model: db.comisiones,
+                            attributes: ['idComision', 'idEvento'],
+                            where: { idEvento: eventoId }
+                        }
+                    ]
+                });
+
+                // Agrupar inscripciones por idComision
+                const inscripcionesPorComision = inscripciones.reduce((acc, inscripcion) => {
+                    if (!acc[inscripcion.idComision]) {
+                        acc[inscripcion.idComision] = 0;
+                    }
+                    acc[inscripcion.idComision]++;
+                    return acc;
+                }, {});
         
                 const comisiones = await COMISIONES.findAll({
                     where: { idEvento: eventoId },
@@ -319,9 +341,21 @@ async findInscripcionesByComision(req, res) {
                 if (!comisiones.length) {
                     return res.status(404).json({ message: 'No se encontraron comisiones para este evento.' });
                 }
+
+                // Filtrar comisiones según cantidadPersonas y inscripciones activas
+                const filteredComisiones = comisiones.filter(comision => {
+                    const detalleHorario = comision.detalleHorario;
+                    if (!detalleHorario) return true;
+
+                    const { idComision } = comision;
+                    const { cantidadPersonas } = detalleHorario;
+
+                    const inscripcionCount = inscripcionesPorComision[idComision] || 0;
+                    return inscripcionCount < cantidadPersonas;
+                });
         
                 // Agregar información adicional como horarioInicio y horarioFinal
-                const formattedComisiones = comisiones.map((comision) => {
+                const formattedComisiones = filteredComisiones.map((comision) => {
                     const detalleHorario = comision.detalleHorario || null;
                     const horario = detalleHorario ? detalleHorario.horario : null;
         
@@ -339,8 +373,6 @@ async findInscripcionesByComision(req, res) {
             }
         },
         
-
-         
         async findByEvento(req, res) {
             const { eventoId, idVoluntario } = req.query; // Asegúrate de recibir `idVoluntario` en la solicitud
 

@@ -45,11 +45,11 @@ module.exports = (sequelize, DataTypes) => {
       allowNull: false
     },
     fechaRegistro: {
-      type: DataTypes.DATE,
+      type: DataTypes.STRING,
       allowNull: false
     },
     fechaSalida: {
-        type: DataTypes.DATE,
+        type: DataTypes.STRING,
         allowNull: true
     },
     estado: {
