@@ -17,18 +17,6 @@ function formatTimeToHHMM(time) {
 function validateData(data) {
     const timeRegex = /^\d{2}:\d{2}:\d{2}$/; // Para validación final HH:MM:SS
 
-    if (data.horarioInicio !== undefined) {
-        data.horarioInicio = formatTimeToHHMM(data.horarioInicio); // Formatear a HH:MM:00
-        if (!data.horarioInicio || !timeRegex.test(data.horarioInicio)) {
-            return 'El formato de horarioInicio es inválido. Debe ser HH:MM';
-        }
-    }
-    if (data.horarioFinal !== undefined) {
-        data.horarioFinal = formatTimeToHHMM(data.horarioFinal); // Formatear a HH:MM:00
-        if (!data.horarioFinal || !timeRegex.test(data.horarioFinal)) {
-            return 'El formato de horarioFinal es inválido. Debe ser HH:MM';
-        }
-    }
     if (data.horarioInicio !== undefined && data.horarioFinal !== undefined) {
         if (data.horarioInicio >= data.horarioFinal) {
             return 'El horario de inicio debe ser menor al horario final';
