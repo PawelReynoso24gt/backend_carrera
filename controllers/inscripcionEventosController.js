@@ -5,6 +5,7 @@ const ASISTENCIA_EVENTOS = db.asistencia_eventos;
 const INSCRIPCION_EVENTOS = db.inscripcion_eventos;
 const EVENTOS = db.eventos;
 const VOLUNTARIOS = db.voluntarios;
+const PERSONAS = db.personas;
 
 module.exports = {
     // Obtener todas las inscripciones
@@ -56,7 +57,14 @@ module.exports = {
                     {
                         model: VOLUNTARIOS,
                         as: 'voluntario',
-                        attributes: ['idVoluntario', 'estado', 'codigoQR']
+                        attributes: ['idVoluntario', 'estado', 'codigoQR'],
+                        include: [
+                            {
+                                model: PERSONAS,
+                                as: 'persona',
+                                attributes: ['nombre']
+                            }
+                        ]
                     },
                     {
                         model: ASISTENCIA_EVENTOS,

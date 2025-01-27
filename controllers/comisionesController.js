@@ -286,7 +286,7 @@ async findInscripcionesByComision(req, res) {
     },
 
         // Obtener comisiones por ID de Evento
-        async findByEventoFront(req, res) {
+        async findByEvento(req, res) {
             const { eventoId } = req.query; // Solo se requiere `eventoId`
         
             try {
@@ -373,18 +373,14 @@ async findInscripcionesByComision(req, res) {
             }
         },
         
-        async findByEvento(req, res) {
-            const { eventoId, idVoluntario } = req.query; // Asegúrate de recibir `idVoluntario` en la solicitud
-
+        async findByEventoFront(req, res) {
+            const { eventoId } = req.query; // Solo se requiere `eventoId`
+        
             try {
                 if (!eventoId) {
                     return res.status(400).json({ message: 'Se requiere el ID del evento.' });
                 }
-
-                if (!idVoluntario) {
-                    return res.status(400).json({ message: 'Se requiere el ID del voluntario.' });
-                }
-
+        
                 const comisiones = await COMISIONES.findAll({
                     where: { idEvento: eventoId },
                     include: [
@@ -404,33 +400,26 @@ async findInscripcionesByComision(req, res) {
                                     attributes: ['idHorario', 'horarioInicio', 'horarioFinal', 'estado']
                                 }
                             ]
-                        },
-                        {
-                            model: db.inscripcion_comisiones,
-                            attributes: ['idInscripcionComision'], // Usa los nombres reales de las columnas
-                            where: { idVoluntario },
-                            required: false // Asegura que no se excluyan las comisiones sin inscripción
                         }
                     ]
                 });
-
+        
                 if (!comisiones.length) {
                     return res.status(404).json({ message: 'No se encontraron comisiones para este evento.' });
                 }
-
-                // Agregar el campo `isInscrito` basado en si hay inscripciones y datos de horarios
+        
+                // Agregar información adicional como horarioInicio y horarioFinal
                 const formattedComisiones = comisiones.map((comision) => {
                     const detalleHorario = comision.detalleHorario || null;
                     const horario = detalleHorario ? detalleHorario.horario : null;
-
+        
                     return {
                         ...comision.toJSON(),
-                        isInscrito: comision.inscripcion_comisiones && comision.inscripcion_comisiones.length > 0,
                         horarioInicio: horario ? horario.horarioInicio : null,
                         horarioFinal: horario ? horario.horarioFinal : null
                     };
                 });
-
+        
                 return res.status(200).json(formattedComisiones);
             } catch (error) {
                 console.error('Error al recuperar comisiones por evento:', error);
