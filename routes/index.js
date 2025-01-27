@@ -103,7 +103,7 @@ module.exports = (app) => {
   router.get('/publicaciones/invitado', publicacionesController.findInvitado);
 
   // ! Todas las rutas a continuación requieren autenticación
-  router.use(authenticateToken); // Middleware para proteger las rutas con autenticación
+  //router.use(authenticateToken); // Middleware para proteger las rutas con autenticación
 
   // * USUARIOS
   router.get('/usuarios/activos', usuariosController.find);
@@ -656,7 +656,7 @@ module.exports = (app) => {
   router.delete('/recaudacion_evento/delete/:id', recaudacion_eventosController.deleteRecaudacionEvento);
 
   // * RUTAS BITACORAS
-  router.get('/bitacora', checkPermissions('Ver bitacora'), bitacorasController.find);
+  router.get('/bitacora', checkPermissions('Ver bitácoras'), bitacorasController.find);
   router.get('/bitacora/:id', bitacorasController.findById);
   router.post('/bitacora/create', bitacorasController.createBitacora);
   router.put('/bitacora/update/:id', bitacorasController.updateBitacora);

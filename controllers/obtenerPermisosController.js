@@ -29,7 +29,6 @@ const getPermissionsForRole = async (req, res) => {
             where: { idRol, estado: 1 },
           });
 
-          console.log('Permisos asignados:', permisosAsignados);
 
           const permisosMap = permisosAsignados.reduce((acc, asignacion) => {
             if (asignacion.permiso && asignacion.permiso.nombrePermiso) {
