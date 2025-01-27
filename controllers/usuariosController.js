@@ -16,13 +16,28 @@ function hashPassword(password) {
 }
 
 // Validación de entrada
-function validateUserData(datos, esCreacion = false) {
+function validateUserData(datos) {
     const usuarioRegex = /^[a-z0-9-_]+$/; // Solo minúsculas, números, guion y guion bajo
 
     if (datos.usuario !== undefined && !usuarioRegex.test(datos.usuario)) {
         return 'El nombre de usuario solo debe contener minúsculas, números, "-" o "_"';
     }
 
+    if (datos.idRol !== undefined && datos.idRol < 1) {
+        return 'El rol es inválido';
+    }
+    if (datos.idSede !== undefined && datos.idSede < 1) {
+        return 'La sede es inválida';
+    }
+    if (datos.idPersona !== undefined && datos.idPersona < 1) {
+        return 'La persona es inválida';
+    }
+
+    return null;
+}
+
+// Validación de contraseña
+function validatePassword(datos, esCreacion = false) {
     if (esCreacion || datos.contrasenia !== undefined) {
         if (!datos.contrasenia) {
             return 'La contraseña no puede estar vacía';
@@ -42,16 +57,6 @@ function validateUserData(datos, esCreacion = false) {
         if (!/[@$!%*?&#]/.test(datos.contrasenia)) {
             return 'La contraseña debe contener al menos un carácter especial (@, $, !, %, *, ?, &, #)';
         }
-    }
-
-    if (datos.idRol !== undefined && datos.idRol < 1) {
-        return 'El rol es inválido';
-    }
-    if (datos.idSede !== undefined && datos.idSede < 1) {
-        return 'La sede es inválida';
-    }
-    if (datos.idPersona !== undefined && datos.idPersona < 1) {
-        return 'La persona es inválida';
     }
 
     return null;
