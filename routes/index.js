@@ -103,7 +103,7 @@ module.exports = (app) => {
   router.get('/publicaciones/invitado', publicacionesController.findInvitado);
 
   // ! Todas las rutas a continuación requieren autenticación
-  //router.use(authenticateToken); // Middleware para proteger las rutas con autenticación
+  router.use(authenticateToken); // Middleware para proteger las rutas con autenticación
 
   // * USUARIOS
   router.get('/usuarios/activos', usuariosController.find);
@@ -737,7 +737,7 @@ module.exports = (app) => {
   router.post('/reportesAspirantes', checkPermissions('Generar reporte aspirantes'), aspirantesController.reporteAspirantes);
   router.post("/reportesRifas", checkPermissions('Generar reporte rifas'), reportesController.reporteRifas);
   router.get('/reportePedidos', checkPermissions('Generar reporte pedidos'), detalle_pedidosController.reportePedidosConDetalle);
-  router.get('/reporteContabilidad', reportesController.reporteContabilidad);
+  router.get('/reporteContabilidad', checkPermissions('Generar reporte contabilidad'), reportesController.reporteContabilidad);
     // * ENDPOINT DE PERMISOS 
     router.get('/usuarios/permisos', obtenerPermisosController.getPermissionsForRole);
 
