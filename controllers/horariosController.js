@@ -82,13 +82,13 @@ module.exports = {
     // * Crear horario
     async create(req, res) {
         const datos = req.body;
-    
+
         // Validar los datos antes de insertarlos
         const error = validateData(datos);
         if (error) {
             return res.status(400).json({ error });
         }
-    
+
         const data = {
             horarioInicio: datos.horarioInicio,
             horarioFinal: datos.horarioFinal,
@@ -108,7 +108,7 @@ module.exports = {
     async update(req, res) {
         const datos = req.body;
         const id = req.params.id;
-    
+
         // Validar los datos antes de actualizarlos
         const error = validateData(datos);
         if (error) {
@@ -139,7 +139,7 @@ module.exports = {
             return res.status(200).send('El horario ha sido actualizado');
         } catch (error) {
             console.log(error);
-            return res.status(500).json({ error: 'Error al actualizar horario' });
+            return res.status(500).json({ error: 'Error al actualizar horario', error });
         }
     },
 
