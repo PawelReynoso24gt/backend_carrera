@@ -16,7 +16,6 @@ module.exports = {
             const personas = await PERSONAS.findAll({
                 include: {
                     model: MUNICIPIOS,
-                    attributes: ["idMunicipio", "municipio"],
                 },
                 where: {
                     estado: 1
@@ -40,7 +39,6 @@ module.exports = {
                 },
                 include: {
                     model: MUNICIPIOS,
-                    attributes: ["idMunicipio", "municipio"],
                 }
             });
             return res.status(200).json(personas);
@@ -61,7 +59,6 @@ module.exports = {
                 },
                 include: {
                     model: MUNICIPIOS,
-                    attributes: ["idMunicipio", "municipio"],
                 }
             });
             return res.status(200).json(personas);
@@ -81,7 +78,6 @@ module.exports = {
             const persona = await PERSONAS.findByPk(id, {
                 include: {
                     model: MUNICIPIOS,
-                    attributes: ["idMunicipio", "municipio"],
                 }
             });
 
