@@ -11,7 +11,7 @@ module.exports = {
                 include: {
                     model: COMISIONES,
                     as: 'comision',
-                    attributes: ['idComision', 'comision', 'descripcion', 'estado']
+                    attributes: ['idComision', 'comision', 'descripcion', 'estado', 'idEvento'],
                 },
                 where: {
                     estado: 1
@@ -34,7 +34,7 @@ module.exports = {
                 include: {
                     model: COMISIONES,
                     as: 'comision',
-                    attributes: ['idComision', 'comision', 'descripcion', 'estado']
+                    attributes: ['idComision', 'comision', 'descripcion', 'estado', 'idEvento']
                 }
             });
             return res.status(200).json(actividades);
@@ -54,7 +54,7 @@ module.exports = {
                 include: {
                     model: COMISIONES,
                     as: 'comision',
-                    attributes: ['idComision', 'comision', 'descripcion', 'estado']
+                    attributes: ['idComision', 'comision', 'descripcion', 'estado', 'idEvento']
                 }
             });
             return res.status(200).json(actividades);
@@ -75,7 +75,7 @@ module.exports = {
                 include: {
                     model: COMISIONES,
                     as: 'comision',
-                    attributes: ['idComision', 'comision', 'descripcion', 'estado']
+                    attributes: ['idComision', 'comision', 'descripcion', 'estado', 'idEvento']
                 }
             });
 
@@ -105,7 +105,7 @@ async findByComision(req, res) {
             include: {
                 model: COMISIONES,
                 as: 'comision',
-                attributes: ['idComision', 'comision', 'descripcion', 'estado']
+                attributes: ['idComision', 'comision', 'descripcion', 'estado', 'idEvento']
             }
         });
 

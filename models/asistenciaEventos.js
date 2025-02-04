@@ -38,7 +38,12 @@ module.exports = (sequelize, DataTypes) => {
         idEmpleado: {
             type: DataTypes.INTEGER,
             allowNull: false
-        }
+        },
+
+        fechaHoraAsistencia: {
+            type: DataTypes.DATE,
+            allowNull: false
+        },
     }, {
         sequelize,
         modelName: 'asistencia_eventos',
