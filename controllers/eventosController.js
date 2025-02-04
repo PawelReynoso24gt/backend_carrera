@@ -14,6 +14,7 @@ module.exports = {
     // * Listar todos los eventos con el nombre de la sede
     async findAll(req, res) {
         return EVENTOS.findAll({
+            where: { estado: 1 }, // Solo eventos activos
             include: [{
                 model: SEDES,
                 as: 'sede', 

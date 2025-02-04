@@ -586,6 +586,7 @@ module.exports = (app) => {
 
   // * RUTAS DE ASISTENCIA A EVENTOS
   router.get('/asistencia_eventos', asistenciaEventosController.find);
+  router.get('/asistencia_eventos/evento/:idEvento', asistenciaEventosController.findByEvento);
   router.get('/asistencia_eventos/activos', asistenciaEventosController.findActive);
   router.get('/asistencia_eventos/inactivos', asistenciaEventosController.findInactive);
   router.get('/asistencia_eventos/:id', asistenciaEventosController.findById);

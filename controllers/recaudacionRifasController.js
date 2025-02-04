@@ -280,11 +280,11 @@ module.exports = {
                         include: [
                             {
                                 model: TALONARIOS, // Talonario asociado
-                                attributes: ['codigoTalonario', 'cantidadBoletos', 'correlativoInicio', 'correlativoFinal'],
+                                attributes: ['idTalonario', 'codigoTalonario', 'cantidadBoletos', 'correlativoInicio', 'correlativoFinal'],
                                 include: [
                                     {
                                         model: RIFAS, // Información de la rifa
-                                        attributes: ['nombreRifa', 'precioBoleto', 'descripcion', 'ventaTotal']
+                                        attributes: ['idRifa', 'nombreRifa', 'precioBoleto', 'descripcion', 'ventaTotal']
                                     }
                                 ]
                             },
@@ -333,7 +333,7 @@ module.exports = {
                 include: [
                     {
                         model: SOLICITUD_TALONARIOS,
-                        where: { estado: 1 },
+                        where: { estado: 2 },
                         include: [
                             {
                                 model: VOLUNTARIOS,

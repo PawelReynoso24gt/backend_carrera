@@ -27,11 +27,14 @@ module.exports = {
             aspirante.estado = 0;
             await aspirante.save();
 
+            // Formatear la fecha actual a 'YYYY-MM-DD'
+            const fechaRegistro = new Date().toISOString().split('T')[0];
+
             // Crear un nuevo voluntario en base al aspirante
             const nuevoVoluntario = await VOLUNTARIOS.create({
                 idPersona: aspirante.idPersona,
                 codigoQR: `VOL-${aspirante.idPersona}-${Date.now()}`, // Generar un código QR único
-                fechaRegistro: new Date(),
+                fechaRegistro:fechaRegistro,
                 estado: 1, // Estado activo
             });
 

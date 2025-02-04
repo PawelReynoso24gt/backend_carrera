@@ -92,10 +92,11 @@ module.exports = {
                 include: [
                     {
                         model: RIFAS, // Incluir la información de la rifa
-                        attributes: ['nombreRifa', 'precioBoleto', 'descripcion', 'estado'],
+                        attributes: ['idRifa', 'nombreRifa', 'precioBoleto', 'descripcion', 'estado'],
                     },
                     {
                         model: SOLICITUD_TALONARIOS, // Información de las solicitudes asociadas
+                        where: { estado: 2 }, // Filtrar por solicitudes aceptadas
                         required: true,
                         include: [
                             {
