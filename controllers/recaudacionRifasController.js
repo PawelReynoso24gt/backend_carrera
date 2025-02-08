@@ -497,10 +497,12 @@ module.exports = {
     
             // Guardar el subtotal anterior
             const subtotalAnterior = parseFloat(recaudacion.subTotal);
+            //console.log("Subtotal anterior:", subtotalAnterior);
     
             // Validar disponibilidad de boletos en el talonario actual
             const talonarioActual = recaudacion.solicitudTalonario.talonario;
             const boletosDisponiblesActuales = talonarioActual.cantidadBoletos + recaudacion.boletosVendidos;
+            //console.log("Boletos disponibles actuales:", boletosDisponiblesActuales);
     
             // Verificar si hay cambios en los datos
             const cambiosBoletos = boletosVendidos !== recaudacion.boletosVendidos;
@@ -521,6 +523,9 @@ module.exports = {
             if (cambiosTalonario) {
                 const rifaAnterior = talonarioActual.rifa;
                 const nuevaVentaTotalRifaAnterior = parseFloat(rifaAnterior.ventaTotal) - subtotalAnterior;
+
+                // console.log("Venta total anterior de la rifa:", rifaAnterior.ventaTotal);
+                // console.log("Nueva venta total de la rifa anterior:", nuevaVentaTotalRifaAnterior);
     
                 await RIFAS.update(
                     { ventaTotal: nuevaVentaTotalRifaAnterior },
@@ -529,6 +534,7 @@ module.exports = {
     
                 // Log para verificar el valor guardado
                 const rifaAnteriorActualizada = await RIFAS.findByPk(rifaAnterior.idRifa, { attributes: ['ventaTotal'], transaction });
+                //console.log("Venta total actualizada de la rifa anterior:", rifaAnteriorActualizada.ventaTotal);
             }
     
             // Validar disponibilidad de boletos en el nuevo talonario (si es diferente)
@@ -551,6 +557,7 @@ module.exports = {
                 }
     
                 const boletosDisponiblesNuevo = talonarioNuevo.cantidadBoletos;
+                //console.log("Boletos disponibles en el nuevo talonario:", boletosDisponiblesNuevo);
                 if (boletosVendidos > boletosDisponiblesNuevo) {
                     await transaction.rollback();
                     return res.status(400).json({ message: "No hay suficientes boletos disponibles en el talonario nuevo." });
@@ -561,13 +568,16 @@ module.exports = {
     
             // Calcular el nuevo subtotal
             const nuevoSubtotal = boletosVendidos * parseFloat(talonarioNuevo.rifa.precioBoleto);
+            //console.log("Nuevo subtotal calculado:", nuevoSubtotal);
     
             // Calcular el total de los montos pagados
             const totalPagado = pagos.reduce((sum, pago) => sum + parseFloat(pago.monto || 0), 0);
+            //console.log("Total pagado:", totalPagado);
     
             // Calcular el total esperado
             const precioBoleto = parseFloat(talonarioNuevo.rifa.precioBoleto);
             const totalEsperado = boletosVendidos * precioBoleto;
+            //console.log("Total esperado:", totalEsperado);
     
             // Comparar ambos totales
             if (totalPagado !== totalEsperado) {
@@ -653,17 +663,25 @@ module.exports = {
     
             // Actualizar el total de venta de la rifa nueva con el nuevo subtotal
             const rifaNueva = talonarioNuevo.rifa;
-    
+
+            // Calcular la diferencia entre el subtotal anterior y el nuevo subtotal
+            const diferenciaSubtotal = nuevoSubtotal - subtotalAnterior;
+
             // Calcular la nueva venta total para la rifa nueva
-            const nuevaVentaTotalRifaNueva = parseFloat(rifaNueva.ventaTotal) + nuevoSubtotal;
-    
+            const nuevaVentaTotalRifaNueva = parseFloat(rifaNueva.ventaTotal) + diferenciaSubtotal;
+
+            // console.log("Venta total anterior de la rifa nueva:", rifaNueva.ventaTotal);
+            // console.log("Diferencia de subtotal:", diferenciaSubtotal);
+            // console.log("Nueva venta total de la rifa nueva:", nuevaVentaTotalRifaNueva);
+
             await RIFAS.update(
                 { ventaTotal: nuevaVentaTotalRifaNueva },
                 { where: { idRifa: rifaNueva.idRifa }, transaction }
             );
-    
+
             // Log para verificar el valor guardado
             const rifaNuevaActualizada = await RIFAS.findByPk(rifaNueva.idRifa, { attributes: ['ventaTotal'], transaction });
+            //console.log("Venta total actualizada de la rifa nueva:", rifaNuevaActualizada.ventaTotal);
     
             // Confirmar la transacción
             await transaction.commit();
