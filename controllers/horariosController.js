@@ -9,18 +9,18 @@ function formatTimeToHHMM(time) {
     // Aceptar tanto HH:mm como HH:mm:ss
     const timeRegex = /^\d{2}:\d{2}(:\d{2})?$/;
     if (!timeRegex.test(time)) {
-      console.log("Formato de tiempo no válido:", time);
-      return null; // No válido
+        console.log("Formato de tiempo no válido:", time);
+        return null; // No válido
     }
-  
+
     // Si el tiempo ya tiene segundos, devolverlo tal cual
     if (time.length === 8) { // HH:mm:ss
-      return time;
+        return time;
     }
-  
+
     // Si el tiempo es HH:mm, agregar los segundos
     return `${time}:00`;
-  }
+}
 
 // * Función para validar los datos para create y update
 function validateData(data) {
@@ -117,47 +117,47 @@ module.exports = {
     async update(req, res) {
         const datos = req.body;
         const id = req.params.id;
-      
+
         console.log("Datos recibidos desde el frontend:", datos);
-      
+
         try {
-          // Obtener el horario actual de la base de datos
-          const horarioActual = await Horarios.findOne({ where: { idHorario: id } });
-          if (!horarioActual) {
-            return res.status(404).send({ message: 'Horario no encontrado' });
-          }
-      
-          // Validar los datos antes de actualizarlos
-          const error = validateData(datos);
-          if (error) {
-            return res.status(400).json({ error });
-          }
-      
-          const camposActualizados = {
-            horarioInicio: datos.horarioInicio !== undefined ? formatTimeToHHMM(datos.horarioInicio) : horarioActual.horarioInicio,
-            horarioFinal: datos.horarioFinal !== undefined ? formatTimeToHHMM(datos.horarioFinal) : horarioActual.horarioFinal,
-          };
-      
-          if (datos.estado !== undefined) {
-            camposActualizados.estado = datos.estado;
-          }
-      
-          console.log("Campos que se actualizarán:", camposActualizados);
-      
-          const [rowsUpdated] = await Horarios.update(camposActualizados, {
-            where: { idHorario: id }
-          });
-      
-          if (rowsUpdated === 0) {
-            return res.status(404).send({ message: 'Horario no encontrado' });
-          }
-      
-          return res.status(200).send('El horario ha sido actualizado');
+            // Obtener el horario actual de la base de datos
+            const horarioActual = await Horarios.findOne({ where: { idHorario: id } });
+            if (!horarioActual) {
+                return res.status(404).send({ message: 'Horario no encontrado' });
+            }
+
+            // Validar los datos antes de actualizarlos
+            const error = validateData(datos);
+            if (error) {
+                return res.status(400).json({ error });
+            }
+
+            const camposActualizados = {
+                horarioInicio: datos.horarioInicio !== undefined ? formatTimeToHHMM(datos.horarioInicio) : horarioActual.horarioInicio,
+                horarioFinal: datos.horarioFinal !== undefined ? formatTimeToHHMM(datos.horarioFinal) : horarioActual.horarioFinal,
+            };
+
+            if (datos.estado !== undefined) {
+                camposActualizados.estado = datos.estado;
+            }
+
+            console.log("Campos que se actualizarán:", camposActualizados);
+
+            const [rowsUpdated] = await Horarios.update(camposActualizados, {
+                where: { idHorario: id }
+            });
+
+            if (rowsUpdated === 0) {
+                return res.status(404).send({ message: 'Horario no encontrado' });
+            }
+
+            return res.status(200).send('El horario ha sido actualizado');
         } catch (error) {
             console.log(error);
             return res.status(500).json({ error: 'Error al actualizar horario', error });
         }
-      },
+    },
 
     // * Eliminar horario
     async delete(req, res) {
