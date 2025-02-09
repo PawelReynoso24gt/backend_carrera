@@ -3,6 +3,7 @@ const db = require("../models");
 const SOLICITUD_TALONARIOS = db.solicitudTalonarios;
 const VOLUNTARIOS = db.voluntarios;
 const PERSONAS = db.personas;
+const TALONARIOS = db.talonarios;
 
 // Métodos CRUD
 module.exports = {
@@ -17,6 +18,10 @@ module.exports = {
                         model: PERSONAS, 
                         attributes: ['idPersona', 'nombre'] 
                     }]
+                },
+                {
+                    model: TALONARIOS, // Incluir el modelo TALONARIOS
+                    attributes: ['idTalonario', 'codigoTalonario'] // Seleccionar los atributos necesarios
                 }]
             });            
             return res.status(200).json(solicitudes);
@@ -29,7 +34,22 @@ module.exports = {
     async getById(req, res) {
         const { id } = req.params;
         try {
-            const solicitud = await SOLICITUD_TALONARIOS.findByPk(id);
+            const solicitud = await SOLICITUD_TALONARIOS.findByPk(id, {
+                include: [
+                    {
+                        model: VOLUNTARIOS,
+                        attributes: ['idVoluntario', 'idPersona'],
+                        include: [{ 
+                            model: PERSONAS, 
+                            attributes: ['idPersona', 'nombre'] 
+                        }]
+                    },
+                    {
+                        model: TALONARIOS, // Incluir el modelo TALONARIOS
+                        attributes: ['idTalonario', 'codigoTalonario'] // Seleccionar los atributos necesarios
+                    }
+                ]
+            });
             if (!solicitud) {
                 return res.status(404).json({ message: 'Solicitud no encontrada.' });
             }
