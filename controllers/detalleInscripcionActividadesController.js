@@ -198,32 +198,45 @@ module.exports = {
         }
     },
 
-    // Crear un nuevo detalle
+   // Crear un nuevo detalle de inscripción
     async create(req, res) {
-        const { idInscripcionEvento, idInscripcionComision, idActividad } = req.body;
-        const estado = req.body.estado !== undefined ? req.body.estado : 1;
-        
+        const { idInscripcionEvento, idInscripcionComision, idActividad, estado } = req.body;
+
         if (!idInscripcionEvento || !idInscripcionComision || !idActividad) {
             return res.status(400).json({ message: 'Faltan campos requeridos.' });
         }
 
         try {
+            // Verificar si ya existe un detalle con los mismos IDs
+            const existente = await DETALLE_INSCRIPCION_ACTIVIDADES.findOne({
+                where: {
+                    idInscripcionEvento,
+                    idInscripcionComision,
+                    idActividad
+                }
+            });
+
+            if (existente) {
+                return res.status(400).json({ message: 'Ya existe un detalle con estos datos.' });
+            }
+
             const nuevoDetalle = await DETALLE_INSCRIPCION_ACTIVIDADES.create({
-                estado,
+                estado: estado !== undefined ? estado : 1, // Valor por defecto: activo
                 idInscripcionEvento,
                 idInscripcionComision,
                 idActividad
             });
 
             return res.status(201).json({
-                message: 'Detalle creado con éxito',
-                createdDetalle: nuevoDetalle
+                message: 'Detalle creado con éxito.',
+                nuevoDetalle
             });
         } catch (error) {
             console.error('Error al crear el detalle:', error);
             return res.status(500).json({ message: 'Error al crear el detalle.' });
         }
     },
+
 
     // Actualizar un detalle existente
     async update(req, res) {
