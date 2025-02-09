@@ -562,6 +562,7 @@ module.exports = (app) => {
   router.get('/detalle_inscripcion_actividades/activos', detalleInscripcionActividadesController.findActive);
   router.get('/detalle_inscripcion_actividades/inactivos', detalleInscripcionActividadesController.findInactive); 
   router.get('/detalle_inscripcion_actividades/:id', detalleInscripcionActividadesController.findById);
+  router.get('/inscripcion_evento/:idVoluntario/:idEvento', detalleInscripcionActividadesController.findInscripcionByComisionAndVoluntario);
   router.post('/detalle_inscripcion_actividades/create', detalleInscripcionActividadesController.create);
   router.put('/detalle_inscripcion_actividades/update/:id', detalleInscripcionActividadesController.update);
   router.delete('/detalle_inscripcion_actividades/delete/:id', detalleInscripcionActividadesController.delete);
