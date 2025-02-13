@@ -322,7 +322,7 @@ module.exports = {
             // Realizar la consulta para obtener los datos
             const aspirantes = await ASPIRANTES.findAll({
                 where: {
-                    estado: 1, // Solo registros activos
+                    //estado: 1, // Solo registros activos
                     fechaRegistro: {
                         [Op.gte]: fechaInicioFormato,
                         [Op.lte]: fechaFinFormato,
