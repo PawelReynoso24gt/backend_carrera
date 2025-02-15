@@ -150,6 +150,27 @@ async function deleteToken(userId) {
     });
 }
 
+// Ejemplo de definición de la función getUserById
+async function getUserById(idUsuario) {
+    try {
+        const user = await USERS.findOne({ where: { idUsuario } });
+        return user;
+    } catch (error) {
+        console.error("Error al obtener el usuario:", error);
+        throw error;
+    }
+}
+
+// Ejemplo de definición de la función updateUserToken
+async function updateUserToken(idUsuario, newToken) {
+    try {
+        await USERS.update({ token: newToken }, { where: { idUsuario } });
+    } catch (error) {
+        console.error("Error al actualizar el token del usuario:", error);
+        throw error;
+    }
+}
+
 module.exports = {
     // * Login
     async login(req, res) {
@@ -505,22 +526,44 @@ module.exports = {
         const token = req.headers.authorization?.split(" ")[1];
 
         if (!token) {
+            console.log("Token no proporcionado.");
             return res.status(401).json({ message: "Token no proporcionado." });
         }
 
         try {
             // Verificar el token y extraer el payload
             const payload = jwt.verify(token, process.env.SECRET_KEY);
+            //console.log("Payload del token:", payload);
 
-            // Generar un nuevo token con una nueva expiración
-            const newToken = jwt.sign(
-                { idUsuario: payload.idUsuario },
-                process.env.SECRET_KEY,
-                { expiresIn: "15m" } // Renueva por 15 minutos más
-            );
+            // Obtener el usuario de la base de datos
+            const user = await getUserById(payload.idUsuario);
+            if (!user) {
+                console.log("Usuario no encontrado.");
+                return res.status(403).send('Token inválido o expirado.');
+            }
+            if (user.token !== token) {
+                //console.log("El token no coincide con el almacenado en la base de datos.");
+                return res.status(403).send('Token inválido o expirado.');
+            }
+
+            // Generar un nuevo token con la misma información que el token original
+            const newToken = jwt.sign({
+                idUsuario: user.idUsuario,
+                usuario: user.usuario,
+                idRol: user.idRol,
+                idSede: user.idSede,
+                idPersona: user.idPersona,
+                idVoluntario: user.idVoluntario,
+                idEmpleado: user.idEmpleado
+            }, process.env.SECRET_KEY, { expiresIn: '15m' }); // Renueva por 15 minutos más
+
+            // Actualizar el token en la base de datos
+            await updateUserToken(user.idUsuario, newToken);
+            //console.log("Token renovado exitosamente:", newToken);
 
             return res.status(200).json({ token: newToken });
         } catch (error) {
+            console.log("Error al renovar el token:", error);
             return res.status(401).json({ message: "Token inválido o expirado." });
         }
     },
