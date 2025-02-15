@@ -54,6 +54,7 @@ module.exports = {
 
     async denyAspirante(req, res) {
         const { idAspirante } = req.params;
+        const { descripcion } = req.body; 
     
         try {
             // Buscar el aspirante por ID
@@ -73,6 +74,7 @@ module.exports = {
     
             // Actualizar el estado del aspirante a denegado (-1)
             aspirante.estado = -1;
+            aspirante.descripcion = descripcion;
             await aspirante.save();
     
             // Retornar la respuesta con el aspirante actualizado

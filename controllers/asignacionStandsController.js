@@ -586,7 +586,7 @@ module.exports = {
     async findAsignacionByVoluntario(req, res) {
         const idVoluntario = req.params.idVoluntario;
         try {
-            const asignacion = await ASIGNACION_STANDS.findOne({
+            const asignacion = await ASIGNACION_STANDS.findAll({
                 where: { estado: 1 },
                 include: [
                     {
