@@ -48,11 +48,11 @@ module.exports = (sequelize, DataTypes) => {
       allowNull: false
     },
     fechaHoraInicio: {
-      type: DataTypes.DATE,
+      type: DataTypes.STRING,
       allowNull: false
     },
     fechaHoraFin: {
-      type: DataTypes.DATE,
+      type: DataTypes.STRING,
       allowNull: false
     },
     descripcion: {

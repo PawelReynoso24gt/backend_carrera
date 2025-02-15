@@ -4,13 +4,13 @@ const { Model } = require('sequelize');
 module.exports = (sequelize, DataTypes) => {
   class talonarios extends Model {
     static associate(models) {
-        talonarios.belongsTo(models.rifas, {
-            foreignKey: 'idRifa'
-        });
+      talonarios.belongsTo(models.rifas, {
+        foreignKey: 'idRifa'
+      });
 
-        talonarios.hasMany(models.solicitudTalonarios, {
-          foreignKey: 'idTalonario',
-        });
+      talonarios.hasMany(models.solicitudTalonarios, {
+        foreignKey: 'idTalonario',
+      });
     }
   }
 
@@ -25,24 +25,28 @@ module.exports = (sequelize, DataTypes) => {
       allowNull: false
     },
     cantidadBoletos: {
-        type: DataTypes.INTEGER,
-        allowNull: false
+      type: DataTypes.INTEGER,
+      allowNull: false
     },
     correlativoInicio: {
-        type: DataTypes.INTEGER,
-        allowNull: false
+      type: DataTypes.INTEGER,
+      allowNull: false
     },
     correlativoFinal: {
-        type: DataTypes.INTEGER,
-        allowNull: false
+      type: DataTypes.INTEGER,
+      allowNull: false
     },
     estado: {
-        type: DataTypes.INTEGER,
-        allowNull: false
+      type: DataTypes.INTEGER,
+      allowNull: false
+    },
+    solicitado: {
+      type: DataTypes.INTEGER,
+      allowNull: false
     },
     idRifa: {
-        type: DataTypes.INTEGER,
-        allowNull: false
+      type: DataTypes.INTEGER,
+      allowNull: false
     },
     createdAt: {
       type: DataTypes.DATE,
@@ -52,7 +56,7 @@ module.exports = (sequelize, DataTypes) => {
     updatedAt: {
       type: DataTypes.DATE,
       allowNull: false,
-      defaultValue: DataTypes.NOW 
+      defaultValue: DataTypes.NOW
     }
   }, {
     sequelize,

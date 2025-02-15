@@ -79,7 +79,7 @@ module.exports = {
 
                 if (!talonarios || talonarios.length === 0) continue;
 
-                // Obtener solicitudes de talonarios y los voluntarios asociados
+                // Obtener solicitudes de talonarios y los voluntaJrios asociados
                 const solicitudes = await SOLICITUD_TALONARIOS.findAll({
                     where: { idTalonario: { [Op.in]: talonarios.map((t) => t.idTalonario) }, estado: 2 }, // se cambió el estado a 2 porque es el estado de aceptado
                     include: [

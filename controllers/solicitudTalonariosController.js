@@ -14,16 +14,16 @@ module.exports = {
                 include: [{
                     model: VOLUNTARIOS,
                     attributes: ['idVoluntario', 'idPersona'],
-                    include: [{ 
-                        model: PERSONAS, 
-                        attributes: ['idPersona', 'nombre'] 
+                    include: [{
+                        model: PERSONAS,
+                        attributes: ['idPersona', 'nombre']
                     }]
                 },
                 {
                     model: TALONARIOS, // Incluir el modelo TALONARIOS
                     attributes: ['idTalonario', 'codigoTalonario'] // Seleccionar los atributos necesarios
                 }]
-            });            
+            });
             return res.status(200).json(solicitudes);
         } catch (error) {
             console.error('Error al recuperar las solicitudes:', error);
@@ -39,9 +39,9 @@ module.exports = {
                     {
                         model: VOLUNTARIOS,
                         attributes: ['idVoluntario', 'idPersona'],
-                        include: [{ 
-                            model: PERSONAS, 
-                            attributes: ['idPersona', 'nombre'] 
+                        include: [{
+                            model: PERSONAS,
+                            attributes: ['idPersona', 'nombre']
                         }]
                     },
                     {
@@ -76,7 +76,7 @@ module.exports = {
         }
     },
 
-   
+
     async getByVoluntario(req, res) {
         const { idVoluntario } = req.params;
         try {
@@ -91,18 +91,27 @@ module.exports = {
     },
 
     // Crear una nueva solicitud
+    // Crear una nueva solicitud
     async create(req, res) {
         const { estado, fechaSolicitud, idTalonario, idVoluntario } = req.body;
         if (!fechaSolicitud || !idTalonario || !idVoluntario) {
             return res.status(400).json({ message: 'Faltan campos requeridos.' });
         }
         try {
+            // Crear la nueva solicitud
             const nuevaSolicitud = await SOLICITUD_TALONARIOS.create({
                 estado: estado !== undefined ? estado : 1,
                 fechaSolicitud,
                 idTalonario,
                 idVoluntario
             });
+
+            // Actualizar el campo solicitado en el talonario
+            await TALONARIOS.update(
+                { solicitado: 1 },
+                { where: { idTalonario } }
+            );
+
             return res.status(201).json(nuevaSolicitud);
         } catch (error) {
             console.error('Error al crear la solicitud:', error);
@@ -113,7 +122,7 @@ module.exports = {
     // Actualizar una solicitud existente
     async update(req, res) {
         const { id } = req.params;
-        const { estado, fechaSolicitud, idTalonario, idVoluntario } = req.body;
+        const { estado, fechaSolicitud, idTalonario, idVoluntario, solicitado } = req.body;
 
         try {
             const solicitud = await SOLICITUD_TALONARIOS.findByPk(id);
@@ -125,7 +134,8 @@ module.exports = {
                 estado: estado !== undefined ? estado : solicitud.estado,
                 fechaSolicitud: fechaSolicitud || solicitud.fechaSolicitud,
                 idTalonario: idTalonario || solicitud.idTalonario,
-                idVoluntario: idVoluntario || solicitud.idVoluntario
+                idVoluntario: idVoluntario || solicitud.idVoluntario,
+                solicitado: solicitado || solicitud.solicitado
             });
 
             return res.status(200).json({ message: 'Solicitud actualizada correctamente.' });
