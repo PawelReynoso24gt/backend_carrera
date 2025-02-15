@@ -333,7 +333,7 @@ module.exports = {
                 include: [
                     {
                         model: SOLICITUD_TALONARIOS,
-                        where: { estado: 1 },
+                        where: { estado: 2 },
                         include: [
                             {
                                 model: VOLUNTARIOS,
