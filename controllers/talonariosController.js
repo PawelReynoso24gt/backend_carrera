@@ -96,6 +96,7 @@ module.exports = {
             correlativoInicio: datos.correlativoInicio,
             correlativoFinal: datos.correlativoFinal,
             estado: datos.estado !== undefined ? datos.estado : 1,
+            solicitado: 0,
             idRifa: datos.idRifa
         };
     

@@ -3,6 +3,7 @@
 const { zonedTimeToUtc, format } = require('date-fns-tz');
 const { parse, isValid } = require('date-fns'); // isValid para validar fechas
 const db = require("../models");
+const { where } = require('sequelize');
 const RIFAS = db.rifas;
 const SEDES = db.sedes;
 const TALONARIOS = db.talonarios;
@@ -374,7 +375,7 @@ module.exports = {
                 include: [
                     {
                         model: TALONARIOS,
-                        attributes: ['idTalonario', 'codigoTalonario', 'cantidadBoletos', 'correlativoInicio', 'correlativoFinal', 'estado'],
+                        attributes: ['idTalonario', 'codigoTalonario', 'cantidadBoletos', 'correlativoInicio', 'correlativoFinal', 'estado', 'solicitado'],
                     }
                 ]
             });
