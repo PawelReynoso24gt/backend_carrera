@@ -1,5 +1,5 @@
 'use strict';
-const { format } = require('date-fns-tz');
+const { zonedTimeToUtc, format } = require('date-fns-tz');
 const db = require('../models');
 const ASISTENCIA_EVENTOS = db.asistencia_eventos;
 const EMPLEADOS = db.empleados;
@@ -17,12 +17,19 @@ module.exports = {
                     {
                         model: EMPLEADOS,
                         as: 'empleado',
-                        attributes: ['idEmpleado', 'fechaRegistro', 'fechaSalida', 'estado']
+                        attributes: ['idEmpleado'],
+                        include: [
+                            {
+                                model: PERSONAS,
+                                as: 'persona',
+                                attributes: ['nombre']
+                            }
+                        ]
                     },
                     {
                         model: INSCRIPCION_EVENTOS,
                         as: 'inscripcionEvento',
-                        attributes: ['idInscripcionEvento', 'fechaHoraInscripcion', 'estado'],
+                        attributes: ['idInscripcionEvento', 'fechaHoraInscripcion', 'estado', 'idEvento'],
                         include: [
                             {
                                 model: EVENTOS, 
@@ -53,6 +60,70 @@ module.exports = {
             return res.status(500).json({
                 message: 'Ocurrió un error al recuperar las asistencias.'
             });
+        }
+    },
+
+    // Obtener asistencias por evento
+    async findByEvento(req, res) {
+        const { idEvento } = req.params; // Obtener el ID del evento desde los parámetros de la URL
+    
+        if (!idEvento) {
+            return res.status(400).json({ message: 'Se requiere el ID del evento.' });
+        }
+    
+        try {
+            // Buscar asistencias relacionadas con el evento
+            const asistencias = await ASISTENCIA_EVENTOS.findAll({
+                include: [
+                    {
+                        model: EMPLEADOS,
+                        as: 'empleado',
+                        attributes: ['idEmpleado'],
+                        include: [
+                            {
+                                model: PERSONAS,
+                                as: 'persona',
+                                attributes: ['nombre']
+                            }
+                        ]
+                    },
+                    {
+                        model: INSCRIPCION_EVENTOS,
+                        as: 'inscripcionEvento',
+                        where: { idEvento, estado: 1}, // Filtrar por el ID del evento
+                        attributes: ['idInscripcionEvento', 'fechaHoraInscripcion', 'estado', 'idEvento'],
+                        include: [
+                            {
+                                model: EVENTOS,
+                                as: 'evento',
+                                attributes: ['idEvento', 'nombreEvento']
+                            },
+                            {
+                                model: VOLUNTARIOS,
+                                as: 'voluntario',
+                                attributes: ['idVoluntario'],
+                                include: [
+                                    {
+                                        model: PERSONAS,
+                                        as: 'persona',
+                                        attributes: ['nombre']
+                                    }
+                                ]
+                            }
+                        ]
+                    }
+                ],
+                where: { estado: 1 } // Solo asistencias activas
+            });
+    
+            if (asistencias.length === 0) {
+                return res.status(404).json({ message: 'No se encontraron asistencias para este evento.' });
+            }
+    
+            return res.status(200).json(asistencias);
+        } catch (error) {
+            console.error('Error al recuperar asistencias por evento:', error);
+            return res.status(500).json({ message: 'Error al recuperar asistencias por evento.' });
         }
     },
 
@@ -167,12 +238,22 @@ module.exports = {
             const nuevaAsistencia = await ASISTENCIA_EVENTOS.create({
                 estado,
                 idInscripcionEvento,
-                idEmpleado
+                idEmpleado,
+                fechaHoraAsistencia: new Date() // Agregar la fecha y hora actual
             });
+
+           // Formatear la fecha para la respuesta
+            const asistenciaConFormato = {
+                ...nuevaAsistencia.toJSON(),
+                fechaHoraAsistencia: format(
+                    new Date(nuevaAsistencia.fechaHoraAsistencia),"yyyy-MM-dd HH:mm:ss", {
+                    timeZone: "America/Guatemala"
+                })
+            };
 
             return res.status(201).json({
                 message: 'Asistencia creada con éxito',
-                createdAsistencia: nuevaAsistencia
+                createdAsistencia: asistenciaConFormato
             });
         } catch (error) {
             console.error('Error al crear la asistencia:', error);

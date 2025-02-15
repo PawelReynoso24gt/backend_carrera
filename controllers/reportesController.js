@@ -60,7 +60,7 @@ module.exports = {
                     fechaFin: {
                         [Op.lte]: fechaFinFormato,
                     },
-                    estado: 1,
+                    //estado: 1, // Se quitó el estado porque no se necesita (por evento de bd)
                     idSede: 1,
                 },
             });
@@ -74,14 +74,14 @@ module.exports = {
             for (const rifa of rifas) {
                 // Obtener talonarios asociados a la rifa
                 const talonarios = await TALONARIOS.findAll({
-                    where: { idRifa: rifa.idRifa, estado: 1 },
+                    where: { idRifa: rifa.idRifa, }, // se le quitó el estado porque no se necesita
                 });
 
                 if (!talonarios || talonarios.length === 0) continue;
 
                 // Obtener solicitudes de talonarios y los voluntaJrios asociados
                 const solicitudes = await SOLICITUD_TALONARIOS.findAll({
-                    where: { idTalonario: { [Op.in]: talonarios.map((t) => t.idTalonario) }, estado: 1 },
+                    where: { idTalonario: { [Op.in]: talonarios.map((t) => t.idTalonario) }, estado: 2 }, // se cambió el estado a 2 porque es el estado de aceptado
                     include: [
                         {
                             model: VOLUNTARIOS,
@@ -260,6 +260,12 @@ module.exports = {
                     {
                         model: DETALLE_TRASLADOS,
                         attributes: ['idDetalleTraslado', 'idProducto', 'cantidad', 'idTraslado'],
+                        include: [
+                            {
+                                model: PRODUCTOS,
+                                attributes: ['nombreProducto'] // Incluye el nombre del producto
+                            }
+                        ]
                     }
                 ]
             });
@@ -280,7 +286,13 @@ module.exports = {
                     },
                     {
                         model: DETALLE_PEDIDOS,
-                        attributes: ['idDetallePedido', 'idProducto', 'cantidad', 'idPedido']
+                        attributes: ['idDetallePedido', 'idProducto', 'cantidad', 'idPedido'],
+                        include: [
+                {
+                    model: PRODUCTOS,
+                    attributes: ['nombreProducto'] // Incluye el nombre del producto
+                }
+            ]
                     }
                 ]
             });

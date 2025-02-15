@@ -27,11 +27,14 @@ module.exports = {
             aspirante.estado = 0;
             await aspirante.save();
 
+            // Formatear la fecha actual a 'YYYY-MM-DD'
+            const fechaRegistro = new Date().toISOString().split('T')[0];
+
             // Crear un nuevo voluntario en base al aspirante
             const nuevoVoluntario = await VOLUNTARIOS.create({
                 idPersona: aspirante.idPersona,
                 codigoQR: `VOL-${aspirante.idPersona}-${Date.now()}`, // Generar un código QR único
-                fechaRegistro: new Date(),
+                fechaRegistro:fechaRegistro,
                 estado: 1, // Estado activo
             });
 
@@ -51,6 +54,7 @@ module.exports = {
 
     async denyAspirante(req, res) {
         const { idAspirante } = req.params;
+        const { descripcion } = req.body; 
     
         try {
             // Buscar el aspirante por ID
@@ -70,6 +74,7 @@ module.exports = {
     
             // Actualizar el estado del aspirante a denegado (-1)
             aspirante.estado = -1;
+            aspirante.descripcion = descripcion;
             await aspirante.save();
     
             // Retornar la respuesta con el aspirante actualizado
@@ -319,7 +324,7 @@ module.exports = {
             // Realizar la consulta para obtener los datos
             const aspirantes = await ASPIRANTES.findAll({
                 where: {
-                    estado: 1, // Solo registros activos
+                    //estado: 1, // Solo registros activos
                     fechaRegistro: {
                         [Op.gte]: fechaInicioFormato,
                         [Op.lte]: fechaFinFormato,

@@ -159,6 +159,15 @@ module.exports = {
             }
             camposActualizados.cantidadBoletos = datos.cantidadBoletos;
         }
+
+        // Validación del campo idRifa si está presente
+        if (datos.idRifa !== undefined) {
+            const regexNumeros = /^[0-9]+$/;
+            if (!regexNumeros.test(datos.idRifa)) {
+                return res.status(400).json({ message: 'El ID de la rifa solo debe contener números.' });
+            }
+            camposActualizados.idRifa = datos.idRifa;
+        }
     
         // Validación del campo estado si está presente
         if (datos.estado !== undefined) {

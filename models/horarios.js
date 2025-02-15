@@ -20,11 +20,11 @@ module.exports = (sequelize, DataTypes) => {
       primaryKey: true
     },
     horarioInicio: {
-      type: DataTypes.STRING, // se usará como STRING por el hecho que esta como TIME en la BD
+      type: DataTypes.TIME,
       allowNull: false
     },
     horarioFinal: {
-      type: DataTypes.STRING,
+      type: DataTypes.TIME,
       allowNull: false
     },
     estado: {

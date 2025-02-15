@@ -39,7 +39,7 @@ module.exports = {
       const materiales = await MATERIALES.findAll({        
         include: {
           model: COMISIONES,
-          attributes: ['idComision', 'comision', 'descripcion', 'estado']
+          attributes: ['idComision', 'comision', 'descripcion', 'estado', 'idEvento']
         }
       });
       return res.status(200).send(materiales);
@@ -77,7 +77,7 @@ async findByComision(req, res) {
       include: [
         {
           model: COMISIONES,
-          attributes: ['idComision', 'comision', 'descripcion', 'estado']
+          attributes: ['idComision', 'comision', 'descripcion', 'estado', 'idEvento']
         }
       ]
     });
