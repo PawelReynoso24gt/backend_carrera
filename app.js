@@ -1,5 +1,7 @@
 require('dotenv').config();
 const path = require('path');
+const fs = require('fs');
+const logStream = fs.createWriteStream(path.join(__dirname, 'access.log'), { flags: 'a' });
 const express       = require('express');
 const cors          = require('cors');
 const logger        = require('morgan');
@@ -14,8 +16,8 @@ const app = express();
 const bus = new EventEmitter();
 bus.setMaxListeners(20); // Incrementar el límite de listeners a 20
 
-app.use(logger('dev'));
-
+//app.use(logger('dev'));
+app.use(logger('combined', { stream: logStream })); // Usar el stream de escritura para guardar los logs
 
 
 //validacion de rutas
@@ -59,5 +61,7 @@ app.get('*', (req, res) => res.status(200).send({
 const port = parseInt(process.env.PORT, 10) || 5000;
 app.set('port', port);
 const server = http.createServer(app);
-server.listen(port);
+server.listen(port, '0.0.0.0', () => {
+     console.log(`Servidor corriendo en http://0.0.0.0:${port}`);
+});
 module.exports = app;

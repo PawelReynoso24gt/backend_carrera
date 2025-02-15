@@ -152,7 +152,7 @@ module.exports = {
                     {
                         model: SOLICITUD_TALONARIOS, // Información de las solicitudes asociadas
                         required: true,
-                        where: { idVoluntario }, // Filtrar por el voluntario
+                        where: { idVoluntario, estado: 2 }, // Filtrar por el voluntario
                         include: [
                             {
                                 model: VOLUNTARIOS, // Información de los voluntarios en las solicitudes
