@@ -174,6 +174,11 @@ module.exports = {
         if (datos.estado !== undefined) {
             camposActualizados.estado = datos.estado;
         }
+
+        // Validación del campo solicitado si está presente
+        if (datos.solicitado !== undefined) {
+            camposActualizados.solicitado = datos.solicitado;
+        }
     
         return TALONARIOS.update(
             camposActualizados,
