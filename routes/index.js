@@ -92,7 +92,7 @@ module.exports = (app) => {
   router.get('/departamentos', departamentosController.find);
   router.get('/aspirantes', aspirantesController.findAll);
   router.post('/aspirantes', aspirantesController.create);
-  router.post('/personas/create', personasController.create);
+  router.post('/personasAsp/create', personasController.createPerAspirante);
 
     // * RUTAS DE NOTIFICACIONES (a mi parecer deberian ir antes del token)
     router.get('/notificaciones', notificacionesController.find);
@@ -326,7 +326,7 @@ module.exports = (app) => {
   router.get('/personas/activos', personasController.findActive);
   router.get('/personas/inactivos', personasController.findInactive);
   router.get('/personas/:id', personasController.findById);
-    router.post('/personas/create', personasController.create);
+  router.post('/personas/create', personasController.create);
   router.put('/personasFoto/:id/foto', uploadPerson.single('foto'), personasController.updateFoto);
   router.put('/personas/update/:id', personasController.update);
   router.delete('/personas/delete/:id', personasController.delete);
