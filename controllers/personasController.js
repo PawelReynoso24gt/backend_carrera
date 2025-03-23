@@ -143,6 +143,68 @@ module.exports = {
             // Crear registro en la tabla personas
             const persona = await PERSONAS.create(nuevaPersona);
 
+            // Crear registro en la tabla aspirantes   
+
+            return res.status(201).json({
+                message: 'Persona creada correctamente',
+                persona,
+            });
+        } catch (error) {
+            console.error('Error al insertar la persona:', error);
+            return res.status(500).json({ error: 'Error al insertar la persona' });
+        }
+    },
+
+
+     // Crear una nueva persona y aspirante
+     async createPerAspirante(req, res) {
+        const datos = req.body;
+
+        // Verificar campos requeridos
+        if (!datos.nombre || !datos.fechaNacimiento || !datos.telefono || !datos.domicilio || !datos.CUI || !datos.correo || !datos.estado || !datos.idMunicipio) {
+            return res.status(400).json({ message: 'Faltan campos requeridos.' });
+        }
+
+        // Expresiones regulares para validaciones
+        const regexNombre = /^[A-Za-záéíóúÁÉÍÓÚÑñ\s]+$/; // Solo letras y espacios
+        const regexTelefono = /^\d{8}$/; // 8 dígitos
+        const regexDomicilio = /^[A-Za-záéíóúÁÉÍÓÚÑñ0-9\s\.\-,]+$/; // Letras, dígitos, espacios, puntos, comas y guiones
+        const regexCUI = /^\d{13}$/; // 13 dígitos
+        const regexCorreo = /^[^\s@]+@[^\s@]+\.[^\s@]+$/; // Formato de correo electrónico
+
+        // Validaciones
+        if (!regexNombre.test(datos.nombre)) {
+            return res.status(400).json({ message: 'El nombre solo puede contener letras y espacios.' });
+        }
+        if (!regexTelefono.test(datos.telefono)) {
+            return res.status(400).json({ message: 'El teléfono debe contener exactamente 8 dígitos.' });
+        }
+        if (!regexDomicilio.test(datos.domicilio)) {
+            return res.status(400).json({ message: 'El domicilio solo puede contener letras, dígitos, espacios, puntos y guiones.' });
+        }
+        if (!regexCUI.test(datos.CUI)) {
+            return res.status(400).json({ message: 'El CUI debe contener exactamente 13 dígitos.' });
+        }
+        if (!regexCorreo.test(datos.correo)) {
+            return res.status(400).json({ message: 'El correo electrónico no es válido.' });
+        }
+
+        const nuevaPersona = {
+            nombre: datos.nombre,
+            fechaNacimiento: datos.fechaNacimiento,
+            telefono: datos.telefono,
+            domicilio: datos.domicilio,
+            CUI: datos.CUI,
+            correo: datos.correo,
+            foto: datos.foto || 'SIN FOTO', // Asignar "SIN FOTO" si no se envía el dato
+            estado: datos.estado !== undefined ? datos.estado : 1,
+            idMunicipio: datos.idMunicipio
+        };
+
+        try {
+            // Crear registro en la tabla personas
+            const persona = await PERSONAS.create(nuevaPersona);
+
             // Crear registro en la tabla aspirantes
             const nuevoAspirante = {
                 idPersona: persona.idPersona, // Usamos el ID generado de la persona
@@ -161,6 +223,7 @@ module.exports = {
             return res.status(500).json({ error: 'Error al insertar la persona o el aspirante' });
         }
     },
+
 
 
     // Actualizar una persona existente
