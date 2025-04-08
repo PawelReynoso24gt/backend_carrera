@@ -344,19 +344,16 @@ module.exports = {
       
           // Realizar la consulta para obtener los eventos dentro del rango de fechas
           const eventosEnRango = await eventos.findAll({
-            where: {
-              fechaHoraInicio: {
-                [Op.gte]: fechaInicioFormato, // Mayor o igual que la fecha de inicio
-              },
-              fechaHoraFin: {
-                [Op.lte]: fechaFinFormato, // Menor o igual que la fecha de fin
-              },
-            },
             include: [
               {
                 model: recaudacion_eventos,
                 as: 'recaudaciones',
-                attributes: ['recaudacion', 'numeroPersonas'], // Incluye número de personas
+                attributes: ['recaudacion', 'numeroPersonas', 'fechaRegistro'],
+                    where: {
+                        fechaRegistro: {
+                            [Op.between]: [fechaInicioFormato, fechaFinFormato]
+                        }
+                    }
               },
               {
                 model: inscripcion_eventos,

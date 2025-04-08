@@ -491,7 +491,10 @@ module.exports = {
 
             for (const detalle of detalles) {
                 const producto = await DETALLE_PRODUCTOS_VOLUNTARIOS.findOne({
-                    where: { idProducto: detalle.idProducto },
+                    where: { idProducto: detalle.idProducto,
+                        idVoluntario: detalle.idVoluntario, //Cambio de ventas
+                     },
+                    
                 });
 
                 if (!producto || producto.cantidad < detalle.cantidad) {
