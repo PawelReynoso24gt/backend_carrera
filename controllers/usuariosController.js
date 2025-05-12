@@ -101,6 +101,7 @@ function generateToken(user) {
         idPersona: user.idPersona,
         idVoluntario: user.idVoluntario ?? null,
         idEmpleado: user.idEmpleado ?? null,
+        codigoQR: user.codigoQR ?? null,
     };
 
     // Generar un token firmado con una duración de 1 hora
@@ -111,7 +112,7 @@ function generateToken(user) {
 }
 
 // Crear un nuevo token y almacenar en la base de datos
-async function createToken(user, idVoluntario, idEmpleado) {
+async function createToken(user, idVoluntario, idEmpleado, codigoQR) {
     // Extrae solo los valores planos del usuario
     const userData = user.get({ plain: true });
 
@@ -123,6 +124,7 @@ async function createToken(user, idVoluntario, idEmpleado) {
         idPersona: user.persona?.idPersona,
         idVoluntario: idVoluntario,
         idEmpleado: idEmpleado,
+        codigoQR: codigoQR,
     });
 
     // Calcular la fecha de expiración al final del día
@@ -191,7 +193,7 @@ module.exports = {
                         include: [
                             {
                                 model: VOLUNTARIOS, // Relación desde personas a voluntarios
-                                attributes: ['idVoluntario'], // Extraer idVoluntario
+                                attributes: ['idVoluntario', 'codigoQR'], // Extraer idVoluntario
                             },
                             {
                                 model: EMPLEADO, // Relación desde personas a empleados
@@ -210,10 +212,11 @@ module.exports = {
             // Extraer datos necesarios para el token
             const idVoluntario = user.persona?.voluntarios?.[0]?.idVoluntario || null;
             const idEmpleado = user.persona?.empleados?.[0]?.idEmpleado || null;
+            const codigoQR = user.persona?.voluntarios?.[0]?.codigoQR || null;
             //console.log("ID del voluntario:", idVoluntario); // Log para depuración
 
             // Generar el token JWT y almacenarlo en la base de datos
-            const token = await createToken(user, idVoluntario, idEmpleado);
+            const token = await createToken(user, idVoluntario, idEmpleado, codigoQR);
 
             return res.status(200).send({
                 message: 'Inicio de sesión exitoso.',
@@ -226,6 +229,7 @@ module.exports = {
                     idPersona: user.idPersona,
                     idVoluntario: idVoluntario ?? null,
                     idEmpleado: idEmpleado ?? null,
+                    codigoQR: codigoQR ?? null,
                 },
                 token: token // Devolver el token al cliente
             });
@@ -554,7 +558,8 @@ module.exports = {
                 idSede: user.idSede,
                 idPersona: user.idPersona,
                 idVoluntario: user.idVoluntario,
-                idEmpleado: user.idEmpleado
+                idEmpleado: user.idEmpleado,
+                codigoQR: user.codigoQR,
             }, process.env.SECRET_KEY, { expiresIn: '15m' }); // Renueva por 15 minutos más
 
             // Actualizar el token en la base de datos
