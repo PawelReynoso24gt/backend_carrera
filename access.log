@@ -296,3 +296,4 @@
 127.0.0.1 - - [18/Feb/2025:00:39:20 +0000] "GET /personas_image/1736794129968-604915598-channels4_profile.jpg HTTP/1.1" 200 20 "-" "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/133.0.0.0 Safari/537.36 Edg/133.0.0.0"
 127.0.0.1 - - [18/Feb/2025:00:39:21 +0000] "OPTIONS /usuarios/logout/3 HTTP/1.1" 204 0 "-" "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/133.0.0.0 Safari/537.36 Edg/133.0.0.0"
 127.0.0.1 - - [18/Feb/2025:00:39:21 +0000] "PUT /usuarios/logout/3 HTTP/1.1" 200 42 "-" "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/133.0.0.0 Safari/537.36 Edg/133.0.0.0"
+127.0.0.1 - - [08/Apr/2025:03:57:47 +0000] "POST /personasAsp/create HTTP/1.1" 201 533 "-" "PostmanRuntime/7.43.0"
