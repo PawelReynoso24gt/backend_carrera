@@ -116,7 +116,7 @@ module.exports = {
         }
 
         // Validar nombre del producto
-        const regexNombreProducto = /^[a-zA-ZáéíóúÁÉÍÓÚÑñ0-9\s-]+$/; // Permitir letras, números, espacios y guiones
+        const regexNombreProducto = /^.+$/; // expresión regular para todo menos salto de línea
         if (!regexNombreProducto.test(datos.nombreProducto)) {
             return res.status(400).json({ message: 'El nombre del producto contiene caracteres no válidos.' });
         }
@@ -191,7 +191,7 @@ module.exports = {
         if (datos.precio !== undefined) camposActualizados.precio = datos.precio;
         if (datos.nombreProducto !== undefined) {
             // Validación de nombreProducto
-            const regexTexto = /^[a-zA-ZáéíóúÁÉÍÓÚÑñ0-9\s-]+$/; // Permitir letras, números, espacios y guiones
+            const regexTexto = /^.+$/;
             if (!regexTexto.test(datos.nombreProducto)) {
                 return res.status(400).json({ message: 'El nombre del producto contiene caracteres no válidos.' });
             }

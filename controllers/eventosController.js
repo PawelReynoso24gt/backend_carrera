@@ -133,9 +133,9 @@ module.exports = {
         }
     
         // Validaciones de formato
-        const regexNombreEvento = /^[A-Za-zÁÉÍÓÚáéíóúÑñ\s]+$/; // Solo letras y espacios
-        const regexDescripcion = /^[A-Za-zÁÉÍÓÚáéíóúÑñ0-9\s.,-]+$/; // Letras, números, espacios y signos .,-
-        const regexDireccion = /^[A-Za-zÁÉÍÓÚáéíóúÑñ0-9\s.,#/-]+$/; // Incluye signos usados en direcciones
+        const regexNombreEvento = /^.+$/; // expresión regular para todo menos salto de línea
+        const regexDescripcion = /^.+$/; 
+        const regexDireccion = /^.+$/; 
     
         if (!regexNombreEvento.test(nombreEvento)) {
             return res.status(400).json({ message: 'El nombre del evento solo debe contener letras y espacios.' });
@@ -184,9 +184,9 @@ module.exports = {
     
         const camposActualizados = {};
     
-        const regexNombreEvento = /^[A-Za-zÁÉÍÓÚáéíóúÑñ\s]+$/; 
-        const regexDescripcion = /^[A-Za-zÁÉÍÓÚáéíóúÑñ0-9\s.,-]+$/; 
-        const regexDireccion = /^[A-Za-zÁÉÍÓÚáéíóúÑñ0-9\s.,#/-]+$/; 
+        const regexNombreEvento = /^.+$/;
+        const regexDescripcion = /^.+$/;
+        const regexDireccion = /^.+$/;
     
         if (nombreEvento !== undefined) {
             if (!regexNombreEvento.test(nombreEvento)) {
