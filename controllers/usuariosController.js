@@ -347,7 +347,7 @@ module.exports = {
         const datosIngreso = {
             usuario: datos.usuario,
             contrasenia: hashPassword(datos.contrasenia),
-            changedPassword: 0,
+            changedPassword: 1, // se cambia a 1 para que no salga la alerta y quede por default
             passwordCreatedAt: new Date(),
             estado: 1,
             idRol: datos.idRol,
@@ -454,7 +454,7 @@ module.exports = {
 
             // Actualizar la contraseña con SHA-256
             user.contrasenia = hashPassword(newPassword);
-            user.changedPassword = 0; // Marcar la contraseña como cambiada
+            user.changedPassword = 1; // Marcar la contraseña como cambiada (PASO DE 0 A 1 POR EL DEFAULT)
             user.passwordCreatedAt = new Date(); // Actualizar la fecha de creación de la contraseña
             await user.save();
 
@@ -510,7 +510,7 @@ module.exports = {
                 const daysRemaining = Math.ceil(timeDiff / (1000 * 60 * 60 * 24));
 
                 return res.status(200).send({
-                    changedPassword: 0,
+                    changedPassword: 0, // PENDIENTE*
                     daysRemaining: daysRemaining,
                     message: `Necesitas cambiar tu contraseña. Te quedan ${daysRemaining} días para cambiarla, de lo contrario, tu usuario será bloqueado.`,
                 });
