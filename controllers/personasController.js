@@ -136,7 +136,8 @@ module.exports = {
             correo: datos.correo,
             foto: datos.foto || 'SIN FOTO', // Asignar "SIN FOTO" si no se envía el dato
             estado: datos.estado !== undefined ? datos.estado : 1,
-            idMunicipio: datos.idMunicipio
+            idMunicipio: datos.idMunicipio,
+            talla: datos.talla || null
         };
 
         try {
@@ -198,7 +199,8 @@ module.exports = {
             correo: datos.correo,
             foto: datos.foto || 'SIN FOTO', // Asignar "SIN FOTO" si no se envía el dato
             estado: datos.estado !== undefined ? datos.estado : 1,
-            idMunicipio: datos.idMunicipio
+            idMunicipio: datos.idMunicipio,
+            talla: datos.talla || null
         };
 
         try {
@@ -266,6 +268,8 @@ module.exports = {
         if (datos.correo !== undefined) camposActualizados.correo = datos.correo;
         if (datos.estado !== undefined) camposActualizados.estado = datos.estado;
         if (datos.idMunicipio !== undefined) camposActualizados.idMunicipio = datos.idMunicipio;
+        //talla
+        if (datos.talla !== undefined) camposActualizados.talla = datos.talla;
 
         try {
             const [rowsUpdated] = await PERSONAS.update(
