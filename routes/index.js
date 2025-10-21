@@ -87,6 +87,9 @@ module.exports = (app) => {
   // * QR (lo puse aqui porque no me dejaba usarlo a pesar de tener el token)
   router.get('/generateQR', voluntariosController.generateQR);
 
+  // * RUTA CREAR USUARIO Y PERSONA
+  router.post('/personas/crear-completo', personasController.createPersonaAspiranteUsuario);
+
   // * RUTAS DE MUNICIPIOS Y DEPARTAMENTOS PARA REGISTRO ASPIRANTES
   router.get('/municipios', municipiosController.find);
   router.get('/departamentos', departamentosController.find);

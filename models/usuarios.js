@@ -47,7 +47,7 @@ module.exports = (sequelize, DataTypes) => {
     changedPassword: {
       type: DataTypes.INTEGER,
       allowNull: false,
-      defaultValue: 0
+      defaultValue: 1 // para que no salga la alerta se cambia a 1
     },
     passwordCreatedAt: {
       type: DataTypes.DATE,

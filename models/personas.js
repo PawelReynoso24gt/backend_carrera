@@ -62,7 +62,7 @@ module.exports = (sequelize, DataTypes) => {
         foto: {
             type: DataTypes.TEXT,
             allowNull: false
-          },
+        },
         estado: {
             type: DataTypes.INTEGER,
             allowNull: false
@@ -71,6 +71,10 @@ module.exports = (sequelize, DataTypes) => {
             type: DataTypes.INTEGER,
             allowNull: false
         },
+        talla: {
+            type: DataTypes.STRING,
+            allowNull: true
+        }
     }, {
         sequelize,
         modelName: 'personas',
