@@ -4,8 +4,18 @@ const db = require("../models");
 const PERSONAS = db.personas;
 const MUNICIPIOS = db.municipios;
 const ASPIRANTES = db.aspirantes;
+const USUARIOS = db.usuarios;
+const VOLUNTARIOS = db.voluntarios;
 const uploadPerson = require('../middlewares/uploadPerson');
 const path = require('path');
+const bcrypt = require('bcryptjs');
+
+const { generateQRCode } = require('./voluntariosController');
+
+const toDateOnly = (v) => {
+    const d = v ? new Date(v) : new Date();
+    return d.toISOString().slice(0, 10); // "YYYY-MM-DD"
+};
 
 // Métodos CRUD
 module.exports = {
@@ -129,7 +139,7 @@ module.exports = {
 
         const nuevaPersona = {
             nombre: datos.nombre,
-            fechaNacimiento: datos.fechaNacimiento,
+            fechaNacimiento: toDateOnly(datos.fechaNacimiento),
             telefono: datos.telefono,
             domicilio: datos.domicilio,
             CUI: datos.CUI,
@@ -157,8 +167,8 @@ module.exports = {
     },
 
 
-     // Crear una nueva persona y aspirante
-     async createPerAspirante(req, res) {
+    // Crear una nueva persona y aspirante
+    async createPerAspirante(req, res) {
         const datos = req.body;
 
         // Verificar campos requeridos
@@ -210,7 +220,7 @@ module.exports = {
             // Crear registro en la tabla aspirantes
             const nuevoAspirante = {
                 idPersona: persona.idPersona, // Usamos el ID generado de la persona
-                fechaRegistro: new Date(), // Fecha actual como fecha de registro
+                fechaRegistro: toDateOnly(new Date()), // Fecha actual como fecha de registro
                 estado: 1, // Estado por defecto
             };
             const aspirante = await ASPIRANTES.create(nuevoAspirante);
@@ -226,7 +236,124 @@ module.exports = {
         }
     },
 
+    // Crear Persona + Aspirante + Usuario + Voluntario en una sola transacción
+    async createPersonaAspiranteUsuario(req, res) {
+        const { persona = {}, aspirante = {}, usuario = {}, voluntario = {} } = req.body || {};
 
+        const regexNombre = /^[A-Za-záéíóúÁÉÍÓÚÑñ\s]+$/;
+        const regexTelefono = /^\d{8}$/;
+        const regexDomicilio = /^[A-Za-záéíóúÁÉÍÓÚÑñ0-9\s\.\-,]+$/;
+        const regexCUI = /^\d{13}$/;
+        const regexCorreo = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
+        const faltanPersona =
+            !persona.nombre || !persona.fechaNacimiento || !persona.telefono ||
+            !persona.domicilio || !persona.CUI || !persona.correo || persona.idMunicipio === undefined;
+
+        if (faltanPersona) return res.status(400).json({ message: 'Faltan campos requeridos en persona.' });
+        if (!regexNombre.test(persona.nombre)) return res.status(400).json({ message: 'El nombre solo puede contener letras y espacios.' });
+        if (!regexTelefono.test(persona.telefono)) return res.status(400).json({ message: 'El teléfono debe contener exactamente 8 dígitos.' });
+        if (!regexDomicilio.test(persona.domicilio)) return res.status(400).json({ message: 'El domicilio solo puede contener letras, dígitos, espacios, puntos y guiones.' });
+        if (!regexCUI.test(persona.CUI)) return res.status(400).json({ message: 'El CUI debe contener exactamente 13 dígitos.' });
+        if (!regexCorreo.test(persona.correo)) return res.status(400).json({ message: 'El correo electrónico no es válido.' });
+
+        if (!usuario.usuario || !usuario.contrasenia || !usuario.idRol || !usuario.idSede) {
+            return res.status(400).json({ message: 'Faltan datos requeridos en usuario (usuario, contrasenia, idRol, idSede).' });
+        }
+
+        const nuevaPersona = {
+            nombre: persona.nombre,
+            fechaNacimiento: toDateOnly(persona.fechaNacimiento),
+            telefono: persona.telefono,
+            domicilio: persona.domicilio,
+            CUI: persona.CUI,
+            correo: persona.correo,
+            foto: persona.foto || 'SIN FOTO',
+            estado: persona.estado !== undefined ? persona.estado : 1,
+            idMunicipio: persona.idMunicipio,
+            talla: persona.talla ?? null
+        };
+
+        const nuevoAspirante = {
+            fechaRegistro: toDateOnly(aspirante.fechaRegistro),
+            estado: 1
+        };
+
+        const nuevoUsuario = {
+            usuario: usuario.usuario,
+            contrasenia: usuario.contrasenia,
+            idRol: usuario.idRol,
+            idSede: usuario.idSede,
+            estado: usuario.estado !== undefined ? usuario.estado : 1
+        };
+
+        const nuevoVoluntario = {
+            fechaRegistro: toDateOnly(voluntario.fechaRegistro),
+            fechaSalida: voluntario.fechaSalida ? toDateOnly(voluntario.fechaSalida) : null,
+            estado: voluntario.estado !== undefined ? voluntario.estado : 1
+        };
+
+        const t = await db.sequelize.transaction();
+        try {
+            const existeCui = await PERSONAS.findOne({ where: { CUI: nuevaPersona.CUI }, transaction: t });
+            if (existeCui) { await t.rollback(); return res.status(409).json({ message: 'El CUI ya está registrado.' }); }
+
+            const existeUsuario = await USUARIOS.findOne({ where: { usuario: nuevoUsuario.usuario }, transaction: t });
+            if (existeUsuario) { await t.rollback(); return res.status(409).json({ message: 'El nombre de usuario ya está en uso.' }); }
+
+            const personaCreada = await PERSONAS.create(nuevaPersona, { transaction: t });
+
+            const aspiranteCreado = await ASPIRANTES.create({
+                ...nuevoAspirante,
+                idPersona: personaCreada.idPersona
+            }, { transaction: t });
+
+            const hash = await bcrypt.hash(nuevoUsuario.contrasenia, 10);
+            const usuarioCreado = await USUARIOS.create({
+                usuario: nuevoUsuario.usuario,
+                contrasenia: hash,
+                idRol: nuevoUsuario.idRol,
+                idSede: nuevoUsuario.idSede,
+                idPersona: personaCreada.idPersona,
+                estado: nuevoUsuario.estado
+            }, { transaction: t });
+
+
+            const qrValue = (typeof generateQRCode === 'function')
+                ? generateQRCode()
+                : Math.floor(100000000 + Math.random() * 900000000).toString();
+
+            const voluntarioCreado = await VOLUNTARIOS.create({
+                codigoQR: qrValue,
+                fechaRegistro: nuevoVoluntario.fechaRegistro,
+                fechaSalida: nuevoVoluntario.fechaSalida,
+                estado: nuevoVoluntario.estado,
+                idPersona: personaCreada.idPersona
+            }, { transaction: t });
+
+            await t.commit();
+
+            return res.status(201).json({
+                message: 'Persona, aspirante, usuario y voluntario creados correctamente.',
+                persona: personaCreada,
+                aspirante: aspiranteCreado,
+                usuario: { idUsuario: usuarioCreado.idUsuario, usuario: usuarioCreado.usuario },
+                voluntario: voluntarioCreado
+            });
+        } catch (error) {
+            await t.rollback();
+            console.error('Error al crear persona/aspirante/usuario/voluntario:', error);
+
+            if (error.name === 'SequelizeUniqueConstraintError') {
+                const field = (error.errors?.[0]?.path || '').toLowerCase();
+                if (field.includes('cui')) return res.status(409).json({ message: 'El CUI ya está registrado.' });
+                if (field.includes('usuario')) return res.status(409).json({ message: 'El nombre de usuario ya está en uso.' });
+                if (field.includes('codigoqr')) return res.status(409).json({ message: 'Código QR ya existe, reintenta el registro.' });
+            }
+
+            return res.status(500).json({ message: 'Error al crear persona, aspirante, usuario y voluntario.' });
+        }
+    },
 
     // Actualizar una persona existente
     async update(req, res) {
