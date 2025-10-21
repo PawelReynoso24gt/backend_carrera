@@ -9,7 +9,10 @@ const PERSONAS = db.personas;
 // Método para generar un código QR numérico
 function generateQRCode() {
     // Generar un número único de 9 dígitos
-    return Math.floor(100000000 + Math.random() * 900000000).toString();
+    const randomNumber = Math.floor(100000000 + Math.random() * 900000000).toString();
+
+    // Combina el prefijo con el número
+    return `VOL-${randomNumber}`;
 }
 
 // Métodos CRUD
