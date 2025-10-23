@@ -245,12 +245,21 @@ module.exports = {
         const regexDomicilio = /^[A-Za-záéíóúÁÉÍÓÚÑñ0-9\s\.\-,]+$/;
         const regexCUI = /^\d{13}$/;
         const regexCorreo = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+        const regexTalla = /^(XXS|XS|S|M|L|XL|XXL)$/; 
+
 
         const faltanPersona =
             !persona.nombre || !persona.fechaNacimiento || !persona.telefono ||
-            !persona.domicilio || !persona.CUI || !persona.correo || persona.idMunicipio === undefined;
+            !persona.domicilio || !persona.CUI || !persona.correo || persona.idMunicipio === undefined ||
+            persona.talla == null || persona.talla.toString().trim() === '';
 
         if (faltanPersona) return res.status(400).json({ message: 'Faltan campos requeridos en persona.' });
+        
+        const tallaNormalizada = persona.talla.toString().trim().toUpperCase();
+            if (!regexTalla.test(tallaNormalizada)) {
+            return res.status(400).json({ message: 'La talla no es válida.' });
+            }
+
         if (!regexNombre.test(persona.nombre)) return res.status(400).json({ message: 'El nombre solo puede contener letras y espacios.' });
         if (!regexTelefono.test(persona.telefono)) return res.status(400).json({ message: 'El teléfono debe contener exactamente 8 dígitos.' });
         if (!regexDomicilio.test(persona.domicilio)) return res.status(400).json({ message: 'El domicilio solo puede contener letras, dígitos, espacios, puntos y guiones.' });
@@ -271,7 +280,7 @@ module.exports = {
             foto: persona.foto || 'SIN FOTO',
             estado: persona.estado !== undefined ? persona.estado : 1,
             idMunicipio: persona.idMunicipio,
-            talla: persona.talla ?? null
+            talla: tallaNormalizada, 
         };
 
         const nuevoAspirante = {
