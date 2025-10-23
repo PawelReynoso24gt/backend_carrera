@@ -10,7 +10,16 @@ const uploadPerson = require('../middlewares/uploadPerson');
 const path = require('path');
 const bcrypt = require('bcryptjs');
 
-const { generateQRCode } = require('./voluntariosController');
+// const { generateQRCode } = require('./voluntariosController');
+
+// Método para generar un código QR numérico
+function generateQRCode() {
+    // Generar un número único de 9 dígitos
+    const randomNumber = Math.floor(100000000 + Math.random() * 900000000).toString();
+
+    // Combina el prefijo con el número
+    return `VOL-${randomNumber}`;
+}
 
 const toDateOnly = (v) => {
     const d = v ? new Date(v) : new Date();
@@ -319,12 +328,12 @@ module.exports = {
             }, { transaction: t });
 
 
-            const qrValue = (typeof generateQRCode === 'function')
-                ? generateQRCode()
-                : Math.floor(100000000 + Math.random() * 900000000).toString();
+            // const qrValue = (typeof generateQRCode === 'function')
+            //     ? generateQRCode()
+            //     : Math.floor(100000000 + Math.random() * 900000000).toString();
 
             const voluntarioCreado = await VOLUNTARIOS.create({
-                codigoQR: qrValue,
+                codigoQR: generateQRCode(), // generar el codigo QR de VOL-x...
                 fechaRegistro: nuevoVoluntario.fechaRegistro,
                 fechaSalida: nuevoVoluntario.fechaSalida,
                 estado: nuevoVoluntario.estado,
