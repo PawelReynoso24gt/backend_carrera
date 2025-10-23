@@ -9,6 +9,12 @@ const VOLUNTARIOS = db.voluntarios;
 const uploadPerson = require('../middlewares/uploadPerson');
 const path = require('path');
 const bcrypt = require('bcryptjs');
+const crypto = require('crypto'); // Librería para hashear contraseñas
+
+// Función para hashear la contraseña usando SHA-256
+function hashPassword(password) {
+    return crypto.createHash('sha256').update(password).digest('hex');
+}
 
 // const { generateQRCode } = require('./voluntariosController');
 
@@ -317,10 +323,10 @@ module.exports = {
                 idPersona: personaCreada.idPersona
             }, { transaction: t });
 
-            const hash = await bcrypt.hash(nuevoUsuario.contrasenia, 10);
+            //const hash = await bcrypt.hash(nuevoUsuario.contrasenia, 10);
             const usuarioCreado = await USUARIOS.create({
                 usuario: nuevoUsuario.usuario,
-                contrasenia: hash,
+                contrasenia: hashPassword(nuevoUsuario.contrasenia),
                 idRol: nuevoUsuario.idRol,
                 idSede: nuevoUsuario.idSede,
                 idPersona: personaCreada.idPersona,
