@@ -9,8 +9,23 @@ const VOLUNTARIOS = db.voluntarios;
 const uploadPerson = require('../middlewares/uploadPerson');
 const path = require('path');
 const bcrypt = require('bcryptjs');
+const crypto = require('crypto'); // Librería para hashear contraseñas
 
-const { generateQRCode } = require('./voluntariosController');
+// Función para hashear la contraseña usando SHA-256
+function hashPassword(password) {
+    return crypto.createHash('sha256').update(password).digest('hex');
+}
+
+// const { generateQRCode } = require('./voluntariosController');
+
+// Método para generar un código QR numérico
+function generateQRCode() {
+    // Generar un número único de 9 dígitos
+    const randomNumber = Math.floor(100000000 + Math.random() * 900000000).toString();
+
+    // Combina el prefijo con el número
+    return `VOL-${randomNumber}`;
+}
 
 const toDateOnly = (v) => {
     const d = v ? new Date(v) : new Date();
@@ -317,10 +332,10 @@ module.exports = {
                 idPersona: personaCreada.idPersona
             }, { transaction: t });
 
-            const hash = await bcrypt.hash(nuevoUsuario.contrasenia, 10);
+            //const hash = await bcrypt.hash(nuevoUsuario.contrasenia, 10);
             const usuarioCreado = await USUARIOS.create({
                 usuario: nuevoUsuario.usuario,
-                contrasenia: hash,
+                contrasenia: hashPassword(nuevoUsuario.contrasenia),
                 idRol: nuevoUsuario.idRol,
                 idSede: nuevoUsuario.idSede,
                 idPersona: personaCreada.idPersona,
@@ -328,12 +343,12 @@ module.exports = {
             }, { transaction: t });
 
 
-            const qrValue = (typeof generateQRCode === 'function')
-                ? generateQRCode()
-                : Math.floor(100000000 + Math.random() * 900000000).toString();
+            // const qrValue = (typeof generateQRCode === 'function')
+            //     ? generateQRCode()
+            //     : Math.floor(100000000 + Math.random() * 900000000).toString();
 
             const voluntarioCreado = await VOLUNTARIOS.create({
-                codigoQR: qrValue,
+                codigoQR: generateQRCode(), // generar el codigo QR de VOL-x...
                 fechaRegistro: nuevoVoluntario.fechaRegistro,
                 fechaSalida: nuevoVoluntario.fechaSalida,
                 estado: nuevoVoluntario.estado,

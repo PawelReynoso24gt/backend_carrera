@@ -7,6 +7,15 @@ const PERSONAS = db.personas;
 const moment = require('moment');
 const { Op } = require('sequelize');
 
+// Método para generar un código QR numérico
+function generateQRCode() {
+    // Generar un número único de 9 dígitos
+    const randomNumber = Math.floor(100000000 + Math.random() * 900000000).toString();
+
+    // Combina el prefijo con el número
+    return `VOL-${randomNumber}`;
+}
+
 module.exports = {
     async acceptAspirante(req, res) {
         const { idAspirante } = req.params;
@@ -33,7 +42,7 @@ module.exports = {
             // Crear un nuevo voluntario en base al aspirante
             const nuevoVoluntario = await VOLUNTARIOS.create({
                 idPersona: aspirante.idPersona,
-                codigoQR: `VOL-${aspirante.idPersona}-${Date.now()}`, // Generar un código QR único
+                codigoQR: generateQRCode(), // Generar codigo QR de VOL-x...
                 fechaRegistro:fechaRegistro,
                 estado: 1, // Estado activo
             });
